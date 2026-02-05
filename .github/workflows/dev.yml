@@ -1,0 +1,42 @@
+name: Build DEV
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+            backend:
+              - 'backend/**'
+
+  build:
+    needs: changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend
+        if: needs.changes.outputs.backend == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: false
+
+      - name: Build frontend
+        if: needs.changes.outputs.frontend == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: false

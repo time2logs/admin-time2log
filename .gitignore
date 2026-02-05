@@ -1,0 +1,38 @@
+# === IDE ===
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.fleet/
+*.swp
+*.swo
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === Java / Maven ===
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+hs_err_pid*
+
+# === Node / Frontend ===
+node_modules/
+dist/
+.next/
+.nuxt/
+.output/
+.cache/
+
+# === Environment ===
+.env
+.env.*
+!.env.example
+
+# === Supabase ===
+supabase/.temp/
