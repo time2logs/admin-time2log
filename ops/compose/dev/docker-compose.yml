@@ -1,0 +1,23 @@
+services:
+  admin-time2log-backend-dev:
+    image: ghcr.io/time2logs/admin-time2log/backend:dev-latest
+    container_name: admin-time2log-backend-dev
+    env_file: ./.env.dev
+    expose:
+      - "9080"
+    networks:
+      - admin-time2log-net
+    restart: always
+
+  admin-time2log-frontend-dev:
+    image: ghcr.io/time2logs/admin-time2log/frontend:dev-latest
+    container_name: admin-time2log-frontend-dev
+    expose:
+      - "80"
+    networks:
+      - admin-time2log-net
+    restart: always
+
+networks:
+  admin-time2log-net:
+    external: true
