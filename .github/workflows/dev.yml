@@ -1,4 +1,4 @@
-name: Build DEV
+name: Build & Push DEV
 
 on:
   push:
@@ -21,22 +21,37 @@ jobs:
             backend:
               - 'backend/**'
 
-  build:
+  build-push:
     needs: changes
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build backend
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push backend
         if: needs.changes.outputs.backend == 'true'
         uses: docker/build-push-action@v6
         with:
           context: ./backend
-          push: false
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/backend:dev-${{ github.sha }}
+            ghcr.io/${{ github.repository }}/backend:dev-latest
 
-      - name: Build frontend
+      - name: Build & push frontend
         if: needs.changes.outputs.frontend == 'true'
         uses: docker/build-push-action@v6
         with:
           context: ./frontend
-          push: false
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/frontend:dev-${{ github.sha }}
+            ghcr.io/${{ github.repository }}/frontend:dev-latest
