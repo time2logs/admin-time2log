@@ -1,2 +1,2 @@
 cors:
-  allowed-origins: -
+  allowed-origins: https://admin.time2log.com, https://www.admin.time2log.com

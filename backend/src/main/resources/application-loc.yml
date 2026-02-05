@@ -1,2 +1,2 @@
 cors:
-  allowed-origins: -
+  allowed-origins: http://localhost:4200

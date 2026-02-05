@@ -1,6 +1,6 @@
 services:
   admin-time2log-backend-prd:
-    image: ghcr.io/time2logs/admin-time2log/backend:prd-latest
+    image: ghcr.io/time2logs/admin-time2log/backend:latest
     container_name: admin-time2log-backend-prd
     env_file: ./.env.prd
     expose:
@@ -10,7 +10,7 @@ services:
     restart: always
 
   admin-time2log-frontend-prd:
-    image: ghcr.io/time2logs/admin-time2log/frontend:prd-latest
+    image: ghcr.io/time2logs/admin-time2log/frontend:latest
     container_name: admin-time2log-frontend-prd
     expose:
       - "80"
