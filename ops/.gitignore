@@ -1,0 +1,9 @@
+# Ignore environment files
+compose/**/.env*
+
+# Keep templates
+!compose/**/.env*.template
+
+# Nginx Proxy Manager runtime data
+nginx-proxy-manager/data/
+nginx-proxy-manager/letsencrypt/
