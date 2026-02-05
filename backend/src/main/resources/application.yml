@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: finpath
+
+server:
+  port: 9080
+  shutdown: graceful
+
+logging:
+  level:
+    root: INFO
+    ch.time2log: INFO
