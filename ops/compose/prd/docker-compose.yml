@@ -1,0 +1,23 @@
+services:
+  admin-time2log-backend-prd:
+    image: ghcr.io/time2logs/admin-time2log/backend:prd-latest
+    container_name: admin-time2log-backend-prd
+    env_file: ./.env.prd
+    expose:
+      - "9080"
+    networks:
+      - admin-time2log-net
+    restart: always
+
+  admin-time2log-frontend-prd:
+    image: ghcr.io/time2logs/admin-time2log/frontend:prd-latest
+    container_name: admin-time2log-frontend-prd
+    expose:
+      - "80"
+    networks:
+      - admin-time2log-net
+    restart: always
+
+networks:
+  admin-time2log-net:
+    external: true
