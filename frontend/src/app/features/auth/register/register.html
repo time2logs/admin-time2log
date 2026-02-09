@@ -1,0 +1,119 @@
+<div class="max-w-md mx-auto mt-8 p-8 bg-white rounded-lg shadow">
+  <!-- Success State -->
+  @if (state() === 'success') {
+    <div class="text-center">
+      <div class="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+        <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <h2 class="text-xl font-semibold text-gray-900 mb-2">{{ 'auth.register.success.title' | translate }}</h2>
+      <p class="text-gray-600 mb-6">{{ 'auth.register.success.message' | translate }}</p>
+      <a
+        routerLink="/auth/login"
+        class="inline-block px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+      >
+        {{ 'auth.login.title' | translate }}
+      </a>
+    </div>
+  } @else {
+    <!-- Form State -->
+    <h1 class="text-2xl font-semibold text-center mb-6">{{ 'auth.register.title' | translate }}</h1>
+
+    <!-- Email Exists Error -->
+    @if (errorType() === 'email_exists') {
+      <div class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex gap-2 items-center">
+        <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <p class="text-sm text-amber-700">{{ 'auth.register.emailExists' | translate }}</p>
+      </div>
+    }
+
+    <!-- Generic Error -->
+    @if (errorType() === 'generic') {
+      <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex gap-2 items-center">
+        <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p class="text-sm text-red-700">{{ 'auth.register.error' | translate }}</p>
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col">
+      <div class="mb-4">
+        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+          {{ 'auth.register.name' | translate }}
+        </label>
+        <input
+          id="name"
+          type="text"
+          formControlName="name"
+          autocomplete="name"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          [class.border-red-300]="form.controls.name.touched && form.controls.name.invalid"
+        />
+        @if (form.controls.name.touched && form.controls.name.invalid) {
+          <p class="mt-1 text-sm text-red-600">{{ 'auth.validation.nameMin' | translate }}</p>
+        }
+      </div>
+
+      <div class="mb-4">
+        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+          {{ 'auth.register.email' | translate }}
+        </label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          [class.border-red-300]="form.controls.email.touched && form.controls.email.invalid"
+        />
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+          <p class="mt-1 text-sm text-red-600">{{ 'auth.validation.emailInvalid' | translate }}</p>
+        }
+      </div>
+
+      <div class="mb-6">
+        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+          {{ 'auth.register.password' | translate }}
+        </label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          autocomplete="new-password"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          [class.border-red-300]="form.controls.password.touched && form.controls.password.invalid"
+        />
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <p class="mt-1 text-sm text-red-600">{{ 'auth.validation.passwordMin' | translate }}</p>
+        }
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="isLoading() || form.invalid"
+        class="w-full px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+      >
+        @if (isLoading()) {
+          <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>{{ 'common.loading' | translate }}</span>
+        } @else {
+          {{ 'auth.register.submit' | translate }}
+        }
+      </button>
+    </form>
+
+    <p class="mt-6 text-center text-sm text-gray-600">
+      {{ 'auth.register.hasAccount' | translate }}
+      <a routerLink="/auth/login" class="text-blue-600 hover:text-blue-700 font-medium">
+        {{ 'auth.register.loginLink' | translate }}
+      </a>
+    </p>
+  }
+</div>

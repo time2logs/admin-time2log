@@ -1,6 +1,6 @@
 spring:
   application:
-    name: finpath
+    name: admim-time2log-backend
 
 server:
   port: 9080

@@ -1,12 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { RouterOutlet } from '@angular/router';
 import { By } from '@angular/platform-browser';
+import { provideTranslateService } from '@ngx-translate/core';
 import { App } from './app';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
+      providers: [provideTranslateService()],
     }).compileComponents();
   });
 
