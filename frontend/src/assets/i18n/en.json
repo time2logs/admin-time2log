@@ -1,0 +1,67 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "back": "Back",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign In",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign In",
+      "error": "Invalid email or password.",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Sign up now",
+      "emailNotConfirmed": {
+        "title": "Email confirmation required",
+        "message": "Please confirm your email address using the link we sent you."
+      }
+    },
+    "register": {
+      "title": "Sign Up",
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Create Account",
+      "error": "Registration failed. Please try again.",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in now",
+      "success": {
+        "title": "Account created",
+        "message": "We've sent you an email. Please confirm your email address to sign in."
+      },
+      "emailExists": "This email address is already registered."
+    },
+    "validation": {
+      "emailInvalid": "Please enter a valid email address.",
+      "emailRequired": "Email is required.",
+      "passwordMin": "Password must be at least 6 characters.",
+      "passwordRequired": "Password is required.",
+      "nameMin": "Name must be at least 2 characters.",
+      "nameRequired": "Name is required."
+    },
+    "logout": "Sign Out"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome!",
+    "groups": {
+      "title": "Groups",
+      "description": "Manage and create groups"
+    }
+  },
+  "groups": {
+    "title": "Groups",
+    "create": "New Group",
+    "memberCount": "{{count}} members",
+    "empty": "No groups yet"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "groups": "Groups"
+  }
+}

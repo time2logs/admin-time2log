@@ -1,0 +1,67 @@
+{
+  "common": {
+    "loading": "Laden...",
+    "back": "Zurück",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten"
+  },
+  "auth": {
+    "login": {
+      "title": "Anmelden",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "submit": "Anmelden",
+      "error": "E-Mail oder Passwort ist falsch.",
+      "noAccount": "Noch kein Konto?",
+      "registerLink": "Jetzt registrieren",
+      "emailNotConfirmed": {
+        "title": "E-Mail-Bestätigung erforderlich",
+        "message": "Bitte bestätigen Sie Ihre E-Mail-Adresse über den Link, den wir Ihnen gesendet haben."
+      }
+    },
+    "register": {
+      "title": "Registrieren",
+      "name": "Name",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "submit": "Konto erstellen",
+      "error": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "hasAccount": "Bereits ein Konto?",
+      "loginLink": "Jetzt anmelden",
+      "success": {
+        "title": "Konto erstellt",
+        "message": "Wir haben Ihnen eine E-Mail gesendet. Bitte bestätigen Sie Ihre E-Mail-Adresse, um sich anzumelden."
+      },
+      "emailExists": "Diese E-Mail-Adresse ist bereits registriert."
+    },
+    "validation": {
+      "emailInvalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+      "emailRequired": "E-Mail ist erforderlich.",
+      "passwordMin": "Passwort muss mindestens 6 Zeichen lang sein.",
+      "passwordRequired": "Passwort ist erforderlich.",
+      "nameMin": "Name muss mindestens 2 Zeichen lang sein.",
+      "nameRequired": "Name ist erforderlich."
+    },
+    "logout": "Abmelden"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Willkommen!",
+    "groups": {
+      "title": "Gruppen",
+      "description": "Gruppen verwalten und erstellen"
+    }
+  },
+  "groups": {
+    "title": "Gruppen",
+    "create": "Neue Gruppe",
+    "memberCount": "{{count}} Mitglieder",
+    "empty": "Noch keine Gruppen vorhanden"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "groups": "Gruppen"
+  }
+}
