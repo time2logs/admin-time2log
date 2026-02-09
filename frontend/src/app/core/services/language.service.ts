@@ -23,12 +23,12 @@ export class LanguageService {
       lang = browserLang;
     }
 
-    this.translate.setDefaultLang(DEFAULT_LANG);
+    this.translate.setFallbackLang(DEFAULT_LANG);
     this.translate.use(lang);
   }
 
   get currentLang(): string {
-    return this.translate.currentLang || DEFAULT_LANG;
+    return this.translate.getCurrentLang() || DEFAULT_LANG;
   }
 
   switchLanguage(lang: string): void {
