@@ -12,6 +12,3 @@ services:
     volumes:
       - ./data:/data
       - ./letsencrypt:/etc/letsencrypt
-    networks:
-      - admin-time2log-net
-      - default
