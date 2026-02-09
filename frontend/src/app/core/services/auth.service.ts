@@ -8,7 +8,7 @@ import {
   User
 } from '@supabase/supabase-js';
 import { environment } from '@env/environment';
-import { BehaviorSubject, from, Observable, map, distinctUntilChanged } from 'rxjs';
+import { BehaviorSubject, from, Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService implements OnDestroy {

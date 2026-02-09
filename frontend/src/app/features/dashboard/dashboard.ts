@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from '@services/auth.service';
-import {AsyncPipe} from '@angular/common';
 
 @Component({
   selector: 'app-dashboard',
