@@ -12,6 +12,9 @@
 *.swp
 *.swo
 
+# === Angular ===
+.angular/
+
 # === OS ===
 .DS_Store
 Thumbs.db
