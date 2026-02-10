@@ -79,7 +79,10 @@ jobs:
 
   deploy:
     needs: [build-push-backend, build-push-frontend]
-    if: always() && !failure() && !cancelled()
+    if: |
+      always() &&
+      (needs.build-push-backend.result == 'success' || needs.build-push-backend.result == 'skipped') &&
+      (needs.build-push-frontend.result == 'success' || needs.build-push-frontend.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Hetzner
@@ -92,6 +95,7 @@ jobs:
 
   smoke-tests:
     needs: deploy
+    if: always() && (needs.deploy.result == 'success' || needs.deploy.result == 'skipped')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
