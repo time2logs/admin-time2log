@@ -1,6 +1,29 @@
 spring:
   application:
-    name: admim-time2log-backend
+    name: admin-time2log-backend
+
+  datasource:
+    url: jdbc:postgresql://db.icakwycwpldldvcyhpqe.supabase.co:5432/postgres?sslmode=require
+    username: postgres
+    password: ${SUPABASE_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 30000
+      connection-timeout: 20000
+      max-lifetime: 1800000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          time_zone: UTC
 
 server:
   port: 9080
@@ -10,3 +33,4 @@ logging:
   level:
     root: INFO
     ch.time2log: INFO
+    org.hibernate.SQL: ${SQL_LOG_LEVEL:INFO}
