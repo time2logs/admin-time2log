@@ -7,4 +7,6 @@ import { TranslateModule } from '@ngx-translate/core';
   imports: [TranslateModule],
   templateUrl: './organizations.html',
 })
-export class OrganizationsComponent {}
+export class OrganizationsComponent {
+
+}
