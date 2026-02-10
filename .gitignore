@@ -58,7 +58,7 @@ dist/
 /bazel-out
 npm-debug.log
 yarn-error.log
-/.angular/cache
+*/.angular/cache
 .sass-cache/
 /typings
 __screenshots__/
