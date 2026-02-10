@@ -11,7 +11,7 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 
 import { routes } from './app.routes';
-import { LanguageService } from './core/services/language.service';
+import { LanguageService } from '@services/language.service';
 
 function initializeLanguage(): () => void {
   const languageService = inject(LanguageService);
