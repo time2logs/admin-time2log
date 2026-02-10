@@ -44,12 +44,6 @@ test.describe('Smoke Tests', () => {
   test('login with valid user', async ({ page }) => {
       await page.goto('/auth/login');
 
-      /* Test User Data:
-         Name: TestUser1
-         Email: testusertime2log@gmail.com
-         PW: TestUserBLJT2L
-       */
-
         await page.fill('#email','testusertime2log@gmail.com');
         await page.fill('#password', 'TestUserBLJT2L');
         await page.click('button[type="submit"]');
