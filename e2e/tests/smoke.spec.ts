@@ -28,4 +28,35 @@ test.describe('Smoke Tests', () => {
     // App-Root sollte existieren
     await expect(page.locator('app-root')).toBeVisible();
   });
+
+  test('register content is visible', async ({ page }) => {
+      await page.goto('/auth/register');
+
+      await expect(page.locator('app-register')).toBeVisible();
+  });
+
+  test('login content is visible', async ({ page }) => {
+    await page.goto('/auth/login');
+
+    await expect(page.locator('app-login')).toBeVisible();
+  });
+
+  test('login with valid user', async ({ page }) => {
+      await page.goto('/auth/login');
+
+      /* Test User Data:
+         Name: TestUser1
+         Email: testusertime2log@gmail.com
+         PW: TestUserBLJT2L
+       */
+
+        await page.fill('#email','testusertime2log@gmail.com');
+        await page.fill('#password', 'TestUserBLJT2L');
+        await page.click('button[type="submit"]');
+
+      await expect(page).toHaveURL('/dashboard');
+
+
+  })
+
 });
