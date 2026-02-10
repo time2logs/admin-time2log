@@ -26,6 +26,7 @@ public class ProfileController {
 
     @GetMapping
     public ProfileDto getProfile(@AuthenticationPrincipal AuthenticatedUser user) {
+        System.out.println("Fetching profile for user id: " + user.id());
         ProfileEntity entity = this.profileRepository.findById(user.id())
                 .orElseThrow(() -> new ProfileNotFoundException ("Profile not found for user id: " + user.id()));
 
