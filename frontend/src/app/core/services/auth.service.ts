@@ -9,6 +9,8 @@ import {
 } from '@supabase/supabase-js';
 import { environment } from '@env/environment';
 import { BehaviorSubject, from, Observable } from 'rxjs';
+import {Profile} from '@app/core/models/profile.models';
+import {HttpClient} from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService implements OnDestroy {
@@ -20,9 +22,12 @@ export class AuthService implements OnDestroy {
   private readonly initializedSubject = new BehaviorSubject<boolean>(false);
   readonly isInitialized$ = this.initializedSubject.asObservable();
 
+  private currentProfileSubject = new BehaviorSubject<Profile | null>(null);
+  readonly currentProfile$ = this.currentProfileSubject.asObservable();
+
   private authSubscription?: { unsubscribe: () => void };
 
-  constructor() {
+  constructor(private http: HttpClient) {
     this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey, {
       auth: {
         persistSession: true,
@@ -30,7 +35,8 @@ export class AuthService implements OnDestroy {
         detectSessionInUrl: true,
       },
     });
-
+    this.currentProfileSubject = new BehaviorSubject<Profile | null>(null);
+    this.currentProfile$ = this.currentProfileSubject.asObservable();
     this.initializeAuth();
   }
 
@@ -42,6 +48,7 @@ export class AuthService implements OnDestroy {
     const { data, error } = await this.supabase.auth.getSession();
     if (!error) {
       this.currentUserSubject.next(data.session?.user ?? null);
+      this.loadProfile();
     } else {
       this.currentUserSubject.next(null);
     }
@@ -49,6 +56,7 @@ export class AuthService implements OnDestroy {
     this.authSubscription = this.supabase.auth.onAuthStateChange(
       (event: AuthChangeEvent, session: Session | null) => {
         this.currentUserSubject.next(session?.user ?? null);
+        this.loadProfile();
       }
     ).data.subscription;
 
@@ -81,5 +89,15 @@ export class AuthService implements OnDestroy {
   logout(): Observable<void> {
     this.currentUserSubject.next(null);
     return from(this.supabase.auth.signOut().then(() => undefined));
+  }
+
+  loadProfile() {
+    this.http.get<Profile>(`${environment.apiBaseUrl}/profile`).subscribe({
+      next: (profile) => {
+        this.currentProfileSubject.next(profile);
+        console.log('User Profile loaded:', profile);
+      },
+      error: (err) => console.error('Failed to load profile:', err)
+    });
   }
 }

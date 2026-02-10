@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from '@services/auth.service';
 
@@ -8,6 +8,11 @@ import { AuthService } from '@services/auth.service';
   imports: [TranslateModule],
   templateUrl: './dashboard.html',
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   protected readonly authService = inject(AuthService);
+  profile$ = this.authService.currentProfile$;
+
+  ngOnInit() {
+
+  }
 }
