@@ -1,9 +1,13 @@
-# === IDE ===
-.idea/
+# See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+# IDEs and editors
+.c9/
+*.launch
+*.sublime-workspace
+.idea
 *.iml
 *.iws
 *.ipr
-.vscode/
+.vscode
 .fleet/
 *.swp
 *.swo
@@ -23,7 +27,6 @@ hs_err_pid*
 
 # === Node / Frontend ===
 node_modules/
-dist/
 .next/
 .nuxt/
 .output/
@@ -36,3 +39,67 @@ dist/
 
 # === Supabase ===
 supabase/.temp/
+
+HELP.md
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Compiled output
+/tmp
+/out-tsc
+/bazel-out
+
+# Node
+npm-debug.log
+yarn-error.log
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# Miscellaneous
+/.angular/cache
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+__screenshots__/
+
+# Ignore environment files
+compose/**/.env*
+
+# Keep templates
+!compose/**/.env*.template
+
+# Nginx Proxy Manager runtime data
+nginx-proxy-manager/data/
+nginx-proxy-manager/letsencrypt/
+
+
