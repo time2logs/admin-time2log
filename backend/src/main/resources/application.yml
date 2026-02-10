@@ -25,6 +25,12 @@ spring:
         jdbc:
           time_zone: UTC
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SUPABASE_AUTH_URL}
+
 server:
   port: 9080
   shutdown: graceful
