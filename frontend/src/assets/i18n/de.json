@@ -49,19 +49,19 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Willkommen!",
-    "groups": {
-      "title": "Gruppen",
-      "description": "Gruppen verwalten und erstellen"
+    "organizations": {
+      "title": "Organisationen",
+      "description": "Organisationen verwalten und erstellen"
     }
   },
-  "groups": {
-    "title": "Gruppen",
-    "create": "Neue Gruppe",
+  "organizations": {
+    "title": "Organisationen",
+    "create": "Neue Organisation",
     "memberCount": "{{count}} Mitglieder",
-    "empty": "Noch keine Gruppen vorhanden"
+    "empty": "Noch keine Organisationen vorhanden"
   },
   "nav": {
     "dashboard": "Dashboard",
-    "groups": "Gruppen"
+    "organizations": "Organisationen"
   }
 }

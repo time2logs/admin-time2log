@@ -20,9 +20,12 @@ export const routes: Routes = [
       import('./features/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
   },
   {
-    path: 'groups',
+    path: 'organizations',
     canActivate: [authGuard],
-    loadChildren: () => import('./features/groups/groups.routes').then((m) => m.GROUPS_ROUTES),
+    loadChildren: () =>
+      import('./features/organizations/organizations.routes').then(
+        (m) => m.ORGANIZATIONS_ROUTES
+      ),
   },
   {
     path: '**',
