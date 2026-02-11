@@ -27,35 +27,35 @@
   class="flex flex-row md:flex-col flex-1 justify-around md:justify-start items-center md:items-stretch md:px-4 md:space-y-2"
 >
   @if (authService.isAuthenticated()) {
-    <a
-      routerLink="/dashboard"
-      #dashboardLink="routerLinkActive"
-      routerLinkActive="md:bg-[#2d3a4f] md:text-blue-400 shadow-sm"
-      class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group"
-    >
-      <span class="md:hidden" [class.svg-active]="dashboardLink.isActive">
-        <svg width="90" height="60" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
-          <g fill="none" stroke="#8E9AAF" stroke-width="2.5" stroke-linejoin="round">
-            <rect x="50" y="14" width="7" height="10" rx="1.5" />
-            <rect x="61" y="14" width="9" height="6" rx="1.5" />
-            <rect x="50" y="27" width="9" height="7" rx="1.5" />
-            <rect x="62" y="23" width="8" height="11" rx="1.5" />
-          </g>
-          <text x="60" y="58" font-family="Arial, sans-serif" font-size="16" fill="#8E9AAF" text-anchor="middle">
-            {{ 'nav.dashboard' | translate }}
-          </text>
-        </svg>
-      </span>
-      <i class="hidden md:inline bi bi-grid-fill text-lg md:mr-3"></i>
-      <span class="hidden md:inline">{{ 'nav.dashboard' | translate }}</span>
-    </a>
+<a
+  routerLink="/dashboard"
+  #dashboardLink="routerLinkActive"
+  routerLinkActive="md:bg-[#2d3a4f] md:text-blue-400 shadow-sm"
+  class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group hover:md:bg-[#2d3a4f]/50 hover:text-[#717D8E] text-[#8E9AAF]"
+>
+  <span class="md:hidden" [class.svg-active]="dashboardLink.isActive">
+    <svg width="90" height="60" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+      <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
+        <rect x="50" y="14" width="7" height="10" rx="1.5" />
+        <rect x="61" y="14" width="9" height="6" rx="1.5" />
+        <rect x="50" y="27" width="9" height="7" rx="1.5" />
+        <rect x="62" y="23" width="8" height="11" rx="1.5" />
+      </g>
+      <text x="60" y="58" font-family="Arial, sans-serif" font-size="16" fill="currentColor" text-anchor="middle">
+        {{ 'nav.dashboard' | translate }}
+      </text>
+    </svg>
+  </span>
+
+  <i class="hidden md:inline bi bi-grid-fill text-lg md:mr-3 transition-colors"></i>
+  <span class="hidden md:inline transition-colors">{{ 'nav.dashboard' | translate }}</span>
+</a>
 
     <a
       routerLink="/organization"
       #organizationLink="routerLinkActive"
       routerLinkActive="md:bg-[#2d3a4f] md:text-blue-400 shadow-sm"
-      class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group"
-    >
+class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group hover:md:bg-[#2d3a4f]/50 hover:text-[#717D8E] text-[#8E9AAF]"    >
       <span class="md:hidden" [class.svg-active]="organizationLink.isActive">
         <svg width="90" height="60" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -84,8 +84,7 @@
       routerLink="/entries"
       #entriesLink="routerLinkActive"
       routerLinkActive="md:bg-[#2d3a4f] md:text-blue-400 shadow-sm"
-      class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group"
-    >
+      class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group hover:md:bg-[#2d3a4f]/50 hover:text-[#717D8E] text-[#8E9AAF]"    >
       <span class="md:hidden" [class.svg-active]="entriesLink.isActive">
         <svg width="90" height="60" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
           <g fill="#8E9AAF">
@@ -167,7 +166,7 @@
     @if (authService.isAuthenticated()) {
       <button
         (click)="logout()"
-        class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 hover:text-red-400 transition-colors"
+        class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 md:rounded-lg hover:md:bg-[#2d3a4f]/50 hover:text-red-400 transition-colors"
       >
         <i class="bi bi-box-arrow-right text-lg"></i>
         <span>{{ 'auth.logout' | translate }}</span>
@@ -175,8 +174,8 @@
 
       <button
         (click)="settings()"
-        class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 hover:text-white transition-colors"
-      >
+        class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 md:rounded-lg hover:md:bg-[#2d3a4f]/50 hover:text-[#717D8E] transition-colors"
+        >
         <i class="bi bi-gear text-lg"></i>
         <span>{{ 'settings.title' | translate }}</span>
       </button>
