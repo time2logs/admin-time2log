@@ -1,6 +1,18 @@
 spring:
   application:
-    name: admim-time2log-backend
+    name: admin-time2log-backend
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SUPABASE_AUTH_URL:http://localhost/issuer/jwks}
+
+supabase:
+  url: ${SUPABASE_URL:anyplaceholderfortests}
+  anon-key: ${SUPABASE_ANON_KEY:anyplaceholderfortests}
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:anyplaceholderfortests}
 
 server:
   port: 9080

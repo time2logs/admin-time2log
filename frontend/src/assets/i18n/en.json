@@ -23,7 +23,8 @@
     },
     "register": {
       "title": "Sign Up",
-      "name": "Name",
+      "firstName": "First Name",
+      "lastName": "Last Name",
       "email": "Email",
       "password": "Password",
       "submit": "Create Account",
@@ -41,22 +42,25 @@
       "emailRequired": "Email is required.",
       "passwordMin": "Password must be at least 6 characters.",
       "passwordRequired": "Password is required.",
-      "nameMin": "Name must be at least 2 characters.",
-      "nameRequired": "Name is required."
+      "firstNameMin": "First name must be at least 2 characters.",
+      "firstNameRequired": "First name is required.",
+      "lastNameMin": "Last name must be at least 2 characters.",
+      "lastNameRequired": "Last name is required."
     },
     "logout": "Sign Out"
   },
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome!",
-    "organization": {
-      "title": "Organization",
+    "organizations": {
+      "title": "Organizations",
       "description": "Manage and create organizations"
     }
   },
-  "organization": {
-    "title": "Organization",
+  "organizations": {
+    "title": "Organizations",
     "create": "New Organization",
+    "namePlaceholder": "Organization name",
     "memberCount": "{{count}} members",
     "empty": "No organizations yet"
   },
@@ -71,4 +75,5 @@
     "theme": "Theme",
     "account": "Account"
   }
+
 }
