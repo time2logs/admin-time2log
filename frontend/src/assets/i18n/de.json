@@ -62,6 +62,13 @@
   },
   "nav": {
     "dashboard": "Dashboard",
-    "groups": "Gruppen"
+    "groups": "Gruppen",
+    "entries": "Einträge"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": "Sprache",
+    "theme": "Design",
+    "account": "Konto"
   }
 }
