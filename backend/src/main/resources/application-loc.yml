@@ -15,4 +15,4 @@ supabase:
 logging:
   level:
     ch.time2log: DEBUG
-    org.springframework.web.reactive: DEBUG
+    reactor.netty.http.client: DEBUG

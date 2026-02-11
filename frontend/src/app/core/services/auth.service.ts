@@ -47,18 +47,21 @@ export class AuthService implements OnDestroy {
   }
 
   private async initializeAuth() {
-    const { data, error } = await this.supabase.auth.getSession();
-    if (!error) {
-      this.currentUserSubject.next(data.session?.user ?? null);
+    const { data, error } = await this.supabase.auth.getUser();
+    if (!error && data.user) {
+      this.currentUserSubject.next(data.user);
       this.loadProfile();
     } else {
       this.currentUserSubject.next(null);
+      await this.supabase.auth.signOut();
     }
 
     this.authSubscription = this.supabase.auth.onAuthStateChange(
       (event: AuthChangeEvent, session: Session | null) => {
         this.currentUserSubject.next(session?.user ?? null);
-        this.loadProfile();
+        if (this.currentUserSubject.value !== null) {
+          this.loadProfile();
+        }
       }
     ).data.subscription;
 
@@ -70,8 +73,25 @@ export class AuthService implements OnDestroy {
   }
 
   async getAccessToken(): Promise<string | null> {
-    const { data } = await this.supabase.auth.getSession();
-    return data.session?.access_token ?? null;
+    const { data: { session } } = await this.supabase.auth.getSession();
+    if (!session) return null;
+
+    const expiresAt = session.expires_at ?? 0;
+    const now = Math.floor(Date.now() / 1000);
+    const bufferSeconds = 30;
+
+    if (expiresAt - now > bufferSeconds) {
+      return session.access_token;
+    }
+
+    const { data, error } = await this.supabase.auth.refreshSession();
+    if (error || !data.session) {
+      this.currentUserSubject.next(null);
+      await this.supabase.auth.signOut();
+      return null;
+    }
+
+    return data.session.access_token;
   }
 
   login(email: string, password: string): Observable<AuthResponse> {

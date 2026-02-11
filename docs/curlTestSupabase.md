@@ -1,4 +1,13 @@
-curl -i "http://127.0.0.1:54321/rest/v1/profiles?id=eq.USERID" \
+curl -i "http://127.0.0.1:54321/rest/v1/profiles?id=eq.7da9c246-c948-4a4e-a998-04ee47da3f61" \
 -H "apikey: sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH" \
--H "Authorization: Bearer JWT_TOKEN" \
+-H "Authorization: Bearer " \
 -H "Accept-Profile: app"
+
+curl -X POST "http://127.0.0.1:54321/rest/v1/organizations" \
+-H "apikey: sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH" \
+-H "Authorization: Bearer eyJhbGciOiJFUzI1NiIsImtpZCI6ImI4MTI2OWYxLTIxZDgtNGYyZS1iNzE5LWMyMjQwYTg0MGQ5MCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjU0MzIxL2F1dGgvdjEiLCJzdWIiOiJjMjc5MDExYS0yNjUyLTRhZGUtYWQ0MC0zYmU1ZDcwNTM0YzciLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzcwODE2MTYyLCJpYXQiOjE3NzA4MTI1NjIsImVtYWlsIjoiamFuaXMuaHViZXJAaXRtZS5jaCIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWwiOiJqYW5pcy5odWJlckBpdG1lLmNoIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcnN0X25hbWUiOiJKYW5pcyBFbGlhIiwibGFzdF9uYW1lIjoiSHViZXIiLCJwaG9uZV92ZXJpZmllZCI6ZmFsc2UsInN1YiI6ImMyNzkwMTFhLTI2NTItNGFkZS1hZDQwLTNiZTVkNzA1MzRjNyJ9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzcwODEyNTYyfV0sInNlc3Npb25faWQiOiJmZDdkYTA4Zi00YzAxLTQyYzctODBlZS00Y2UxMjY2ZjAzMTciLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.QxCPEXANFDjf3dB5CWtl66_iSJ0MK7YQHrgLhK-1fh-F8emLW3lEZSFD9kQC_Lj5cZhLAoP4GRKA68emlCna7w" \
+-H "Content-Type: application/json" \
+-H "Content-Profile: admin" \
+-d '{
+"name": "My Organization"
+}'

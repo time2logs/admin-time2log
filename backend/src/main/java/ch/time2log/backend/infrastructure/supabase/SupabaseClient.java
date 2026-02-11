@@ -1,8 +1,11 @@
 package ch.time2log.backend.infrastructure.supabase;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.http.MediaType;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -10,7 +13,7 @@ import java.util.Map;
 
 @Component
 public class SupabaseClient {
-
+    private static final Logger log = LoggerFactory.getLogger(SupabaseClient.class);
     private final WebClient webClient;
 
     public SupabaseClient(@Value("${supabase.url}") String supabaseUrl,
@@ -21,9 +24,6 @@ public class SupabaseClient {
                 .build();
     }
 
-    /**
-     * Parse "schema.table" into schema and table parts
-     */
     private record SchemaTable(String schema, String table) {
         static SchemaTable parse(String schemaTable) {
             if (schemaTable.contains(".")) {
@@ -34,11 +34,18 @@ public class SupabaseClient {
         }
     }
 
+    private static String toBearerAuth(String userToken) {
+        if (userToken == null) return null;
+        String t = userToken.trim();
+        if (t.isEmpty()) return null;
+        return t.regionMatches(true, 0, "Bearer ", 0, 7) ? t : "Bearer " + t;
+    }
+
     public <T> Mono<T> get(String schemaTable, String userToken, Class<T> responseType) {
         var st = SchemaTable.parse(schemaTable);
         return webClient.get()
                 .uri("/{table}", st.table())
-                .header("Authorization", "Bearer " + userToken)
+                .header("Authorization", toBearerAuth(userToken))
                 .header("Accept-Profile", st.schema())
                 .retrieve()
                 .bodyToMono(responseType);
@@ -48,7 +55,7 @@ public class SupabaseClient {
         var st = SchemaTable.parse(schemaTable);
         return webClient.get()
                 .uri("/{table}", st.table())
-                .header("Authorization", "Bearer " + userToken)
+                .header("Authorization", toBearerAuth(userToken))
                 .header("Accept-Profile", st.schema())
                 .retrieve()
                 .bodyToFlux(elementType)
@@ -59,7 +66,7 @@ public class SupabaseClient {
         var st = SchemaTable.parse(schemaTable);
         return webClient.get()
                 .uri("/{table}?{query}", st.table(), query)
-                .header("Authorization", "Bearer " + userToken)
+                .header("Authorization", toBearerAuth(userToken))
                 .header("Accept-Profile", st.schema())
                 .retrieve()
                 .bodyToMono(responseType);
@@ -69,7 +76,7 @@ public class SupabaseClient {
         var st = SchemaTable.parse(schemaTable);
         return webClient.get()
                 .uri("/{table}?{query}", st.table(), query)
-                .header("Authorization", "Bearer " + userToken)
+                .header("Authorization", toBearerAuth(userToken))
                 .header("Accept-Profile", st.schema())
                 .retrieve()
                 .bodyToFlux(elementType)
@@ -78,13 +85,24 @@ public class SupabaseClient {
 
     public <T> Mono<T> post(String schemaTable, Object body, String userToken, Class<T> responseType) {
         var st = SchemaTable.parse(schemaTable);
+        String authHeader = "Bearer " + userToken;
+        log.debug("POST to {}.{}", st.schema(), st.table());
+        log.debug("Authorization: {}...", authHeader.substring(0, Math.min(60, authHeader.length())));
+        log.debug("Body: {}", body);
+
         return webClient.post()
                 .uri("/{table}", st.table())
-                .header("Authorization", "Bearer " + userToken)
+                .header("Authorization", authHeader)
                 .header("Content-Profile", st.schema())
-                .header("Prefer", "return=representation")
+                .header("Content-Type", "application/json")
                 .bodyValue(body)
                 .retrieve()
+                .onStatus(status -> status.isError(), resp ->
+                    resp.bodyToMono(String.class).flatMap(bodyStr -> {
+                        log.error("Supabase error: {} - {}", resp.statusCode(), bodyStr);
+                        return Mono.error(new RuntimeException(resp.statusCode() + " " + bodyStr));
+                    })
+                )
                 .bodyToMono(responseType);
     }
 
@@ -92,9 +110,11 @@ public class SupabaseClient {
         var st = SchemaTable.parse(schemaTable);
         return webClient.patch()
                 .uri("/{table}?{query}", st.table(), query)
-                .header("Authorization", "Bearer " + userToken)
+                .header("Authorization", toBearerAuth(userToken))
                 .header("Content-Profile", st.schema())
+                .header("Accept-Profile", st.schema())
                 .header("Prefer", "return=representation")
+                .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(body)
                 .retrieve()
                 .bodyToMono(responseType);
@@ -104,7 +124,7 @@ public class SupabaseClient {
         var st = SchemaTable.parse(schemaTable);
         return webClient.delete()
                 .uri("/{table}?{query}", st.table(), query)
-                .header("Authorization", "Bearer " + userToken)
+                .header("Authorization", toBearerAuth(userToken))
                 .header("Content-Profile", st.schema())
                 .retrieve()
                 .bodyToMono(Void.class);
@@ -116,7 +136,8 @@ public class SupabaseClient {
     public <T> Mono<T> rpc(String functionName, Map<String, Object> params, String userToken, Class<T> responseType) {
         return webClient.post()
                 .uri("/rpc/{function}", functionName)
-                .header("Authorization", "Bearer " + userToken)
+                .header("Authorization", toBearerAuth(userToken))
+                .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(params)
                 .retrieve()
                 .bodyToMono(responseType);
