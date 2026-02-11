@@ -1,4 +1,4 @@
-import {Inject, Injectable, OnDestroy} from '@angular/core';
+import {inject, Injectable, OnDestroy} from '@angular/core';
 import {
   AuthChangeEvent,
   AuthResponse,
@@ -16,7 +16,7 @@ import {HttpClient} from '@angular/common/http';
 @Injectable({ providedIn: 'root' })
 export class AuthService implements OnDestroy {
   private supabase: SupabaseClient;
-  private http = Inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
   private readonly currentUserSubject = new BehaviorSubject<User | null>(null);
   readonly currentUser$ = this.currentUserSubject.asObservable();

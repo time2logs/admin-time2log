@@ -1,6 +1,5 @@
-import {Component, inject, OnInit} from '@angular/core';
+import { Component } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
-import { AuthService } from '@services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
