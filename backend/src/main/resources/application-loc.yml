@@ -1,5 +1,4 @@
-cors:
-  allowed-origins: http://localhost:4200
+# Local Development (Supabase local)
 
 spring:
   security:
@@ -10,9 +9,11 @@ spring:
 
 supabase:
   url: http://127.0.0.1:54321
-  anon-key: sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH
+  anon-key: ${SUPABASE_ANON_KEY:sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH}
+
+cors:
+  allowed-origins: http://localhost:4200
 
 logging:
   level:
     ch.time2log: DEBUG
-    reactor.netty.http.client: DEBUG

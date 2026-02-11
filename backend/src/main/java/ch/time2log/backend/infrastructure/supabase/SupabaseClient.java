@@ -130,9 +130,6 @@ public class SupabaseClient {
                 .bodyToMono(Void.class);
     }
 
-    /**
-     * Call RPC function
-     */
     public <T> Mono<T> rpc(String functionName, Map<String, Object> params, String userToken, Class<T> responseType) {
         return webClient.post()
                 .uri("/rpc/{function}", functionName)

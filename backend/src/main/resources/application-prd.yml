@@ -1,2 +1,4 @@
+# Production Environment
+
 cors:
-  allowed-origins: https://admin.time2log.com, https://www.admin.time2log.com
+  allowed-origins: https://admin.time2log.app

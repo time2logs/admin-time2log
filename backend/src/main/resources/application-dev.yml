@@ -1,21 +1,8 @@
-spring:
-  jpa:
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-  web:
-    error:
-      include-message: always
-      include-stacktrace: always
+# Development Environment
 
 cors:
-  allowed-origins: https://dev.admin.time2log.com, https://www.dev.admin.time2log.com
+  allowed-origins: https://dev.admin.time2log.app
 
 logging:
   level:
-    root: INFO
-    ch.finpath: DEBUG
-    org.springframework.web: DEBUG
-    org.springframework.security: WARN
-    org.springframework.security.oauth2: WARN
+    ch.time2log: DEBUG

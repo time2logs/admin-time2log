@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import {Inject, Injectable, OnDestroy} from '@angular/core';
 import {
   AuthChangeEvent,
   AuthResponse,
@@ -16,6 +16,7 @@ import {HttpClient} from '@angular/common/http';
 @Injectable({ providedIn: 'root' })
 export class AuthService implements OnDestroy {
   private supabase: SupabaseClient;
+  private http = Inject(HttpClient);
 
   private readonly currentUserSubject = new BehaviorSubject<User | null>(null);
   readonly currentUser$ = this.currentUserSubject.asObservable();
@@ -28,7 +29,7 @@ export class AuthService implements OnDestroy {
 
   private authSubscription?: { unsubscribe: () => void };
 
-  constructor(private http: HttpClient) {
+  constructor() {
     this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey, {
       auth: {
         persistSession: true,
