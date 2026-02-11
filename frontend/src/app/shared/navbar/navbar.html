@@ -51,12 +51,12 @@
     </a>
 
     <a
-      routerLink="/groups"
-      #groupsLink="routerLinkActive"
+      routerLink="/organization"
+      #organizationLink="routerLinkActive"
       routerLinkActive="md:bg-[#2d3a4f] md:text-blue-400 shadow-sm"
       class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group"
     >
-      <span class="md:hidden" [class.svg-active]="groupsLink.isActive">
+      <span class="md:hidden" [class.svg-active]="organizationLink.isActive">
         <svg width="90" height="60" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <mask id="teams-cutout">
@@ -72,12 +72,12 @@
           <circle cx="53" cy="21" r="4.5" stroke="#8E9AAF" stroke-width="2.5" fill="none" />
           <path d="M46 38V35C46 31 49 28 53 28H55C59 28 62 31 62 35V38" stroke="#8E9AAF" stroke-width="2.5" stroke-linecap="round" fill="none"/>
           <text x="60" y="58" font-family="Arial, sans-serif" font-size="16" fill="#8E9AAF" text-anchor="middle">
-            {{ 'nav.groups' | translate }}
+            {{ 'nav.organization' | translate }}
           </text>
         </svg>
       </span>
       <i class="hidden md:inline bi bi-people-fill text-lg md:mr-3"></i>
-      <span class="hidden md:inline">{{ 'nav.groups' | translate }}</span>
+      <span class="hidden md:inline">{{ 'nav.organization' | translate }}</span>
     </a>
 
     <a
