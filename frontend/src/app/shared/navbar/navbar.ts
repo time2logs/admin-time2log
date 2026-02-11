@@ -5,10 +5,27 @@ import { AuthService } from '@services/auth.service';
 import { LanguageService } from '@services/language.service';
 
 @Component({
-  selector: 'app-header',
+  selector: 'app-navbar',
   standalone: true,
   imports: [RouterLink, RouterLinkActive, TranslateModule],
-  templateUrl: './header.html',
+  templateUrl: './navbar.html',
+  styles: [`
+    span.svg-active svg g {
+      stroke: #3b82f6;
+    }
+
+    span.svg-active svg circle {
+      stroke: #3b82f6;
+    }
+
+    span.svg-active svg path {
+      stroke: #3b82f6;
+    }
+
+    span.svg-active svg text {
+      fill: #3b82f6;
+    }
+  `],
 })
 export class HeaderComponent {
   protected readonly authService = inject(AuthService);
@@ -39,5 +56,9 @@ export class HeaderComponent {
     this.authService.logout().subscribe(() => {
       this.router.navigate(['/auth/login']);
     });
+  }
+
+  settings(): void {
+    this.router.navigate(['/settings']);
   }
 }
