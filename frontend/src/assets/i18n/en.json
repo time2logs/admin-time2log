@@ -66,6 +66,14 @@
   },
   "nav": {
     "dashboard": "Dashboard",
-    "organizations": "Organizations"
+    "organization": "Organization",
+    "entries": "Entries"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "account": "Account"
   }
+
 }

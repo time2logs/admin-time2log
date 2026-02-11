@@ -66,6 +66,14 @@
   },
   "nav": {
     "dashboard": "Dashboard",
-    "organizations": "Organisationen"
+    "organizations": "Organisation",
+    "entries": "Einträge"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": "Sprache",
+    "theme": "Design",
+    "account": "Konto"
   }
+
 }
