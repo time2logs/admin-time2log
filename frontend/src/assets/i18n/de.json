@@ -49,19 +49,26 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Willkommen!",
-    "groups": {
-      "title": "Gruppen",
-      "description": "Gruppen verwalten und erstellen"
+    "organization": {
+      "title": "Organisation",
+      "description": "Organisation verwalten und erstellen"
     }
   },
-  "groups": {
-    "title": "Gruppen",
-    "create": "Neue Gruppe",
+  "organization": {
+    "title": "Organisation",
+    "create": "Neue Organisation erstellen",
     "memberCount": "{{count}} Mitglieder",
-    "empty": "Noch keine Gruppen vorhanden"
+    "empty": "Noch keine Organisationen vorhanden"
   },
   "nav": {
     "dashboard": "Dashboard",
-    "groups": "Gruppen"
+    "organization": "Organisation",
+    "entries": "Einträge"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": "Sprache",
+    "theme": "Design",
+    "account": "Konto"
   }
 }

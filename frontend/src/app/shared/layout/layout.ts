@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
-import {HeaderComponent} from '../header/header';
+import {HeaderComponent} from '../navbar/navbar';
 
 @Component({
   selector: 'app-layout',

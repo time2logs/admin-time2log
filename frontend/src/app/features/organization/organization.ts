@@ -2,9 +2,9 @@ import { Component } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-groups',
+  selector: 'app-organization',
   standalone: true,
   imports: [TranslateModule],
-  templateUrl: './groups.html',
+  templateUrl: './organization.html',
 })
-export class GroupsComponent {}
+export class OrganizationComponent {}

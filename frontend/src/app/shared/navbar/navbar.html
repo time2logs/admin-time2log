@@ -1,0 +1,185 @@
+<header
+  class="md:hidden fixed top-0 left-0 w-full bg-[#1e293b] p-4 pl-6 z-50 border-b border-gray-800"
+>
+  <div class="flex flex-col">
+    <div class="text-2xl font-semibold text-white">
+      <span>Time<span class="text-blue-400">2</span>Log</span>
+    </div>
+    <span class="text-xs text-gray-500">Admin</span>
+  </div>
+</header>
+
+<aside
+  class="fixed bottom-0 left-0 w-full bg-white text-gray-800 border-t border-gray-200 flex flex-col z-50 md:relative md:w-64 md:h-screen md:bg-[#1e293b] md:text-gray-300 md:border-t-0 md:border-r md:border-gray-800"
+>
+  <div class="hidden md:block p-6">
+    <div class="pl-6">
+      <div class="flex items-center gap-5 text-2xl font-semibold text-white">
+        <span>Time<span class="text-blue-400">2</span>Log</span>
+      </div>
+      <span class="text-xs text-gray-500 block">Admin</span>
+    </div>
+
+    <hr class="border-gray-700/50 mt-4" />
+  </div>
+
+<nav
+  class="flex flex-row md:flex-col flex-1 justify-around md:justify-start items-center md:items-stretch md:px-4 md:space-y-2"
+>
+  @if (authService.isAuthenticated()) {
+    <a
+      routerLink="/dashboard"
+      #dashboardLink="routerLinkActive"
+      routerLinkActive="md:bg-[#2d3a4f] md:text-blue-400 shadow-sm"
+      class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group"
+    >
+      <span class="md:hidden" [class.svg-active]="dashboardLink.isActive">
+        <svg width="90" height="60" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="#8E9AAF" stroke-width="2.5" stroke-linejoin="round">
+            <rect x="50" y="14" width="7" height="10" rx="1.5" />
+            <rect x="61" y="14" width="9" height="6" rx="1.5" />
+            <rect x="50" y="27" width="9" height="7" rx="1.5" />
+            <rect x="62" y="23" width="8" height="11" rx="1.5" />
+          </g>
+          <text x="60" y="58" font-family="Arial, sans-serif" font-size="16" fill="#8E9AAF" text-anchor="middle">
+            {{ 'nav.dashboard' | translate }}
+          </text>
+        </svg>
+      </span>
+      <i class="hidden md:inline bi bi-grid-fill text-lg md:mr-3"></i>
+      <span class="hidden md:inline">{{ 'nav.dashboard' | translate }}</span>
+    </a>
+
+    <a
+      routerLink="/organization"
+      #organizationLink="routerLinkActive"
+      routerLinkActive="md:bg-[#2d3a4f] md:text-blue-400 shadow-sm"
+      class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group"
+    >
+      <span class="md:hidden" [class.svg-active]="organizationLink.isActive">
+        <svg width="90" height="60" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <mask id="teams-cutout">
+              <rect width="100%" height="100%" fill="white" />
+              <circle cx="53" cy="21" r="5.5" fill="black" />
+              <path d="M45 37V35C45 31 48 28 52 28H54C58 28 61 31 61 35V37" stroke="black" stroke-width="6" fill="black"/>
+            </mask>
+          </defs>
+          <g mask="url(#teams-cutout)">
+            <circle cx="63" cy="20" r="4.5" stroke="#8E9AAF" stroke-width="2.5" fill="none" />
+            <path d="M58 31C58 28 61 26 64 26H65C68 26 71 28 71 31V36" stroke="#8E9AAF" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          </g>
+          <circle cx="53" cy="21" r="4.5" stroke="#8E9AAF" stroke-width="2.5" fill="none" />
+          <path d="M46 38V35C46 31 49 28 53 28H55C59 28 62 31 62 35V38" stroke="#8E9AAF" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <text x="60" y="58" font-family="Arial, sans-serif" font-size="16" fill="#8E9AAF" text-anchor="middle">
+            {{ 'nav.organization' | translate }}
+          </text>
+        </svg>
+      </span>
+      <i class="hidden md:inline bi bi-people-fill text-lg md:mr-3"></i>
+      <span class="hidden md:inline">{{ 'nav.organization' | translate }}</span>
+    </a>
+
+    <a
+      routerLink="/entries"
+      #entriesLink="routerLinkActive"
+      routerLinkActive="md:bg-[#2d3a4f] md:text-blue-400 shadow-sm"
+      class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group"
+    >
+      <span class="md:hidden" [class.svg-active]="entriesLink.isActive">
+        <svg width="90" height="60" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+          <g fill="#8E9AAF">
+            <rect x="48" y="15" width="4" height="3" rx="1" />
+            <rect x="56" y="15" width="16" height="3" rx="1" />
+            <rect x="48" y="23" width="4" height="3" rx="1" />
+            <rect x="56" y="23" width="16" height="3" rx="1" />
+            <rect x="48" y="31" width="4" height="3" rx="1" />
+            <rect x="56" y="31" width="16" height="3" rx="1" />
+          </g>
+          <text x="60" y="58" font-family="Arial, sans-serif" font-size="16" fill="#8E9AAF" text-anchor="middle">
+            {{ 'nav.entries' | translate }}
+          </text>
+        </svg>
+      </span>
+      <i class="hidden md:inline bi bi-list-ul text-lg md:mr-3"></i>
+      <span class="hidden md:inline">{{ 'nav.entries' | translate }}</span>
+    </a>
+  }
+</nav>
+
+  <div class="hidden md:block p-4 border-t border-gray-800 space-y-2">
+    <div class="relative">
+      @if (isLangMenuOpen()) {
+        <div 
+          class="fixed inset-0 z-40" 
+          (click)="toggleLangMenu()" 
+          (keyup.escape)="toggleLangMenu()"
+          tabindex="0"
+          role="button"
+          aria-label="Close menu">
+        </div>
+      }
+
+      <button
+        (click)="toggleLangMenu()"
+        class="relative z-50 w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-400 hover:text-white hover:bg-[#2d3a4f] rounded-lg transition-all"
+      >
+        <div class="flex items-center gap-3">
+          <i class="bi bi-translate text-lg"></i>
+          <span class="uppercase">{{ currentLang.code }}</span>
+        </div>
+        <svg
+          class="w-4 h-4 transition-transform duration-200"
+          [class.rotate-180]="isLangMenuOpen()"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
+
+      @if (isLangMenuOpen()) {
+        <div
+          class="absolute bottom-full left-0 mb-2 w-full bg-[#2d3a4f] border border-gray-700 rounded-lg shadow-2xl z-50 overflow-hidden"
+        >
+          @for (lang of languages; track lang.code) {
+            <button
+              (click)="switchLanguage(lang.code); toggleLangMenu()"
+              class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left transition-colors"
+              [class.bg-blue-600]="languageService.currentLang === lang.code"
+              [class.text-white]="languageService.currentLang === lang.code"
+              [class.text-gray-300]="languageService.currentLang !== lang.code"
+              [class.hover:bg-[#3d4b63]]="languageService.currentLang !== lang.code"
+            >
+              <span>{{ lang.label }}</span>
+            </button>
+          }
+        </div>
+      }
+    </div>
+
+    @if (authService.isAuthenticated()) {
+      <button
+        (click)="logout()"
+        class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 hover:text-red-400 transition-colors"
+      >
+        <i class="bi bi-box-arrow-right text-lg"></i>
+        <span>{{ 'auth.logout' | translate }}</span>
+      </button>
+
+      <button
+        (click)="settings()"
+        class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 hover:text-white transition-colors"
+      >
+        <i class="bi bi-gear text-lg"></i>
+        <span>{{ 'settings.title' | translate }}</span>
+      </button>
+    }
+  </div>
+</aside>
