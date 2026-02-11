@@ -21,6 +21,7 @@ public class SupabaseClient {
         this.webClient = WebClient.builder()
                 .baseUrl(supabaseUrl + "/rest/v1")
                 .defaultHeader("apikey", anonKey)
+                .defaultHeader("Accept", "application/json")
                 .build();
     }
 
