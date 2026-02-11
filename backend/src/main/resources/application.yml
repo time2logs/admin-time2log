@@ -5,14 +5,14 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${SUPABASE_AUTH_URL}
+          issuer-uri: ${SUPABASE_AUTH_URL:anyplaceholderfortests}
 
 supabase:
-  url: ${SUPABASE_URL}
-  anon-key: ${SUPABASE_ANON_KEY}
+  url: ${SUPABASE_URL:anyplaceholderfortests}
+  anon-key: ${SUPABASE_ANON_KEY:anyplaceholderfortests}
 
 cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:anyplaceholderfortests}
 
 server:
   port: 9080
