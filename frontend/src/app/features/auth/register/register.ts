@@ -23,7 +23,8 @@ export class RegisterComponent {
   protected readonly errorType = signal<ErrorType>(null);
 
   protected readonly form = this.fb.nonNullable.group({
-    name: ['', [Validators.required, Validators.minLength(2)]],
+    firstName: ['', [Validators.required, Validators.minLength(2)]],
+    lastName: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
@@ -35,8 +36,8 @@ export class RegisterComponent {
     this.errorType.set(null);
 
     try {
-      const { name, email, password } = this.form.getRawValue();
-      const { error } = await firstValueFrom(this.authService.register(email, password, name));
+      const { firstName, lastName, email, password } = this.form.getRawValue();
+      const { error } = await firstValueFrom(this.authService.register(email, password, firstName, lastName));
 
       if (error) {
         this.errorType.set(this.mapError(error.message));

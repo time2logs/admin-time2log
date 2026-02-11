@@ -23,7 +23,8 @@
     },
     "register": {
       "title": "Registrieren",
-      "name": "Name",
+      "firstName": "Vorname",
+      "lastName": "Nachnamen",
       "email": "E-Mail",
       "password": "Passwort",
       "submit": "Konto erstellen",
@@ -41,8 +42,10 @@
       "emailRequired": "E-Mail ist erforderlich.",
       "passwordMin": "Passwort muss mindestens 6 Zeichen lang sein.",
       "passwordRequired": "Passwort ist erforderlich.",
-      "nameMin": "Name muss mindestens 2 Zeichen lang sein.",
-      "nameRequired": "Name ist erforderlich."
+      "firstNameMin": "Vorname muss mindestens 2 Zeichen lang sein.",
+      "firstNameRequired": "Vorname ist erforderlich.",
+      "lastNameMin": "Nachname muss mindestens 2 Zeichen lang sein.",
+      "lastNameRequired": "Nachname ist erforderlich."
     },
     "logout": "Abmelden"
   },
@@ -57,6 +60,7 @@
   "organizations": {
     "title": "Organisationen",
     "create": "Neue Organisation",
+    "namePlaceholder": "Name der Organisation",
     "memberCount": "{{count}} Mitglieder",
     "empty": "Noch keine Organisationen vorhanden"
   },

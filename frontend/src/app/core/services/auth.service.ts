@@ -78,12 +78,12 @@ export class AuthService implements OnDestroy {
     return from(this.supabase.auth.signInWithPassword({ email, password }));
   }
 
-  register(email: string, password: string, name: string): Observable<AuthResponse> {
+  register(email: string, password: string, firstName: string, lastName: string): Observable<AuthResponse> {
     return from(
       this.supabase.auth.signUp({
         email,
         password,
-        options: { data: { name } },
+        options: { data: { first_name: firstName, last_name: lastName } },
       })
     );
   }
@@ -97,7 +97,6 @@ export class AuthService implements OnDestroy {
     this.http.get<Profile>(`${environment.apiBaseUrl}/profile`).subscribe({
       next: (profile) => {
         this.currentProfileSubject.next(profile);
-        console.log('User Profile loaded:', profile);
       },
       error: (err) => console.error('Failed to load profile:', err)
     });

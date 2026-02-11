@@ -62,7 +62,6 @@ public class SecurityConfig {
     JwtDecoder jwtDecoder() {
         log.info("Expected issuer: {}", issuerUri);
 
-        // Build decoder from issuer metadata (will discover jwks_uri automatically)
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withIssuerLocation(issuerUri).build();
 
         OAuth2TokenValidator<Jwt> withIssuer = new JwtIssuerValidator(issuerUri);
@@ -92,8 +91,9 @@ public class SecurityConfig {
 
         UUID userId = UUID.fromString(jwt.getSubject());
         String email = jwt.getClaimAsString("email");
-        var principal = new AuthenticatedUser(userId, email);
+        String token = jwt.getTokenValue();
+        var principal = new AuthenticatedUser(userId, email, token);
 
-        return new UsernamePasswordAuthenticationToken(principal, "n/a", List.of());
+        return new UsernamePasswordAuthenticationToken(principal, null, List.of());
     }
 }
