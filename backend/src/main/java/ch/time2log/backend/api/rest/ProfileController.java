@@ -1,6 +1,7 @@
 package ch.time2log.backend.api.rest;
 
 import ch.time2log.backend.api.rest.dto.outbound.ProfileDto;
+import ch.time2log.backend.api.rest.exception.ProfileNotFoundException;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
 import ch.time2log.backend.infrastructure.supabase.responses.ProfileResponse;
 import ch.time2log.backend.security.AuthenticatedUser;
@@ -25,7 +26,7 @@ public class ProfileController {
     public ProfileDto getProfile(@AuthenticationPrincipal AuthenticatedUser user) {
         var profiles = supabase.getListWithQuery("app.profiles", "id=eq." + user.id(), ProfileResponse.class);
         if (profiles.isEmpty()) {
-            throw new RuntimeException("Profile not found");
+            throw new ProfileNotFoundException("Profile not found");
         }
         return ProfileDto.of(profiles.getFirst());
     }
@@ -34,7 +35,7 @@ public class ProfileController {
     public ProfileDto getProfileById(@PathVariable UUID id) {
         var profiles = supabase.getListWithQuery("app.profiles", "id=eq." + id, ProfileResponse.class);
         if (profiles.isEmpty()) {
-            throw new RuntimeException("Profile not found");
+            throw new ProfileNotFoundException("Profile not found");
         }
         return ProfileDto.of(profiles.getFirst());
     }

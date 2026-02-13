@@ -96,6 +96,7 @@ public class SupabaseClient {
                 .header("Authorization", authHeader)
                 .header("Content-Profile", st.schema())
                 .header("Content-Type", "application/json")
+                .header("Prefer", "return=representation")
                 .bodyValue(body)
                 .retrieve()
                 .onStatus(status -> status.isError(), resp ->
