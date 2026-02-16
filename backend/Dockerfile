@@ -1,4 +1,4 @@
-FROM eclipse-temurin:25-jdk-alpine AS build
+FROM eclipse-temurin:25.0.2_10-jdk-alpine AS build
 #Build backend
 
 WORKDIR /app
@@ -8,7 +8,7 @@ RUN ./mvnw -q dependency:go-offline
 COPY src/ src/
 RUN ./mvnw -q -DskipTests package
 
-FROM eclipse-temurin:25-jre-alpine
+FROM eclipse-temurin:25.0.2_10-jre-alpine
 # Build Image
 
 RUN addgroup -S spring && adduser -S spring -G spring
