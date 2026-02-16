@@ -34,6 +34,13 @@ public class SupabaseClient {
         return t.regionMatches(true, 0, "Bearer ", 0, 7) ? t : "Bearer " + t;
     }
 
+    private static String requireQuery(String query, String operation) {
+        if (query == null || query.isBlank()) {
+            throw new IllegalArgumentException(operation + " requires a non-empty query filter");
+        }
+        return query;
+    }
+
     private Mono<? extends Throwable> mapError(ClientResponse response) {
         return response.bodyToMono(String.class)
                 .defaultIfEmpty("")
@@ -69,8 +76,12 @@ public class SupabaseClient {
 
     public <T> Mono<T> getWithQuery(String schemaTable, String query, String userToken, Class<T> responseType) {
         var st = SchemaTable.parse(schemaTable);
+        String safeQuery = requireQuery(query, "GET");
         return webClient.get()
-                .uri("/{table}?{query}", st.table(), query)
+                .uri(uriBuilder -> uriBuilder
+                        .path("/{table}")
+                        .query(safeQuery)
+                        .build(st.table()))
                 .header("Authorization", toBearerAuth(userToken))
                 .header("Accept-Profile", st.schema())
                 .retrieve()
@@ -80,8 +91,12 @@ public class SupabaseClient {
 
     public <T> Mono<List<T>> getListWithQuery(String schemaTable, String query, String userToken, Class<T> elementType) {
         var st = SchemaTable.parse(schemaTable);
+        String safeQuery = requireQuery(query, "GET");
         return webClient.get()
-                .uri("/{table}?{query}", st.table(), query)
+                .uri(uriBuilder -> uriBuilder
+                        .path("/{table}")
+                        .query(safeQuery)
+                        .build(st.table()))
                 .header("Authorization", toBearerAuth(userToken))
                 .header("Accept-Profile", st.schema())
                 .retrieve()
@@ -96,6 +111,7 @@ public class SupabaseClient {
                 .uri("/{table}", st.table())
                 .header("Authorization", toBearerAuth(userToken))
                 .header("Content-Profile", st.schema())
+                .header("Accept-Profile", st.schema())
                 .header("Prefer", "return=representation")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(body)
@@ -106,8 +122,12 @@ public class SupabaseClient {
 
     public <T> Mono<T> patch(String schemaTable, String query, Object body, String userToken, Class<T> responseType) {
         var st = SchemaTable.parse(schemaTable);
+        String safeQuery = requireQuery(query, "PATCH");
         return webClient.patch()
-                .uri("/{table}?{query}", st.table(), query)
+                .uri(uriBuilder -> uriBuilder
+                        .path("/{table}")
+                        .query(safeQuery)
+                        .build(st.table()))
                 .header("Authorization", toBearerAuth(userToken))
                 .header("Content-Profile", st.schema())
                 .header("Accept-Profile", st.schema())
@@ -121,13 +141,36 @@ public class SupabaseClient {
 
     public Mono<Void> delete(String schemaTable, String query, String userToken) {
         var st = SchemaTable.parse(schemaTable);
+        String safeQuery = requireQuery(query, "DELETE");
         return webClient.delete()
-                .uri("/{table}?{query}", st.table(), query)
+                .uri(uriBuilder -> uriBuilder
+                        .path("/{table}")
+                        .query(safeQuery)
+                        .build(st.table()))
                 .header("Authorization", toBearerAuth(userToken))
                 .header("Content-Profile", st.schema())
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, this::mapError)
                 .bodyToMono(Void.class);
+    }
+
+    public Mono<Integer> deleteReturningCount(String schemaTable, String query, String userToken) {
+        var st = SchemaTable.parse(schemaTable);
+        String safeQuery = requireQuery(query, "DELETE");
+        return webClient.delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/{table}")
+                        .query(safeQuery)
+                        .build(st.table()))
+                .header("Authorization", toBearerAuth(userToken))
+                .header("Content-Profile", st.schema())
+                .header("Accept-Profile", st.schema())
+                .header("Prefer", "return=representation")
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, this::mapError)
+                .bodyToFlux(Object.class)
+                .collectList()
+                .map(List::size);
     }
 
     public <T> Mono<T> rpc(String functionName, Map<String, Object> params, String userToken, Class<T> responseType) {
