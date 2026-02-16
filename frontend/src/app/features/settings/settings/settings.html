@@ -1,0 +1,108 @@
+<div class="max-w-4xl mx-auto">
+  <h1 class="text-3xl font-semibold mb-6">{{ 'settings.title' | translate }}</h1>
+
+  <div class="space-y-6">
+    <!-- Profile Section -->
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+      <div class="px-5 py-3 bg-gray-50 border-b border-gray-200">
+        <h2 class="text-lg font-medium text-gray-800">{{ 'settings.profile.title' | translate }}</h2>
+      </div>
+      <div class="p-5 space-y-4">
+        @if (authService.currentProfile$ | async; as profile) {
+          <div class="flex items-center gap-4 mb-2">
+            <div class="h-12 w-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-lg font-medium">
+              {{ profile.firstName.charAt(0) }}{{ profile.lastName.charAt(0) }}
+            </div>
+            <div>
+              <p class="text-lg font-medium text-gray-800">{{ profile.firstName }} {{ profile.lastName }}</p>
+              @if (authService.currentUser$ | async; as user) {
+                <p class="text-sm text-gray-500">{{ user.email }}</p>
+              }
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-gray-100">
+            <label class="block text-sm font-medium text-gray-500 mb-1">{{ 'settings.profile.userId' | translate }}</label>
+            <div class="flex items-center gap-2">
+              <code class="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 font-mono">{{ profile.id }}</code>
+              <button
+                class="px-3 py-2 text-sm border border-gray-200 rounded hover:bg-gray-50 transition-colors"
+                (click)="copyId(profile.id)"
+              >
+                @if (idCopied()) {
+                  {{ 'settings.profile.copied' | translate }}
+                } @else {
+                  {{ 'settings.profile.copy' | translate }}
+                }
+              </button>
+            </div>
+            <p class="mt-1 text-xs text-gray-400">{{ 'settings.profile.userIdHint' | translate }}</p>
+          </div>
+        } @else {
+          <p class="text-gray-500">{{ 'common.loading' | translate }}</p>
+        }
+      </div>
+    </div>
+
+    <!-- Language Section -->
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+      <div class="px-5 py-3 bg-gray-50 border-b border-gray-200">
+        <h2 class="text-lg font-medium text-gray-800">{{ 'settings.language' | translate }}</h2>
+      </div>
+      <div class="p-5">
+        <div class="flex gap-2">
+          @for (lang of languages; track lang.code) {
+            <button
+              class="px-4 py-2 text-sm border rounded transition-all"
+              [class.border-blue-500]="languageService.currentLang === lang.code"
+              [class.bg-blue-50]="languageService.currentLang === lang.code"
+              [class.text-blue-700]="languageService.currentLang === lang.code"
+              [class.border-gray-200]="languageService.currentLang !== lang.code"
+              [class.text-gray-700]="languageService.currentLang !== lang.code"
+              [class.hover:border-gray-300]="languageService.currentLang !== lang.code"
+              (click)="switchLanguage(lang.code)"
+            >
+              {{ lang.label }}
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="bg-white border border-red-200 rounded-lg shadow-sm overflow-hidden">
+      <div class="px-5 py-3 bg-red-50 border-b border-red-200">
+        <h2 class="text-lg font-medium text-red-700">{{ 'settings.dangerZone.title' | translate }}</h2>
+      </div>
+      <div class="p-5">
+        <p class="text-sm text-gray-600 mb-4">{{ 'settings.dangerZone.description' | translate }}</p>
+        @if (!showDeleteConfirm()) {
+          <button
+            class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors disabled:opacity-50"
+            [disabled]="isDeleting()"
+            (click)="showDeleteConfirm.set(true)"
+          >
+            {{ 'settings.dangerZone.deleteAccount' | translate }}
+          </button>
+        } @else {
+          <div class="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded">
+            <p class="text-red-600 text-sm">{{ 'settings.dangerZone.deleteConfirm' | translate }}</p>
+            <button
+              class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors disabled:opacity-50"
+              [disabled]="isDeleting()"
+              (click)="deleteAccount()"
+            >
+              {{ 'common.delete' | translate }}
+            </button>
+            <button
+              class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+              (click)="showDeleteConfirm.set(false)"
+            >
+              {{ 'common.cancel' | translate }}
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

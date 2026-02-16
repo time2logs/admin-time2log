@@ -73,7 +73,53 @@
     "roleAdmin": "Admin",
     "inviteButton": "Invite",
     "inviteError": "Failed to invite user. Please check the User ID and try again.",
-    "inviteSuccess": "User invited successfully."
+    "inviteSuccess": "User invited successfully.",
+    "delete": "Delete Organization",
+    "deleteConfirm": "Are you sure? This action cannot be undone."
+  },
+  "organizationManaging": {
+    "tabs": {
+      "members": "Members",
+      "activities": "Activities",
+      "settings": "Settings"
+    },
+    "members": {
+      "title": "Members",
+      "noMembers": "No members yet.",
+      "inviteToggle": "Invite Member",
+      "userIdPlaceholder": "User ID",
+      "roleMember": "Member",
+      "roleAdmin": "Admin",
+      "inviteButton": "Invite",
+      "inviteError": "Failed to invite user. Please check the User ID and try again.",
+      "inviteSuccess": "User invited successfully.",
+      "remove": "Remove"
+    },
+    "activities": {
+      "title": "Activities",
+      "add": "Add Activity",
+      "empty": "No activities defined yet.",
+      "key": "Key",
+      "label": "Label",
+      "description": "Description",
+      "category": "Category",
+      "active": "Active",
+      "inactive": "Inactive",
+      "saveButton": "Save",
+      "deleteConfirm": "Delete this activity?",
+      "createError": "Failed to create activity.",
+      "updateError": "Failed to update activity.",
+      "deleteError": "Failed to delete activity."
+    },
+    "settings": {
+      "title": "Settings",
+      "general": "General",
+      "organizationName": "Organization Name",
+      "dangerZone": "Danger Zone",
+      "dangerDescription": "Irreversible actions for this organization.",
+      "deleteOrganization": "Delete Organization",
+      "deleteConfirm": "Are you sure? This action cannot be undone."
+    }
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -84,7 +130,19 @@
     "title": "Settings",
     "language": "Language",
     "theme": "Theme",
-    "account": "Account"
+    "account": "Account",
+    "profile": {
+      "title": "Profile",
+      "userId": "User ID",
+      "userIdHint": "Share this ID to get invited to organizations.",
+      "copy": "Copy",
+      "copied": "Copied!"
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "description": "Deleting your account is permanent and cannot be undone. All your data will be removed.",
+      "deleteAccount": "Delete Account",
+      "deleteConfirm": "Are you sure? This will permanently delete your account."
+    }
   }
-
 }
