@@ -24,6 +24,8 @@ export class OrganizationDetailComponent implements OnInit {
   protected readonly isInviting = signal(false);
   protected readonly inviteError = signal(false);
   protected readonly inviteSuccess = signal(false);
+  protected readonly showDeleteConfirm = signal(false);
+  protected readonly isDeleting = signal(false);
 
   private organizationId = '';
 
@@ -53,6 +55,14 @@ export class OrganizationDetailComponent implements OnInit {
         this.inviteError.set(true);
         this.isInviting.set(false);
       },
+    });
+  }
+
+  protected deleteOrganization(): void {
+    this.isDeleting.set(true);
+    this.organizationService.deleteOrganization(this.organizationId).subscribe({
+      next: () => this.router.navigate(['/organizations']),
+      error: () => this.isDeleting.set(false),
     });
   }
 

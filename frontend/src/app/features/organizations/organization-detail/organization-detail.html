@@ -63,6 +63,35 @@
         <p class="mt-2 text-green-600 text-sm">{{ 'organizationDetail.inviteSuccess' | translate }}</p>
       }
     </section>
+
+    <section class="mt-8 pt-8 border-t border-gray-200">
+      @if (!showDeleteConfirm()) {
+        <button
+          class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors disabled:opacity-50"
+          [disabled]="isDeleting()"
+          (click)="showDeleteConfirm.set(true)"
+        >
+          {{ 'organizationDetail.delete' | translate }}
+        </button>
+      } @else {
+        <div class="flex items-center gap-3">
+          <p class="text-red-600 text-sm">{{ 'organizationDetail.deleteConfirm' | translate }}</p>
+          <button
+            class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors disabled:opacity-50"
+            [disabled]="isDeleting()"
+            (click)="deleteOrganization()"
+          >
+            {{ 'common.delete' | translate }}
+          </button>
+          <button
+            class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+            (click)="showDeleteConfirm.set(false)"
+          >
+            {{ 'common.cancel' | translate }}
+          </button>
+        </div>
+      }
+    </section>
   } @else {
     <p class="text-gray-500">{{ 'common.loading' | translate }}</p>
   }

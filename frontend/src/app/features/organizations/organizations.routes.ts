@@ -8,6 +8,8 @@ export const ORGANIZATIONS_ROUTES: Routes = [
   {
     path: ':id',
     loadComponent: () =>
-      import('./organization-detail/organization-detail').then((m) => m.OrganizationDetailComponent),
+      import('./organization-managing/organization-managing/organization-managing').then(
+        (m) => m.OrganizationManaging,
+      ),
   },
 ];
