@@ -10,6 +10,7 @@ spring:
 supabase:
   url: ${SUPABASE_URL:anyplaceholderfortests}
   anon-key: ${SUPABASE_ANON_KEY:anyplaceholderfortests}
+  service-role-key: ${SUPABASE_SERVICE_ROLE_KEY:anyplaceholderfortests}
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:anyplaceholderfortests}
