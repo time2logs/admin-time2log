@@ -6,41 +6,63 @@
     ":semanticCommits",
     "group:allNonMajor"
   ],
-  "labels": ["dependencies"],
+  "labels": [
+    "dependencies"
+  ],
   "rangeStrategy": "pin",
   "lockFileMaintenance": {
     "enabled": true,
-    "schedule": ["before 6am on monday"]
+    "schedule": [
+      "before 6am on monday"
+    ]
   },
   "packageRules": [
     {
       "description": "Angular packages together",
-      "matchPackagePatterns": ["^@angular", "^@angular-devkit", "^angular-eslint", "^zone.js"],
-      "groupName": "angular"
+      "groupName": "angular",
+      "matchPackageNames": [
+        "/^@angular/",
+        "/^@angular-devkit/",
+        "/^angular-eslint/",
+        "/^zone.js/"
+      ]
     },
     {
       "description": "TypeScript and ESLint together",
-      "matchPackagePatterns": ["^typescript", "^eslint", "^typescript-eslint"],
-      "groupName": "typescript-eslint"
+      "groupName": "typescript-eslint",
+      "matchPackageNames": [
+        "/^typescript/",
+        "/^eslint/",
+        "/^typescript-eslint/"
+      ]
     },
     {
       "description": "Spring Boot packages together",
-      "matchPackagePatterns": ["^org.springframework"],
-      "groupName": "spring"
+      "groupName": "spring",
+      "matchPackageNames": [
+        "/^org.springframework/"
+      ]
     },
     {
       "description": "Automerge minor/patch if tests pass",
-      "matchUpdateTypes": ["minor", "patch"],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "automerge": true
     },
     {
       "description": "Don't automerge major updates",
-      "matchUpdateTypes": ["major"],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "automerge": false
     }
   ],
   "vulnerabilityAlerts": {
     "enabled": true,
-    "labels": ["security"]
+    "labels": [
+      "security"
+    ]
   }
 }
