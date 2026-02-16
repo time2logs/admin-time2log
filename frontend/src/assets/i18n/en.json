@@ -121,6 +121,23 @@
       "deleteConfirm": "Are you sure? This action cannot be undone."
     }
   },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Could not reach the server. Check your connection.",
+    "forbidden": "You don't have permission for this action.",
+    "FORBIDDEN_OPERATION": "You don't have permission for this action.",
+    "ACTIVITY_NOT_FOUND": "Activity not found.",
+    "MEMBER_NOT_FOUND": "Member not found."
+  },
+  "toast": {
+    "inviteSuccess": "Member invited successfully.",
+    "memberRemoved": "Member removed.",
+    "activityCreated": "Activity created.",
+    "activityUpdated": "Activity updated.",
+    "activityDeleted": "Activity deleted.",
+    "organizationCreated": "Organization created.",
+    "organizationDeleted": "Organization deleted."
+  },
   "nav": {
     "dashboard": "Dashboard",
     "organizations": "Organization",

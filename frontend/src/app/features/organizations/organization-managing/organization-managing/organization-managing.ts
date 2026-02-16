@@ -1,9 +1,10 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { OrganizationService } from '@services/organization.service';
 import { ActivityService } from '@services/activity.service';
+import { ToastService } from '@services/toast.service';
 import { Organization } from '@app/core/models/organizations.models';
 import { Profile } from '@app/core/models/profile.models';
 import { PreDefinedActivity } from '@app/core/models/activity.models';
@@ -21,6 +22,8 @@ export class OrganizationManaging implements OnInit {
   private readonly router = inject(Router);
   private readonly organizationService = inject(OrganizationService);
   private readonly activityService = inject(ActivityService);
+  private readonly toast = inject(ToastService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly activeTab = signal<Tab>('members');
   protected readonly organization = signal<Organization | null>(null);
@@ -30,8 +33,6 @@ export class OrganizationManaging implements OnInit {
   protected readonly inviteUserId = signal('');
   protected readonly inviteRole = signal('member');
   protected readonly isInviting = signal(false);
-  protected readonly inviteError = signal(false);
-  protected readonly inviteSuccess = signal(false);
 
   protected readonly activities = signal<PreDefinedActivity[]>([]);
   protected readonly showActivityForm = signal(false);
@@ -41,7 +42,6 @@ export class OrganizationManaging implements OnInit {
   protected readonly activityDescription = signal('');
   protected readonly activityCategory = signal('');
   protected readonly activityIsActive = signal(true);
-  protected readonly activityError = signal('');
 
   protected readonly showDeleteConfirm = signal(false);
   protected readonly isDeleting = signal(false);
@@ -63,11 +63,8 @@ export class OrganizationManaging implements OnInit {
     this.router.navigate(['/organizations']);
   }
 
-
   protected toggleInviteForm(): void {
     this.showInviteForm.update((v) => !v);
-    this.inviteError.set(false);
-    this.inviteSuccess.set(false);
   }
 
   protected invite(): void {
@@ -75,31 +72,29 @@ export class OrganizationManaging implements OnInit {
     if (!userId) return;
 
     this.isInviting.set(true);
-    this.inviteError.set(false);
-    this.inviteSuccess.set(false);
 
     this.organizationService.inviteToOrganization(this.organizationId, userId, this.inviteRole()).subscribe({
       next: () => {
         this.inviteUserId.set('');
         this.inviteRole.set('member');
-        this.inviteSuccess.set(true);
         this.isInviting.set(false);
+        this.toast.success(this.translate.instant('toast.inviteSuccess'));
         this.loadMembers();
       },
       error: () => {
-        this.inviteError.set(true);
         this.isInviting.set(false);
       },
     });
   }
 
-
   protected removeMember(member: Profile): void {
     this.organizationService.removeOrganizationMember(this.organizationId, member.id).subscribe({
-      next: () => this.loadMembers(),
+      next: () => {
+        this.toast.success(this.translate.instant('toast.memberRemoved'));
+        this.loadMembers();
+      },
     });
   }
-
 
   protected openAddActivityForm(): void {
     this.editingActivity.set(null);
@@ -108,7 +103,6 @@ export class OrganizationManaging implements OnInit {
     this.activityDescription.set('');
     this.activityCategory.set('');
     this.activityIsActive.set(true);
-    this.activityError.set('');
     this.showActivityForm.set(true);
   }
 
@@ -119,7 +113,6 @@ export class OrganizationManaging implements OnInit {
     this.activityDescription.set(activity.description ?? '');
     this.activityCategory.set(activity.category ?? '');
     this.activityIsActive.set(activity.isActive);
-    this.activityError.set('');
     this.showActivityForm.set(true);
   }
 
@@ -143,9 +136,9 @@ export class OrganizationManaging implements OnInit {
           next: () => {
             this.showActivityForm.set(false);
             this.editingActivity.set(null);
+            this.toast.success(this.translate.instant('toast.activityUpdated'));
             this.loadActivities();
           },
-          error: () => this.activityError.set('organizationManaging.activities.updateError'),
         });
     } else {
       this.activityService
@@ -158,28 +151,32 @@ export class OrganizationManaging implements OnInit {
         .subscribe({
           next: () => {
             this.showActivityForm.set(false);
+            this.toast.success(this.translate.instant('toast.activityCreated'));
             this.loadActivities();
           },
-          error: () => this.activityError.set('organizationManaging.activities.createError'),
         });
     }
   }
 
   protected deleteActivity(activity: PreDefinedActivity): void {
     this.activityService.deleteActivity(this.organizationId, activity.id).subscribe({
-      next: () => this.loadActivities(),
+      next: () => {
+        this.toast.success(this.translate.instant('toast.activityDeleted'));
+        this.loadActivities();
+      },
     });
   }
-
 
   protected deleteOrganization(): void {
     this.isDeleting.set(true);
     this.organizationService.deleteOrganization(this.organizationId).subscribe({
-      next: () => this.router.navigate(['/organizations']),
+      next: () => {
+        this.toast.success(this.translate.instant('toast.organizationDeleted'));
+        this.router.navigate(['/organizations']);
+      },
       error: () => this.isDeleting.set(false),
     });
   }
-
 
   private loadOrganization(): void {
     this.organizationService.getOrganizations().subscribe({

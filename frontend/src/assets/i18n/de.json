@@ -121,6 +121,23 @@
       "deleteConfirm": "Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden."
     }
   },
+  "errors": {
+    "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+    "network": "Server nicht erreichbar. Prüfe deine Verbindung.",
+    "forbidden": "Keine Berechtigung für diese Aktion.",
+    "FORBIDDEN_OPERATION": "Keine Berechtigung für diese Aktion.",
+    "ACTIVITY_NOT_FOUND": "Aktivität nicht gefunden.",
+    "MEMBER_NOT_FOUND": "Mitglied nicht gefunden."
+  },
+  "toast": {
+    "inviteSuccess": "Mitglied erfolgreich eingeladen.",
+    "memberRemoved": "Mitglied entfernt.",
+    "activityCreated": "Aktivität erstellt.",
+    "activityUpdated": "Aktivität aktualisiert.",
+    "activityDeleted": "Aktivität gelöscht.",
+    "organizationCreated": "Organisation erstellt.",
+    "organizationDeleted": "Organisation gelöscht."
+  },
   "nav": {
     "dashboard": "Dashboard",
     "organizations": "Organisation",
