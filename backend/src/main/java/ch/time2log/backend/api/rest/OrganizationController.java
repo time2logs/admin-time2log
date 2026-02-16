@@ -3,7 +3,9 @@ package ch.time2log.backend.api.rest;
 import ch.time2log.backend.api.rest.dto.inbound.CreateOrganizationRequest;
 import ch.time2log.backend.api.rest.dto.inbound.InviteRequest;
 import ch.time2log.backend.api.rest.dto.outbound.ProfileDto;
+import ch.time2log.backend.api.rest.exception.EntityAlreadyExistsException;
 import ch.time2log.backend.api.rest.exception.NoRowsAffectedException;
+import ch.time2log.backend.infrastructure.supabase.SupabaseApiException;
 import ch.time2log.backend.infrastructure.supabase.responses.OrganizationMemberResponse;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
 import ch.time2log.backend.infrastructure.supabase.responses.OrganizationResponse;
@@ -90,7 +92,14 @@ public class OrganizationController {
                 "organization_id", id,
                 "user_role", userRole
         );
-        supabase.post("admin.organization_members", body, Void.class);
+        try {
+            supabase.post("admin.organization_members", body, Void.class);
+        } catch (SupabaseApiException e) {
+            if (e.getStatusCode() == 409) {
+                throw new EntityAlreadyExistsException("Member already exists in this organization");
+            }
+            throw e;
+        }
     }
 
     @DeleteMapping("/{id}/members/{userId}")
