@@ -64,6 +64,17 @@
     "memberCount": "{{count}} members",
     "empty": "No organizations yet"
   },
+  "organizationDetail": {
+    "members": "Members",
+    "noMembers": "No members yet",
+    "invite": "Invite User",
+    "userIdPlaceholder": "User ID",
+    "roleMember": "Member",
+    "roleAdmin": "Admin",
+    "inviteButton": "Invite",
+    "inviteError": "Failed to invite user. Please check the User ID and try again.",
+    "inviteSuccess": "User invited successfully."
+  },
   "nav": {
     "dashboard": "Dashboard",
     "organizations": "Organization",

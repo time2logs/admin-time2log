@@ -28,6 +28,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'activities',
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./features/activities/activities.routes').then(
+        (m) => m.ACTIVITIES_ROUTES
+      )
+  },
+  {
     path: '**',
     redirectTo: 'auth',
   },

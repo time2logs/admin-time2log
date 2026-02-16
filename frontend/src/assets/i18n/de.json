@@ -64,6 +64,17 @@
     "memberCount": "{{count}} Mitglieder",
     "empty": "Noch keine Organisationen vorhanden"
   },
+  "organizationDetail": {
+    "members": "Mitglieder",
+    "noMembers": "Noch keine Mitglieder",
+    "invite": "Benutzer einladen",
+    "userIdPlaceholder": "Benutzer-ID",
+    "roleMember": "Mitglied",
+    "roleAdmin": "Admin",
+    "inviteButton": "Einladen",
+    "inviteError": "Einladung fehlgeschlagen. Bitte überprüfen Sie die Benutzer-ID und versuchen Sie es erneut.",
+    "inviteSuccess": "Benutzer erfolgreich eingeladen."
+  },
   "nav": {
     "dashboard": "Dashboard",
     "organizations": "Organisation",
