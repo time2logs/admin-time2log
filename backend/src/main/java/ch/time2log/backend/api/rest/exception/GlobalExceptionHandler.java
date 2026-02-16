@@ -23,15 +23,64 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(SupabaseApiException.class)
     public ProblemDetail handleSupabaseApiException(SupabaseApiException exception, HttpServletRequest request) {
-        HttpStatusCode status = HttpStatus.resolve(exception.getStatusCode());
-        if (status == null) {
-            status = HttpStatus.BAD_GATEWAY;
-        }
+        HttpStatusCode status = resolveStatus(exception);
+        boolean forbidden = HttpStatus.FORBIDDEN.equals(status);
+        String detail = forbidden
+                ? "You are not allowed to perform this operation."
+                : exception.getMessage();
 
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, exception.getMessage());
-        problemDetail.setTitle("Supabase request failed");
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, detail);
+        problemDetail.setTitle(forbidden ? "Forbidden operation" : "Supabase request failed");
         problemDetail.setProperty("path", request.getRequestURI());
         problemDetail.setProperty("supabaseResponse", exception.getResponseBody());
+        if (forbidden) {
+            problemDetail.setProperty("code", "FORBIDDEN_OPERATION");
+        }
         return problemDetail;
+    }
+
+    @ExceptionHandler(NoRowsAffectedException.class)
+    public ProblemDetail handleNoRowsAffected(NoRowsAffectedException exception, HttpServletRequest request) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(exception.getStatus(), exception.getMessage());
+        problemDetail.setTitle(exception.getTitle());
+        problemDetail.setProperty("path", request.getRequestURI());
+        problemDetail.setProperty("code", exception.getCode());
+        return problemDetail;
+    }
+
+    private HttpStatusCode resolveStatus(SupabaseApiException exception) {
+        HttpStatus resolved = HttpStatus.resolve(exception.getStatusCode());
+        if (resolved == HttpStatus.UNAUTHORIZED || resolved == HttpStatus.FORBIDDEN) {
+            return resolved;
+        }
+        if (isNotFoundError(exception.getResponseBody())) {
+            return HttpStatus.NOT_FOUND;
+        }
+        if (isRlsPermissionError(exception.getResponseBody())) {
+            return HttpStatus.FORBIDDEN;
+        }
+        return resolved != null ? resolved : HttpStatus.BAD_GATEWAY;
+    }
+
+    private boolean isRlsPermissionError(String responseBody) {
+        if (responseBody == null || responseBody.isBlank()) {
+            return false;
+        }
+
+        String normalized = responseBody.toLowerCase();
+        return normalized.contains("row-level security")
+                || normalized.contains("permission denied")
+                || normalized.contains("\"code\":\"42501\"")
+                || normalized.contains("new row violates row-level security policy");
+    }
+
+    private boolean isNotFoundError(String responseBody) {
+        if (responseBody == null || responseBody.isBlank()) {
+            return false;
+        }
+
+        String normalized = responseBody.toLowerCase();
+        return normalized.contains("\"code\":\"p0002\"")
+                || normalized.contains("not found");
     }
 }
