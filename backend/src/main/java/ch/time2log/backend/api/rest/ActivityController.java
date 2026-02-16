@@ -3,12 +3,13 @@ package ch.time2log.backend.api.rest;
 import ch.time2log.backend.api.rest.dto.inbound.CreateActivityRequest;
 import ch.time2log.backend.api.rest.dto.inbound.UpdateActivityRequest;
 import ch.time2log.backend.api.rest.dto.outbound.PreDefinedActivityDto;
+import ch.time2log.backend.api.rest.exception.EntityNotCreatedException;
+import ch.time2log.backend.api.rest.exception.EntityNotFoundException;
 import ch.time2log.backend.api.rest.exception.NoRowsAffectedException;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
 import ch.time2log.backend.infrastructure.supabase.responses.PreDefinedActivityResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -47,7 +48,7 @@ public class ActivityController {
 
         var created = supabase.post("app.pre_defined_activities", body, PreDefinedActivityResponse[].class);
         if (created == null || created.length == 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Supabase returned no created activity");
+            throw new EntityNotCreatedException("Supabase returned no created activity");
         }
         return PreDefinedActivityDto.of(created[0]);
     }
@@ -70,7 +71,7 @@ public class ActivityController {
                 PreDefinedActivityResponse[].class
         );
         if (updated == null || updated.length == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found");
+            throw new EntityNotFoundException("Activity not found");
         }
         return PreDefinedActivityDto.of(updated[0]);
     }

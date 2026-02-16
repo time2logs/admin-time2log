@@ -8,9 +8,9 @@ import ch.time2log.backend.infrastructure.supabase.responses.OrganizationMemberR
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
 import ch.time2log.backend.infrastructure.supabase.responses.OrganizationResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.ProfileResponse;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import ch.time2log.backend.api.rest.exception.EntityNotCreatedException;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -37,7 +37,7 @@ public class OrganizationController {
         var body = Map.of("name", request.name());
         var created = supabase.post("admin.organizations", body, OrganizationResponse[].class);
         if (created == null || created.length == 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Supabase returned no created organization");
+            throw new EntityNotCreatedException("Supabase returned no created organization");
         }
         return created[0];
     }
