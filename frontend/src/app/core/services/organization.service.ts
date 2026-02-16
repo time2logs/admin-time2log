@@ -21,4 +21,14 @@ export class OrganizationService {
   createOrganization(name: string): Observable<Organization> {
     return this.http.post<Organization>(this.baseUrl, { name });
   }
+
+  private static readonly ROLE_MAPPING: Record<string, string> = {
+    member: 'user',
+    admin: 'admin',
+  };
+
+  inviteToOrganization(organizationId: string, userId: string, userRole: string): Observable<void> {
+    const backendRole = OrganizationService.ROLE_MAPPING[userRole] ?? userRole;
+    return this.http.post<void>(`${this.baseUrl}/${organizationId}/invite`, { userId, userRole: backendRole });
+  }
 }

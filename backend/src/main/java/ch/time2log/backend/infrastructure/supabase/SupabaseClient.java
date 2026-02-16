@@ -2,8 +2,10 @@ package ch.time2log.backend.infrastructure.supabase;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.http.MediaType;
 import reactor.core.publisher.Mono;
@@ -25,21 +27,21 @@ public class SupabaseClient {
                 .build();
     }
 
-    private record SchemaTable(String schema, String table) {
-        static SchemaTable parse(String schemaTable) {
-            if (schemaTable.contains(".")) {
-                String[] parts = schemaTable.split("\\.", 2);
-                return new SchemaTable(parts[0], parts[1]);
-            }
-            return new SchemaTable("public", schemaTable);
-        }
-    }
-
     private static String toBearerAuth(String userToken) {
         if (userToken == null) return null;
         String t = userToken.trim();
         if (t.isEmpty()) return null;
         return t.regionMatches(true, 0, "Bearer ", 0, 7) ? t : "Bearer " + t;
+    }
+
+    private Mono<? extends Throwable> mapError(ClientResponse response) {
+        return response.bodyToMono(String.class)
+                .defaultIfEmpty("")
+                .flatMap(body -> {
+                    int statusCode = response.statusCode().value();
+                    log.error("Supabase error: {} - {}", statusCode, body);
+                    return Mono.error(new SupabaseApiException(statusCode, body));
+                });
     }
 
     public <T> Mono<T> get(String schemaTable, String userToken, Class<T> responseType) {
@@ -49,6 +51,7 @@ public class SupabaseClient {
                 .header("Authorization", toBearerAuth(userToken))
                 .header("Accept-Profile", st.schema())
                 .retrieve()
+                .onStatus(HttpStatusCode::isError, this::mapError)
                 .bodyToMono(responseType);
     }
 
@@ -59,6 +62,7 @@ public class SupabaseClient {
                 .header("Authorization", toBearerAuth(userToken))
                 .header("Accept-Profile", st.schema())
                 .retrieve()
+                .onStatus(HttpStatusCode::isError, this::mapError)
                 .bodyToFlux(elementType)
                 .collectList();
     }
@@ -70,6 +74,7 @@ public class SupabaseClient {
                 .header("Authorization", toBearerAuth(userToken))
                 .header("Accept-Profile", st.schema())
                 .retrieve()
+                .onStatus(HttpStatusCode::isError, this::mapError)
                 .bodyToMono(responseType);
     }
 
@@ -80,31 +85,22 @@ public class SupabaseClient {
                 .header("Authorization", toBearerAuth(userToken))
                 .header("Accept-Profile", st.schema())
                 .retrieve()
+                .onStatus(HttpStatusCode::isError, this::mapError)
                 .bodyToFlux(elementType)
                 .collectList();
     }
 
     public <T> Mono<T> post(String schemaTable, Object body, String userToken, Class<T> responseType) {
         var st = SchemaTable.parse(schemaTable);
-        String authHeader = "Bearer " + userToken;
-        log.debug("POST to {}.{}", st.schema(), st.table());
-        log.debug("Authorization: {}...", authHeader.substring(0, Math.min(60, authHeader.length())));
-        log.debug("Body: {}", body);
-
         return webClient.post()
                 .uri("/{table}", st.table())
-                .header("Authorization", authHeader)
+                .header("Authorization", toBearerAuth(userToken))
                 .header("Content-Profile", st.schema())
-                .header("Content-Type", "application/json")
                 .header("Prefer", "return=representation")
+                .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(body)
                 .retrieve()
-                .onStatus(status -> status.isError(), resp ->
-                    resp.bodyToMono(String.class).flatMap(bodyStr -> {
-                        log.error("Supabase error: {} - {}", resp.statusCode(), bodyStr);
-                        return Mono.error(new RuntimeException(resp.statusCode() + " " + bodyStr));
-                    })
-                )
+                .onStatus(HttpStatusCode::isError, this::mapError)
                 .bodyToMono(responseType);
     }
 
@@ -119,6 +115,7 @@ public class SupabaseClient {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(body)
                 .retrieve()
+                .onStatus(HttpStatusCode::isError, this::mapError)
                 .bodyToMono(responseType);
     }
 
@@ -129,6 +126,7 @@ public class SupabaseClient {
                 .header("Authorization", toBearerAuth(userToken))
                 .header("Content-Profile", st.schema())
                 .retrieve()
+                .onStatus(HttpStatusCode::isError, this::mapError)
                 .bodyToMono(Void.class);
     }
 
@@ -139,6 +137,7 @@ public class SupabaseClient {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(params)
                 .retrieve()
+                .onStatus(HttpStatusCode::isError, this::mapError)
                 .bodyToMono(responseType);
     }
 }
