@@ -1,8 +1,9 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { OrganizationService } from '@services/organization.service';
+import { ToastService } from '@services/toast.service';
 import { Organization } from '@app/core/models/organizations.models';
 
 @Component({
@@ -14,6 +15,8 @@ import { Organization } from '@app/core/models/organizations.models';
 export class OrganizationsComponent implements OnInit {
   private readonly organizationService = inject(OrganizationService);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly organizations = signal<Organization[]>([]);
   protected readonly newName = signal('');
@@ -31,8 +34,9 @@ export class OrganizationsComponent implements OnInit {
     this.organizationService.createOrganization(name).subscribe({
       next: () => {
         this.newName.set('');
-        this.loadOrganizations();
         this.isCreating.set(false);
+        this.toast.success(this.translate.instant('toast.organizationCreated'));
+        this.loadOrganizations();
       },
       error: () => this.isCreating.set(false),
     });

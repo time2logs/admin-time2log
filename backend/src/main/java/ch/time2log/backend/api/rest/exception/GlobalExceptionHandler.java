@@ -12,11 +12,38 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ProfileNotFoundException.class)
+    @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ProblemDetail handleProfileNotFound(ProfileNotFoundException exception, HttpServletRequest request) {
+    public ProblemDetail handleEntityNotFound(EntityNotFoundException exception, HttpServletRequest request) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
-        problemDetail.setTitle("Profile not found");
+        problemDetail.setTitle("Entity not found");
+        problemDetail.setProperty("path", request.getRequestURI());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(EntityNotCreatedException.class)
+    @ResponseStatus(HttpStatus.BAD_GATEWAY)
+    public ProblemDetail handleEntityNotCreated(EntityNotCreatedException exception, HttpServletRequest request) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_GATEWAY, exception.getMessage());
+        problemDetail.setTitle("Entity not created");
+        problemDetail.setProperty("path", request.getRequestURI());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(EntityAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ProblemDetail handleEntityAlreadyExists(EntityAlreadyExistsException exception, HttpServletRequest request) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+        problemDetail.setTitle("Entity already exists");
+        problemDetail.setProperty("path", request.getRequestURI());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ProblemDetail handleIllegalState(IllegalStateException exception, HttpServletRequest request) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, exception.getMessage());
+        problemDetail.setTitle("Unauthorized");
         problemDetail.setProperty("path", request.getRequestURI());
         return problemDetail;
     }
@@ -45,6 +72,15 @@ public class GlobalExceptionHandler {
         problemDetail.setTitle(exception.getTitle());
         problemDetail.setProperty("path", request.getRequestURI());
         problemDetail.setProperty("code", exception.getCode());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ProblemDetail handleGenericException(Exception exception, HttpServletRequest request) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
+        problemDetail.setTitle("Internal server error");
+        problemDetail.setProperty("path", request.getRequestURI());
         return problemDetail;
     }
 

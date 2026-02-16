@@ -87,12 +87,6 @@
                 {{ 'organizationManaging.members.inviteButton' | translate }}
               </button>
             </div>
-            @if (inviteError()) {
-              <p class="mt-2 text-red-600 text-sm">{{ 'organizationManaging.members.inviteError' | translate }}</p>
-            }
-            @if (inviteSuccess()) {
-              <p class="mt-2 text-green-600 text-sm">{{ 'organizationManaging.members.inviteSuccess' | translate }}</p>
-            }
           </div>
         }
 
@@ -196,9 +190,6 @@
                 {{ 'common.cancel' | translate }}
               </button>
             </div>
-            @if (activityError()) {
-              <p class="mt-2 text-red-600 text-sm">{{ activityError() | translate }}</p>
-            }
           </div>
         }
 
