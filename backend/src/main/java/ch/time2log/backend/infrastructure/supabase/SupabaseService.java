@@ -52,6 +52,10 @@ public class SupabaseService {
         client.delete(table, query, getCurrentUserToken()).block();
     }
 
+    public int deleteReturningCount(String table, String query) {
+        return client.deleteReturningCount(table, query, getCurrentUserToken()).blockOptional().orElse(0);
+    }
+
     public <T> T rpc(String functionName, Map<String, Object> params, Class<T> responseType) {
         return client.rpc(functionName, params, getCurrentUserToken(), responseType).block();
     }

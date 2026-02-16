@@ -114,6 +114,10 @@ export class AuthService implements OnDestroy {
     return from(this.supabase.auth.signOut().then(() => undefined));
   }
 
+  deleteProfile(): Observable<void> {
+    return this.http.delete<void>(`${environment.apiBaseUrl}/profile`);
+  }
+
   loadProfile() {
     this.http.get<Profile>(`${environment.apiBaseUrl}/profile`).subscribe({
       next: (profile) => {

@@ -1,10 +1,10 @@
 <div class="max-w-4xl mx-auto">
   <h1 class="text-3xl font-semibold mb-6">{{ 'organizations.title' | translate }}</h1>
 
-  <div class="flex gap-3 mb-8">
+  <div class="flex gap-3 mb-8 p-4 bg-gray-50 border border-gray-200 rounded-lg">
     <input
       type="text"
-      class="flex-1 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       [placeholder]="'organizations.namePlaceholder' | translate"
       [ngModel]="newName()"
       (ngModelChange)="newName.set($event)"
@@ -27,7 +27,7 @@
         <li
           tabindex="0"
           role="button"
-          class="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
+          class="flex items-center justify-between px-5 py-4 bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer hover:border-blue-300 hover:shadow-md transition-all"
           (click)="openOrganization(org)"
           (keydown.enter)="openOrganization(org)"
         >

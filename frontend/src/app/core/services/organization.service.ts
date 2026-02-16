@@ -22,6 +22,10 @@ export class OrganizationService {
     return this.http.post<Organization>(this.baseUrl, { name });
   }
 
+  deleteOrganization(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
   private static readonly ROLE_MAPPING: Record<string, string> = {
     member: 'user',
     admin: 'admin',
@@ -30,5 +34,9 @@ export class OrganizationService {
   inviteToOrganization(organizationId: string, userId: string, userRole: string): Observable<void> {
     const backendRole = OrganizationService.ROLE_MAPPING[userRole] ?? userRole;
     return this.http.post<void>(`${this.baseUrl}/${organizationId}/invite`, { userId, userRole: backendRole });
+  }
+
+  removeOrganizationMember(organizationId: string, userId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${organizationId}/members/${userId}`);
   }
 }

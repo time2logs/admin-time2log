@@ -73,7 +73,53 @@
     "roleAdmin": "Admin",
     "inviteButton": "Einladen",
     "inviteError": "Einladung fehlgeschlagen. Bitte überprüfen Sie die Benutzer-ID und versuchen Sie es erneut.",
-    "inviteSuccess": "Benutzer erfolgreich eingeladen."
+    "inviteSuccess": "Benutzer erfolgreich eingeladen.",
+    "delete": "Organisation löschen",
+    "deleteConfirm": "Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden."
+  },
+  "organizationManaging": {
+    "tabs": {
+      "members": "Mitglieder",
+      "activities": "Aktivitäten",
+      "settings": "Einstellungen"
+    },
+    "members": {
+      "title": "Mitglieder",
+      "noMembers": "Noch keine Mitglieder.",
+      "inviteToggle": "Mitglied einladen",
+      "userIdPlaceholder": "Benutzer-ID",
+      "roleMember": "Mitglied",
+      "roleAdmin": "Admin",
+      "inviteButton": "Einladen",
+      "inviteError": "Einladung fehlgeschlagen. Bitte überprüfen Sie die Benutzer-ID und versuchen Sie es erneut.",
+      "inviteSuccess": "Benutzer erfolgreich eingeladen.",
+      "remove": "Entfernen"
+    },
+    "activities": {
+      "title": "Aktivitäten",
+      "add": "Aktivität hinzufügen",
+      "empty": "Noch keine Aktivitäten definiert.",
+      "key": "Schlüssel",
+      "label": "Bezeichnung",
+      "description": "Beschreibung",
+      "category": "Kategorie",
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "saveButton": "Speichern",
+      "deleteConfirm": "Diese Aktivität löschen?",
+      "createError": "Aktivität konnte nicht erstellt werden.",
+      "updateError": "Aktivität konnte nicht aktualisiert werden.",
+      "deleteError": "Aktivität konnte nicht gelöscht werden."
+    },
+    "settings": {
+      "title": "Einstellungen",
+      "general": "Allgemein",
+      "organizationName": "Organisationsname",
+      "dangerZone": "Gefahrenzone",
+      "dangerDescription": "Unwiderrufliche Aktionen für diese Organisation.",
+      "deleteOrganization": "Organisation löschen",
+      "deleteConfirm": "Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden."
+    }
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -84,7 +130,19 @@
     "title": "Einstellungen",
     "language": "Sprache",
     "theme": "Design",
-    "account": "Konto"
+    "account": "Konto",
+    "profile": {
+      "title": "Profil",
+      "userId": "Benutzer-ID",
+      "userIdHint": "Teile diese ID, um zu Organisationen eingeladen zu werden.",
+      "copy": "Kopieren",
+      "copied": "Kopiert!"
+    },
+    "dangerZone": {
+      "title": "Gefahrenzone",
+      "description": "Das Löschen deines Kontos ist dauerhaft und kann nicht rückgängig gemacht werden. Alle deine Daten werden entfernt.",
+      "deleteAccount": "Konto löschen",
+      "deleteConfirm": "Bist du sicher? Dein Konto wird unwiderruflich gelöscht."
+    }
   }
-
 }

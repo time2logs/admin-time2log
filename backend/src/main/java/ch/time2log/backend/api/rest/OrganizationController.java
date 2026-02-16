@@ -3,11 +3,14 @@ package ch.time2log.backend.api.rest;
 import ch.time2log.backend.api.rest.dto.inbound.CreateOrganizationRequest;
 import ch.time2log.backend.api.rest.dto.inbound.InviteRequest;
 import ch.time2log.backend.api.rest.dto.outbound.ProfileDto;
+import ch.time2log.backend.api.rest.exception.NoRowsAffectedException;
 import ch.time2log.backend.infrastructure.supabase.responses.OrganizationMemberResponse;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
 import ch.time2log.backend.infrastructure.supabase.responses.OrganizationResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.ProfileResponse;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.Map;
@@ -32,7 +35,24 @@ public class OrganizationController {
     @PostMapping
     public OrganizationResponse createOrganization(@RequestBody CreateOrganizationRequest request) {
         var body = Map.of("name", request.name());
-        return supabase.post("admin.organizations", body, OrganizationResponse.class);
+        var created = supabase.post("admin.organizations", body, OrganizationResponse[].class);
+        if (created == null || created.length == 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Supabase returned no created organization");
+        }
+        return created[0];
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteOrganization(@PathVariable UUID id) {
+        int deleted = supabase.deleteReturningCount("admin.organizations", "id=eq." + id);
+        if (deleted == 0) {
+            throw new NoRowsAffectedException(
+                    HttpStatus.FORBIDDEN,
+                    "ORGANIZATION_DELETE_BLOCKED",
+                    "Forbidden operation",
+                    "Organization could not be deleted."
+            );
+        }
     }
 
     @GetMapping("/{id}/members")
@@ -42,6 +62,9 @@ public class OrganizationController {
                 "organization_id=eq." + id,
                 OrganizationMemberResponse.class
         );
+        if (members.isEmpty()) {
+            return List.of();
+        }
 
         var memberIds = members.stream()
                 .map(OrganizationMemberResponse::user_id)
@@ -68,5 +91,18 @@ public class OrganizationController {
                 "user_role", userRole
         );
         supabase.post("admin.organization_members", body, Void.class);
+    }
+
+    @DeleteMapping("/{id}/members/{userId}")
+    public void removeOrganizationMember(@PathVariable String id, @PathVariable String userId) {
+        int deleted = supabase.deleteReturningCount("admin.organization_members", "organization_id=eq." + id + "&user_id=eq." + userId);
+        if (deleted == 0) {
+            throw new NoRowsAffectedException(
+                    HttpStatus.FORBIDDEN,
+                    "MEMBER_REMOVE_BLOCKED",
+                    "Forbidden operation",
+                    "Organization member could not be removed."
+            );
+        }
     }
 }

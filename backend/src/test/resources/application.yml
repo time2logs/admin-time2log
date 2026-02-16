@@ -13,6 +13,7 @@ spring:
 supabase:
   url: http://localhost:54321
   anon-key: test-anon-key
+  service-role-key: test-service-role-key
 
 cors:
   allowed-origins: http://localhost:3000
