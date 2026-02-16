@@ -1,4 +1,4 @@
-FROM node:25-alpine AS build
+FROM node:25.6.1-alpine AS build
 
 ARG BUILD_CONFIGURATION=production
 
