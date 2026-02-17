@@ -6,7 +6,7 @@ services:
     expose:
       - "9080"
     networks:
-      - admin-time2log-net
+      - time2log-net
     restart: always
 
   admin-time2log-frontend-dev:
@@ -15,9 +15,9 @@ services:
     expose:
       - "80"
     networks:
-      - admin-time2log-net
+      - time2log-net
     restart: always
 
 networks:
-  admin-time2log-net:
+  time2log-net:
     external: true
