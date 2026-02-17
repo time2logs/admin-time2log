@@ -14,6 +14,8 @@
       "password": "Passwort",
       "submit": "Anmelden",
       "error": "E-Mail oder Passwort ist falsch.",
+      "google": "Weiter mit Google",
+      "orDivider": "oder",
       "noAccount": "Noch kein Konto?",
       "registerLink": "Jetzt registrieren",
       "emailNotConfirmed": {
@@ -29,6 +31,7 @@
       "password": "Passwort",
       "submit": "Konto erstellen",
       "error": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "google": "Weiter mit Google",
       "hasAccount": "Bereits ein Konto?",
       "loginLink": "Jetzt anmelden",
       "success": {

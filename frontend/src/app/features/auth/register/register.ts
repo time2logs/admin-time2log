@@ -52,6 +52,17 @@ export class RegisterComponent {
     }
   }
 
+  async signInWithGoogle(): Promise<void> {
+    this.isLoading.set(true);
+    this.errorType.set(null);
+    try {
+      await this.authService.signInWithGoogle();
+    } catch {
+      this.errorType.set('generic');
+      this.isLoading.set(false);
+    }
+  }
+
   private mapError(message: string): ErrorType {
     const msg = message.toLowerCase();
 

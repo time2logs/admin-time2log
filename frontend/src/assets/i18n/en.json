@@ -14,6 +14,8 @@
       "password": "Password",
       "submit": "Sign In",
       "error": "Invalid email or password.",
+      "google": "Continue with Google",
+      "orDivider": "or",
       "noAccount": "Don't have an account?",
       "registerLink": "Sign up now",
       "emailNotConfirmed": {
@@ -29,6 +31,7 @@
       "password": "Password",
       "submit": "Create Account",
       "error": "Registration failed. Please try again.",
+      "google": "Continue with Google",
       "hasAccount": "Already have an account?",
       "loginLink": "Sign in now",
       "success": {

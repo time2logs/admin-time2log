@@ -99,6 +99,16 @@ export class AuthService implements OnDestroy {
     return from(this.supabase.auth.signInWithPassword({ email, password }));
   }
 
+  async signInWithGoogle(): Promise<void> {
+    const { error } = await this.supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + '/dashboard',
+      },
+    });
+    if (error) throw error;
+  }
+
   register(email: string, password: string, firstName: string, lastName: string): Observable<AuthResponse> {
     return from(
       this.supabase.auth.signUp({
