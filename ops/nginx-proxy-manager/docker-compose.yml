@@ -12,3 +12,9 @@ services:
     volumes:
       - ./data:/data
       - ./letsencrypt:/etc/letsencrypt
+    networks:
+      - time2log-net
+
+networks:
+  time2log-net:
+    external: true
