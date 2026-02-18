@@ -1,0 +1,65 @@
+<div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+  <!-- Header -->
+  <div class="flex items-center justify-between px-5 py-3 bg-gray-50 border-b border-gray-200">
+    <button
+      class="p-1 rounded hover:bg-gray-200 transition-colors text-gray-600"
+      (click)="prevMonth()"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </button>
+    <h3 class="text-sm font-semibold text-gray-800 capitalize">{{ monthLabel() }}</h3>
+    <button
+      class="p-1 rounded hover:bg-gray-200 transition-colors text-gray-600"
+      (click)="nextMonth()"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
+  </div>
+
+  <div class="p-3">
+    <!-- Weekday labels -->
+    <div class="grid grid-cols-7 mb-1">
+      @for (wd of weekdays; track wd) {
+        <div class="text-center text-xs font-medium text-gray-400 py-1">{{ wd | translate }}</div>
+      }
+    </div>
+
+    <!-- Day grid -->
+    <div class="grid grid-cols-7 gap-0.5">
+      @for (day of days(); track day.date) {
+        <button
+          class="relative flex flex-col items-center justify-center h-10 w-full rounded-lg text-sm transition-colors"
+          [class.text-gray-300]="!day.isCurrentMonth"
+          [class.text-gray-400]="day.isCurrentMonth && day.isWeekend && !day.isToday && selectedDate() !== day.date"
+          [class.text-gray-700]="day.isCurrentMonth && !day.isWeekend && !day.isToday && selectedDate() !== day.date"
+          [class.font-semibold]="day.isToday"
+          [class.ring-2]="day.isToday && selectedDate() !== day.date"
+          [class.ring-blue-400]="day.isToday && selectedDate() !== day.date"
+          [class.bg-blue-500]="selectedDate() === day.date"
+          [class.text-white]="selectedDate() === day.date"
+          [class.hover:bg-gray-100]="day.isCurrentMonth && selectedDate() !== day.date"
+          [class.cursor-default]="!day.isCurrentMonth"
+          [class.cursor-pointer]="day.isCurrentMonth"
+          (click)="selectDate(day)"
+        >
+          {{ day.day }}
+
+          <!-- Status dot -->
+          @if (day.isCurrentMonth && !day.isFuture && getStatus(day.date)) {
+            <span
+              class="absolute bottom-1 h-1.5 w-1.5 rounded-full"
+              [class.bg-green-500]="getStatus(day.date) === 'reported'"
+              [class.bg-yellow-400]="getStatus(day.date) === 'bad_rating'"
+              [class.bg-gray-300]="getStatus(day.date) === 'missing'"
+              [class.opacity-0]="selectedDate() === day.date"
+            ></span>
+          }
+        </button>
+      }
+    </div>
+  </div>
+</div>

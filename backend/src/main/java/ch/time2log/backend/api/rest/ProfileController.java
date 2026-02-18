@@ -1,10 +1,8 @@
 package ch.time2log.backend.api.rest;
 
 import ch.time2log.backend.api.rest.dto.outbound.ProfileDto;
-import ch.time2log.backend.api.rest.exception.EntityNotFoundException;
+import ch.time2log.backend.domain.ProfileDomainService;
 import ch.time2log.backend.infrastructure.supabase.SupabaseAdminClient;
-import ch.time2log.backend.infrastructure.supabase.SupabaseService;
-import ch.time2log.backend.infrastructure.supabase.responses.ProfileResponse;
 import ch.time2log.backend.security.AuthenticatedUser;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -15,30 +13,22 @@ import java.util.UUID;
 @RequestMapping("api/profile")
 public class ProfileController {
 
-    private final SupabaseService supabase;
+    private final ProfileDomainService profileDomainService;
     private final SupabaseAdminClient supabaseAdmin;
 
-    public ProfileController(SupabaseService supabase, SupabaseAdminClient supabaseAdmin) {
-        this.supabase = supabase;
+    public ProfileController(ProfileDomainService profileDomainService, SupabaseAdminClient supabaseAdmin) {
+        this.profileDomainService = profileDomainService;
         this.supabaseAdmin = supabaseAdmin;
     }
 
     @GetMapping
     public ProfileDto getProfile(@AuthenticationPrincipal AuthenticatedUser user) {
-        var profiles = supabase.getListWithQuery("app.profiles", "id=eq." + user.id(), ProfileResponse.class);
-        if (profiles.isEmpty()) {
-            throw new EntityNotFoundException("Profile not found");
-        }
-        return ProfileDto.of(profiles.getFirst());
+        return ProfileDto.of(profileDomainService.getById(user.id()));
     }
 
     @GetMapping("/{id}")
     public ProfileDto getProfileById(@PathVariable UUID id) {
-        var profiles = supabase.getListWithQuery("app.profiles", "id=eq." + id, ProfileResponse.class);
-        if (profiles.isEmpty()) {
-            throw new EntityNotFoundException("Profile not found");
-        }
-        return ProfileDto.of(profiles.getFirst());
+        return ProfileDto.of(profileDomainService.getById(id));
     }
 
     @DeleteMapping

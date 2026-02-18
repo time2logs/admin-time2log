@@ -59,6 +59,12 @@ export class TeamManaging implements OnInit {
     this.router.navigate(['/organizations', this.organizationId], { queryParams: { tab: 'teams' } });
   }
 
+  protected openMemberReport(member: Profile): void {
+    this.router.navigate(['/reports/members', member.id], {
+      queryParams: { organizationId: this.organizationId },
+    });
+  }
+
   protected openSelection(): void {
     this.showSelection.set(true);
   }

@@ -30,7 +30,13 @@
           } @else {
             <ul class="space-y-2">
               @for (member of teamMembers(); track member.id) {
-                <li class="flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+                <li
+                  role="button"
+                  tabindex="0"
+                  class="flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer hover:border-gray-300 hover:shadow-md transition-all"
+                  (click)="openMemberReport(member)"
+                  (keydown.enter)="openMemberReport(member)"
+                >
                   <div class="h-9 w-9 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-sm font-medium flex-shrink-0">
                     {{ member.firstName.charAt(0) }}{{ member.lastName.charAt(0) }}
                   </div>
@@ -42,7 +48,7 @@
         </div>
       </div>
     } @else {
-      <!-- Member Selection (WhatsApp-style) -->
+      <!-- Member Selection -->
       <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
         <div class="px-5 py-3 bg-gray-50 border-b border-gray-200">
           <h2 class="text-lg font-medium text-gray-800">{{ 'teamManaging.selection.title' | translate }}</h2>

@@ -2,116 +2,51 @@ package ch.time2log.backend.api.rest;
 
 import ch.time2log.backend.api.rest.dto.inbound.CreateOrganizationRequest;
 import ch.time2log.backend.api.rest.dto.inbound.InviteRequest;
+import ch.time2log.backend.api.rest.dto.outbound.OrganizationDto;
 import ch.time2log.backend.api.rest.dto.outbound.ProfileDto;
-import ch.time2log.backend.api.rest.exception.EntityAlreadyExistsException;
-import ch.time2log.backend.api.rest.exception.NoRowsAffectedException;
-import ch.time2log.backend.infrastructure.supabase.SupabaseApiException;
-import ch.time2log.backend.infrastructure.supabase.responses.OrganizationMemberResponse;
-import ch.time2log.backend.infrastructure.supabase.SupabaseService;
-import ch.time2log.backend.infrastructure.supabase.responses.OrganizationResponse;
-import ch.time2log.backend.infrastructure.supabase.responses.ProfileResponse;
-import ch.time2log.backend.api.rest.exception.EntityNotCreatedException;
-import org.springframework.http.HttpStatus;
+import ch.time2log.backend.domain.OrganizationDomainService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RequestMapping("api/organizations")
 @RestController
 public class OrganizationController {
 
-    private final SupabaseService supabase;
+    private final OrganizationDomainService orgDomainService;
 
-    public OrganizationController(SupabaseService supabase) {
-        this.supabase = supabase;
+    public OrganizationController(OrganizationDomainService orgDomainService) {
+        this.orgDomainService = orgDomainService;
     }
 
     @GetMapping
-    public List<OrganizationResponse> getOrganizations() {
-        return supabase.getList("admin.organizations", OrganizationResponse.class);
+    public List<OrganizationDto> getOrganizations() {
+        return OrganizationDto.ofList(orgDomainService.getOrganizations());
     }
 
     @PostMapping
-    public OrganizationResponse createOrganization(@RequestBody CreateOrganizationRequest request) {
-        var body = Map.of("name", request.name());
-        var created = supabase.post("admin.organizations", body, OrganizationResponse[].class);
-        if (created == null || created.length == 0) {
-            throw new EntityNotCreatedException("Supabase returned no created organization");
-        }
-        return created[0];
+    public OrganizationDto createOrganization(@RequestBody CreateOrganizationRequest request) {
+        return OrganizationDto.of(orgDomainService.createOrganization(request.name()));
     }
 
     @DeleteMapping("/{id}")
     public void deleteOrganization(@PathVariable UUID id) {
-        int deleted = supabase.deleteReturningCount("admin.organizations", "id=eq." + id);
-        if (deleted == 0) {
-            throw new NoRowsAffectedException(
-                    HttpStatus.FORBIDDEN,
-                    "ORGANIZATION_DELETE_BLOCKED",
-                    "Forbidden operation",
-                    "Organization could not be deleted."
-            );
-        }
+        orgDomainService.deleteOrganization(id);
     }
 
     @GetMapping("/{id}/members")
     public List<ProfileDto> getOrganizationMembers(@PathVariable UUID id) {
-        var members = supabase.getListWithQuery(
-                "admin.organization_members",
-                "organization_id=eq." + id,
-                OrganizationMemberResponse.class
-        );
-        if (members.isEmpty()) {
-            return List.of();
-        }
-
-        var memberIds = members.stream()
-                .map(OrganizationMemberResponse::user_id)
-                .map(UUID::toString)
-                .collect(Collectors.joining(","));
-
-        var profiles = supabase.getListWithQuery(
-                "app.profiles",
-                "id=in.(" + memberIds + ")",
-                ProfileResponse.class
-        );
-
-        return ProfileDto.ofList(profiles);
+        return ProfileDto.ofList(orgDomainService.getOrganizationMemberProfiles(id));
     }
 
-    //Inviting per id later maybe per mail -> todo: PO
     @PostMapping("/{id}/invite")
-    public void inviteToOrganization(@PathVariable String id, @RequestBody InviteRequest request) {
-        var userId = request.userId();
-        var userRole = request.userRole();
-        var body = Map.of(
-                "user_id", userId,
-                "organization_id", id,
-                "user_role", userRole
-        );
-        try {
-            supabase.post("admin.organization_members", body, Void.class);
-        } catch (SupabaseApiException e) {
-            if (e.getStatusCode() == 409) {
-                throw new EntityAlreadyExistsException("Member already exists in this organization");
-            }
-            throw e;
-        }
+    public void inviteToOrganization(@PathVariable UUID id, @RequestBody InviteRequest request) {
+        orgDomainService.inviteToOrganization(id, request.userId(), request.userRole());
     }
 
     @DeleteMapping("/{id}/members/{userId}")
-    public void removeOrganizationMember(@PathVariable String id, @PathVariable String userId) {
-        int deleted = supabase.deleteReturningCount("admin.organization_members", "organization_id=eq." + id + "&user_id=eq." + userId);
-        if (deleted == 0) {
-            throw new NoRowsAffectedException(
-                    HttpStatus.FORBIDDEN,
-                    "MEMBER_REMOVE_BLOCKED",
-                    "Forbidden operation",
-                    "Organization member could not be removed."
-            );
-        }
+    public void removeOrganizationMember(@PathVariable UUID id, @PathVariable UUID userId) {
+        orgDomainService.removeOrganizationMember(id, userId);
     }
 }

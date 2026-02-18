@@ -1,0 +1,132 @@
+<div class="max-w-4xl mx-auto space-y-6">
+  <button
+    class="text-blue-500 hover:text-blue-700 inline-flex items-center gap-1 transition-colors"
+    (click)="goBack()"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+    </svg>
+    {{ 'common.back' | translate }}
+  </button>
+
+  @if (member()) {
+    <div class="flex items-center gap-3">
+      <div class="h-12 w-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-lg font-medium">
+        {{ member()!.firstName.charAt(0) }}{{ member()!.lastName.charAt(0) }}
+      </div>
+      <h1 class="text-3xl font-semibold">{{ member()!.firstName }} {{ member()!.lastName }}</h1>
+    </div>
+  }
+
+  <div class="grid gap-6 lg:grid-cols-2">
+    <!-- Calendar with status coloring -->
+    <app-calendar
+      [statusMap]="statusMap()"
+      [selectedDate]="selectedDate()"
+      (dateSelected)="onDateSelected($event)"
+      (monthChanged)="onMonthChanged($event)"
+    />
+
+    <!-- Day detail -->
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+      <div class="px-5 py-3 bg-gray-50 border-b border-gray-200">
+        <h2 class="text-lg font-medium text-gray-800">{{ selectedDate() }}</h2>
+      </div>
+      <div class="p-4">
+        @if (isLoadingRecords()) {
+          <p class="text-gray-500 text-sm">{{ 'common.loading' | translate }}</p>
+        } @else if (selectedDayRecords().length === 0) {
+          <p class="text-gray-500 text-sm">{{ 'reports.memberDetail.noRecordsForDay' | translate }}</p>
+        } @else {
+          <ul class="space-y-3">
+            @for (record of selectedDayRecords(); track record.id) {
+              <li class="border border-gray-100 rounded-lg p-3 bg-gray-50">
+                <div class="flex items-start justify-between gap-2 mb-1">
+                  <p class="text-sm font-medium text-gray-800">{{ record.activityLabel || '—' }}</p>
+                  <span class="text-sm font-medium text-gray-700 flex-shrink-0">{{ record.hours }}h</span>
+                </div>
+                @if (record.rating !== null) {
+                  <div class="flex items-center gap-1 mb-1">
+                    @for (star of [1,2,3,4,5]; track star) {
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-3.5 w-3.5"
+                        [class.text-yellow-400]="star <= record.rating!"
+                        [class.text-gray-300]="star > record.rating!"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    }
+                  </div>
+                }
+                @if (record.notes) {
+                  <p class="text-xs text-gray-500">{{ record.notes }}</p>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress section -->
+  @if (activityProgress().length > 0) {
+    <div class="space-y-4">
+      <!-- Activity progress (derived from records, no curriculum lookup) -->
+      <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+        <div class="px-5 py-3 bg-gray-50 border-b border-gray-200">
+          <h2 class="text-lg font-medium text-gray-800">{{ 'reports.memberDetail.progress' | translate }}</h2>
+        </div>
+        <div class="p-4 space-y-3">
+          @for (activity of activityProgress(); track activity.id) {
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-sm text-gray-700 truncate">{{ activity.label }}</span>
+                <span class="text-sm font-medium text-gray-800 ml-2 flex-shrink-0">{{ activity.hours }}h</span>
+              </div>
+              <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  class="h-full bg-green-500 rounded-full transition-all"
+                  [style.width.%]="(activity.hours / maxActivityHours()) * 100"
+                ></div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Competency progress -->
+      @if (curriculum()!.competencies.length > 0) {
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+          <div class="px-5 py-3 bg-gray-50 border-b border-gray-200">
+            <h2 class="text-lg font-medium text-gray-800">{{ 'reports.memberDetail.competencies' | translate }}</h2>
+          </div>
+          <div class="p-4 space-y-3">
+            @for (comp of curriculum()!.competencies; track comp.id) {
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-sm text-gray-700">
+                    <span class="font-mono text-xs text-gray-400 mr-1">{{ comp.code }}</span>
+                    {{ comp.description }}
+                  </span>
+                  <span class="text-sm font-medium text-gray-800 ml-2 flex-shrink-0">{{ competencyHours().get(comp.id) ?? 0 }}h</span>
+                </div>
+                <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    class="h-full rounded-full transition-all"
+                    [class.bg-blue-500]="(competencyHours().get(comp.id) ?? 0) > 0"
+                    [class.bg-gray-200]="(competencyHours().get(comp.id) ?? 0) === 0"
+                    [style.width.%]="((competencyHours().get(comp.id) ?? 0) / maxCompetencyHours()) * 100"
+                  ></div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

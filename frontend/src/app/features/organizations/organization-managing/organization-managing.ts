@@ -206,6 +206,12 @@ export class OrganizationManaging implements OnInit {
     this.router.navigate(['/organizations', this.organizationId, 'teams', team.id]);
   }
 
+  protected openMemberReport(member: Profile): void {
+    this.router.navigate(['/reports/members', member.id], {
+      queryParams: { organizationId: this.organizationId },
+    });
+  }
+
   private loadTeams(): void {
     this.teamService.getTeams(this.organizationId).subscribe({
       next: (teams) => this.teams.set(teams),

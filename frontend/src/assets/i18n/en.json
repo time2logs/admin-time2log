@@ -200,6 +200,31 @@
     "teamCreated": "Team created.",
     "teamDeleted": "Team deleted."
   },
+  "reports": {
+    "title": "Reports",
+    "selectOrganization": "Please select an organization.",
+    "noReports": "No members found.",
+    "entries": "entries",
+    "status": {
+      "reported": "Reported",
+      "bad_rating": "Flagged",
+      "missing": "Missing"
+    },
+    "memberDetail": {
+      "noRecordsForDay": "No entries for this day.",
+      "progress": "Activity Progress",
+      "competencies": "Competencies"
+    },
+    "calendar": {
+      "mon": "Mo",
+      "tue": "Tu",
+      "wed": "We",
+      "thu": "Th",
+      "fri": "Fr",
+      "sat": "Sa",
+      "sun": "Su"
+    }
+  },
   "nav": {
     "dashboard": "Dashboard",
     "organizations": "Organization",
