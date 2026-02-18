@@ -6,11 +6,12 @@ import { TeamService } from '@services/team.service';
 import { ToastService } from '@services/toast.service';
 import { Team } from '@app/core/models/team.models';
 import { Profile } from '@app/core/models/profile.models';
+import {Reports} from '@app/features/reports/reports/reports';
 
 @Component({
   selector: 'app-team-managing',
   standalone: true,
-  imports: [TranslateModule],
+  imports: [TranslateModule, Reports],
   templateUrl: './team-managing.html',
 })
 export class TeamManaging implements OnInit {
@@ -40,7 +41,7 @@ export class TeamManaging implements OnInit {
     }));
   });
 
-  private organizationId = '';
+  protected organizationId = '';
   private teamId = '';
 
   ngOnInit(): void {
@@ -57,6 +58,12 @@ export class TeamManaging implements OnInit {
       return;
     }
     this.router.navigate(['/organizations', this.organizationId], { queryParams: { tab: 'teams' } });
+  }
+
+  protected openMemberReport(member: Profile): void {
+    this.router.navigate(['/reports/members', member.id], {
+      queryParams: { organizationId: this.organizationId },
+    });
   }
 
   protected openSelection(): void {

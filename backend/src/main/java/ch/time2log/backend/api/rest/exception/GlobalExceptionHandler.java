@@ -1,5 +1,9 @@
 package ch.time2log.backend.api.rest.exception;
 
+import ch.time2log.backend.domain.exception.EntityAlreadyExistsException;
+import ch.time2log.backend.domain.exception.EntityNotCreatedException;
+import ch.time2log.backend.domain.exception.EntityNotFoundException;
+import ch.time2log.backend.domain.exception.NoRowsAffectedException;
 import ch.time2log.backend.infrastructure.supabase.SupabaseApiException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;

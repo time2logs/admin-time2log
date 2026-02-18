@@ -1,4 +1,4 @@
-package ch.time2log.backend.api.rest.exception;
+package ch.time2log.backend.domain.exception;
 
 public class EntityNotFoundException extends RuntimeException {
     public EntityNotFoundException(String message) {

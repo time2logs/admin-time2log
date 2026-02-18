@@ -1,5 +1,6 @@
 package ch.time2log.backend.api.rest.dto.outbound;
 
+import ch.time2log.backend.domain.models.Team;
 import ch.time2log.backend.infrastructure.supabase.responses.TeamResponse;
 
 import java.util.List;
@@ -10,11 +11,15 @@ public record TeamDto(
         UUID professionId,
         String name
 ) {
-    public static TeamDto of(TeamResponse response) {
-        return new TeamDto(response.id(), response.profession_id(), response.name());
+    public static TeamDto of(Team team) {
+        return new TeamDto(
+                team.id(),
+                team.profession_id(),
+                team.name()
+        );
     }
 
-    public static List<TeamDto> ofList(List<TeamResponse> responses) {
-        return responses.stream().map(TeamDto::of).toList();
+    public static List<TeamDto> ofList(List<Team> teams) {
+        return teams.stream().map(TeamDto::of).toList();
     }
 }
