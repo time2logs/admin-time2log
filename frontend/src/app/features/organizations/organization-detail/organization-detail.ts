@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { OrganizationService } from '@services/organization.service';
-import {Organization, Profession} from '@app/core/models/organizations.models';
+import { Organization } from '@app/core/models/organizations.models';
 import { Profile } from '@app/core/models/profile.models';
 
 @Component({
