@@ -148,6 +148,9 @@
     "selection": {
       "title": "Manage Members",
       "description": "Select organization members to add them to the team."
+    },
+    "reports": {
+      "title": "Reports"
     }
   },
   "professionManaging": {

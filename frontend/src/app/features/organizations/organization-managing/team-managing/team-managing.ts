@@ -6,11 +6,12 @@ import { TeamService } from '@services/team.service';
 import { ToastService } from '@services/toast.service';
 import { Team } from '@app/core/models/team.models';
 import { Profile } from '@app/core/models/profile.models';
+import {Reports} from '@app/features/reports/reports/reports';
 
 @Component({
   selector: 'app-team-managing',
   standalone: true,
-  imports: [TranslateModule],
+  imports: [TranslateModule, Reports],
   templateUrl: './team-managing.html',
 })
 export class TeamManaging implements OnInit {

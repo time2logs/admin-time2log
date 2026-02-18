@@ -99,7 +99,7 @@
       </div>
 
       <!-- Competency progress -->
-      @if (curriculum()!.competencies.length > 0) {
+      @if (curriculum() && curriculum()!.competencies.length > 0) {
         <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
           <div class="px-5 py-3 bg-gray-50 border-b border-gray-200">
             <h2 class="text-lg font-medium text-gray-800">{{ 'reports.memberDetail.competencies' | translate }}</h2>

@@ -148,6 +148,9 @@
     "selection": {
       "title": "Mitglieder verwalten",
       "description": "Wähle Mitglieder der Organisation aus, um sie dem Team zuzuweisen."
+    },
+    "reports": {
+      "title": "Reports"
     }
   },
   "professionManaging": {

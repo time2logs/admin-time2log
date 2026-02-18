@@ -119,4 +119,13 @@
   } @else {
     <p class="text-gray-500">{{ 'common.loading' | translate }}</p>
   }
+
+  <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden mt-5">
+    <div class="px-5 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+      <h2 class="text-lg font-medium text-gray-800">{{ 'teamManaging.reports.title' | translate }}</h2>
+    </div>
+    <div class="p-5">
+      <app-reports></app-reports>
+    </div>
+  </div>
 </div>

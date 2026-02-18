@@ -42,7 +42,7 @@ export class Calendar implements OnInit {
 
   protected readonly monthLabel = computed(() => {
     const d = new Date(this.currentYear(), this.currentMonth(), 1);
-    const locale = this.translate.currentLang === 'de' ? 'de-CH' : 'en-US';
+    const locale = this.translate.getCurrentLang() === 'de' ? 'de-CH' : 'en-US';
     return d.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
   });
 
@@ -53,26 +53,22 @@ export class Calendar implements OnInit {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
 
-    // Monday-based: 0=Mon, 6=Sun
     let startOffset = firstDay.getDay() - 1;
     if (startOffset < 0) startOffset = 6;
 
     const days: CalendarDay[] = [];
 
-    // Fill leading days from previous month
     const prevMonthLast = new Date(year, month, 0);
     for (let i = startOffset - 1; i >= 0; i--) {
       const d = new Date(year, month - 1, prevMonthLast.getDate() - i);
       days.push(this.buildDay(d, false, today));
     }
 
-    // Current month days
     for (let i = 1; i <= lastDay.getDate(); i++) {
       const d = new Date(year, month, i);
       days.push(this.buildDay(d, true, today));
     }
 
-    // Fill trailing days
     const remaining = 42 - days.length;
     for (let i = 1; i <= remaining; i++) {
       const d = new Date(year, month + 1, i);
