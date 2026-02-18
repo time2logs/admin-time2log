@@ -19,6 +19,7 @@ export class OrganizationsComponent implements OnInit {
   private readonly translate = inject(TranslateService);
 
   protected readonly organizations = signal<Organization[]>([]);
+  protected readonly memberCounts = signal<Record<string, number>>({});
   protected readonly newName = signal('');
   protected readonly isCreating = signal(false);
 
@@ -48,7 +49,15 @@ export class OrganizationsComponent implements OnInit {
 
   private loadOrganizations(): void {
     this.organizationService.getOrganizations().subscribe({
-      next: (orgs) => this.organizations.set(orgs),
+      next: (orgs) => {
+        this.organizations.set(orgs);
+        for (const org of orgs) {
+          this.organizationService.getOrganizationMembers(org.id).subscribe({
+            next: (members) =>
+              this.memberCounts.update((counts) => ({ ...counts, [org.id]: members.length })),
+          });
+        }
+      },
     });
   }
 }

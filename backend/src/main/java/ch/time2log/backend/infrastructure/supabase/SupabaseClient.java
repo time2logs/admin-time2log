@@ -173,10 +173,12 @@ public class SupabaseClient {
                 .map(List::size);
     }
 
-    public <T> Mono<T> rpc(String functionName, Map<String, Object> params, String userToken, Class<T> responseType) {
+    public <T> Mono<T> rpc(String schemaFunction, Map<String, Object> params, String userToken, Class<T> responseType) {
+        var st = SchemaTable.parse(schemaFunction);
         return webClient.post()
-                .uri("/rpc/{function}", functionName)
+                .uri("/rpc/{function}", st.table())
                 .header("Authorization", toBearerAuth(userToken))
+                .header("Content-Profile", st.schema())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(params)
                 .retrieve()

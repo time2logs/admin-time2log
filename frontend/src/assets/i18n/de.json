@@ -83,7 +83,8 @@
   "organizationManaging": {
     "tabs": {
       "members": "Mitglieder",
-      "activities": "Aktivitäten",
+      "curriculums": "Bildungspläne",
+      "teams": "Teams",
       "settings": "Einstellungen"
     },
     "members": {
@@ -114,6 +115,19 @@
       "updateError": "Aktivität konnte nicht aktualisiert werden.",
       "deleteError": "Aktivität konnte nicht gelöscht werden."
     },
+    "curriculums": {
+      "empty": "Noch keine Berufe vorhanden.",
+      "add": "Beruf hinzufügen",
+      "keyPlaceholder": "Schlüssel (z.B. maurer)",
+      "labelPlaceholder": "Bezeichnung (z.B. Maurer/in EFZ)"
+    },
+    "teams": {
+      "title": "Teams",
+      "add": "Team erstellen",
+      "empty": "Noch keine Teams vorhanden.",
+      "namePlaceholder": "Teamname",
+      "professionPlaceholder": "Beruf auswählen"
+    },
     "settings": {
       "title": "Einstellungen",
       "general": "Allgemein",
@@ -122,6 +136,48 @@
       "dangerDescription": "Unwiderrufliche Aktionen für diese Organisation.",
       "deleteOrganization": "Organisation löschen",
       "deleteConfirm": "Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden."
+    }
+  },
+  "teamManaging": {
+    "members": {
+      "title": "Teammitglieder",
+      "empty": "Noch keine Mitglieder im Team.",
+      "manage": "Verwalten",
+      "noOrgMembers": "Noch keine Mitglieder in der Organisation."
+    },
+    "selection": {
+      "title": "Mitglieder verwalten",
+      "description": "Wähle Mitglieder der Organisation aus, um sie dem Team zuzuweisen."
+    }
+  },
+  "professionManaging": {
+    "active": {
+      "title": "Aktueller Bildungsplan",
+      "importedOn": "Importiert am",
+      "empty": "Noch kein Bildungsplan importiert."
+    },
+    "import": {
+      "title": "Neuer Import",
+      "description": "Laden Sie eine JSON-Datei mit dem Bildungsplan hoch.",
+      "selectFile": "Datei auswählen",
+      "upload": "Hochladen",
+      "uploading": "Wird hochgeladen...",
+      "uploadSuccess": "Import erfolgreich gespeichert.",
+      "apply": "Import anwenden",
+      "applying": "Wird angewendet...",
+      "applySuccess": "Bildungsplan erfolgreich importiert.",
+      "applyFailed": "Import fehlgeschlagen.",
+      "invalidJson": "Ungültige JSON-Datei.",
+      "version": "Version",
+      "statusPending": "Ausstehend",
+      "statusApplied": "Angewendet",
+      "statusFailed": "Fehlgeschlagen"
+    },
+    "pending": {
+      "uploadedOn": "Hochgeladen am"
+    },
+    "history": {
+      "title": "Verlauf"
     }
   },
   "errors": {
@@ -139,12 +195,15 @@
     "activityUpdated": "Aktivität aktualisiert.",
     "activityDeleted": "Aktivität gelöscht.",
     "organizationCreated": "Organisation erstellt.",
-    "organizationDeleted": "Organisation gelöscht."
+    "organizationDeleted": "Organisation gelöscht.",
+    "professionCreated": "Beruf erstellt.",
+    "teamCreated": "Team erstellt.",
+    "teamDeleted": "Team gelöscht."
   },
   "nav": {
     "dashboard": "Dashboard",
     "organizations": "Organisation",
-    "entries": "Einträge"
+    "reports": "Reports"
   },
   "settings": {
     "title": "Einstellungen",

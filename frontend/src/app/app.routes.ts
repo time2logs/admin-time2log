@@ -28,11 +28,11 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'activities',
+    path: 'reports',
     canActivate: [authGuard],
     loadChildren: () =>
-      import('./features/activities/activities.routes').then(
-        (m) => m.ACTIVITIES_ROUTES
+      import('./features/reports/reports.routes').then(
+        (m) => m.REPORTS_ROUTES
       )
   },
   {

@@ -83,7 +83,8 @@
   "organizationManaging": {
     "tabs": {
       "members": "Members",
-      "activities": "Activities",
+      "curriculums": "Curriculums",
+      "teams": "Teams",
       "settings": "Settings"
     },
     "members": {
@@ -114,6 +115,19 @@
       "updateError": "Failed to update activity.",
       "deleteError": "Failed to delete activity."
     },
+    "curriculums": {
+      "empty": "No professions yet.",
+      "add": "Add Profession",
+      "keyPlaceholder": "Key (e.g. maurer)",
+      "labelPlaceholder": "Label (e.g. Maurer/in EFZ)"
+    },
+    "teams": {
+      "title": "Teams",
+      "add": "Create Team",
+      "empty": "No teams yet.",
+      "namePlaceholder": "Team name",
+      "professionPlaceholder": "Select profession"
+    },
     "settings": {
       "title": "Settings",
       "general": "General",
@@ -122,6 +136,48 @@
       "dangerDescription": "Irreversible actions for this organization.",
       "deleteOrganization": "Delete Organization",
       "deleteConfirm": "Are you sure? This action cannot be undone."
+    }
+  },
+  "teamManaging": {
+    "members": {
+      "title": "Team Members",
+      "empty": "No members in this team yet.",
+      "manage": "Manage",
+      "noOrgMembers": "No members in the organization yet."
+    },
+    "selection": {
+      "title": "Manage Members",
+      "description": "Select organization members to add them to the team."
+    }
+  },
+  "professionManaging": {
+    "active": {
+      "title": "Current Curriculum",
+      "importedOn": "Imported on",
+      "empty": "No curriculum imported yet."
+    },
+    "import": {
+      "title": "New Import",
+      "description": "Upload a JSON file with the curriculum data.",
+      "selectFile": "Select File",
+      "upload": "Upload",
+      "uploading": "Uploading...",
+      "uploadSuccess": "Import saved successfully.",
+      "apply": "Apply Import",
+      "applying": "Applying...",
+      "applySuccess": "Curriculum imported successfully.",
+      "applyFailed": "Import failed.",
+      "invalidJson": "Invalid JSON file.",
+      "version": "Version",
+      "statusPending": "Pending",
+      "statusApplied": "Applied",
+      "statusFailed": "Failed"
+    },
+    "pending": {
+      "uploadedOn": "Uploaded on"
+    },
+    "history": {
+      "title": "History"
     }
   },
   "errors": {
@@ -139,12 +195,15 @@
     "activityUpdated": "Activity updated.",
     "activityDeleted": "Activity deleted.",
     "organizationCreated": "Organization created.",
-    "organizationDeleted": "Organization deleted."
+    "organizationDeleted": "Organization deleted.",
+    "professionCreated": "Profession created.",
+    "teamCreated": "Team created.",
+    "teamDeleted": "Team deleted."
   },
   "nav": {
     "dashboard": "Dashboard",
     "organizations": "Organization",
-    "entries": "Entries"
+    "reports": "Reports"
   },
   "settings": {
     "title": "Settings",
