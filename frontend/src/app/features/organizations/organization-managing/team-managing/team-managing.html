@@ -125,7 +125,7 @@
       <h2 class="text-lg font-medium text-gray-800">{{ 'teamManaging.reports.title' | translate }}</h2>
     </div>
     <div class="p-5">
-      <app-reports></app-reports>
+      <app-reports [organizationId]="organizationId" [members]="teamMembers()" />
     </div>
   </div>
 </div>

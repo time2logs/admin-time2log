@@ -1,87 +1,55 @@
-<div class="max-w-4xl mx-auto space-y-6">
-  <h1 class="text-3xl font-semibold">{{ 'reports.title' | translate }}</h1>
+<div class="grid gap-6 lg:grid-cols-2">
+  <app-calendar
+    [selectedDate]="selectedDate()"
+    (dateSelected)="onDateSelected($event)"
+  />
 
-  <!-- Org selector -->
-  @if (organizations().length > 1) {
-    <div class="flex flex-wrap gap-2">
-      @for (org of organizations(); track org.id) {
-        <button
-          class="px-4 py-2 text-sm rounded-full border transition-colors"
-          [class.bg-blue-500]="selectedOrgId() === org.id"
-          [class.text-white]="selectedOrgId() === org.id"
-          [class.border-blue-500]="selectedOrgId() === org.id"
-          [class.border-gray-300]="selectedOrgId() !== org.id"
-          [class.text-gray-700]="selectedOrgId() !== org.id"
-          [class.hover:bg-gray-50]="selectedOrgId() !== org.id"
-          (click)="selectOrg(org.id)"
-        >
-          {{ org.name }}
-        </button>
+  <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+    <div class="px-5 py-3 bg-gray-50 border-b border-gray-200">
+      <h2 class="text-lg font-medium text-gray-800">{{ selectedDate() }}</h2>
+    </div>
+    <div class="p-4">
+      @if (isLoading()) {
+        <p class="text-gray-500 text-sm">{{ 'common.loading' | translate }}</p>
+      } @else if (filteredReport().length === 0) {
+        <p class="text-gray-500 text-sm">{{ 'reports.noReports' | translate }}</p>
+      } @else {
+        <ul class="space-y-2">
+          @for (entry of filteredReport(); track entry.userId) {
+            <li
+              role="button"
+              tabindex="0"
+              class="flex items-center justify-between px-4 py-3 border border-gray-200 rounded-lg cursor-pointer hover:border-gray-300 hover:shadow-sm transition-all"
+              (click)="openMember(entry)"
+              (keydown.enter)="openMember(entry)"
+            >
+              <div class="flex items-center gap-3">
+                <div class="h-9 w-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-medium flex-shrink-0">
+                  {{ entry.firstName.charAt(0) }}{{ entry.lastName.charAt(0) }}
+                </div>
+                <div>
+                  <p class="font-medium text-gray-800 text-sm">{{ entry.firstName }} {{ entry.lastName }}</p>
+                  @if (entry.status !== 'missing') {
+                    <p class="text-xs text-gray-500">{{ entry.totalHours }}h &middot; {{ entry.recordCount }} {{ 'reports.entries' | translate }}</p>
+                  }
+                </div>
+              </div>
+
+              <span
+                class="px-2.5 py-1 rounded-full text-xs font-medium"
+                [class.bg-green-100]="entry.status === 'reported'"
+                [class.text-green-700]="entry.status === 'reported'"
+                [class.bg-yellow-100]="entry.status === 'bad_rating'"
+                [class.text-yellow-700]="entry.status === 'bad_rating'"
+                [class.bg-gray-100]="entry.status === 'missing'"
+                [class.text-gray-600]="entry.status === 'missing'"
+              >
+                {{ 'reports.status.' + entry.status | translate }}
+              </span>
+            </li>
+          }
+        </ul>
       }
     </div>
-  }
-
-  @if (!selectedOrgId()) {
-    <p class="text-gray-500">{{ 'reports.selectOrganization' | translate }}</p>
-  } @else {
-    <div class="grid gap-6 lg:grid-cols-2">
-      <!-- Calendar -->
-      <app-calendar
-        [selectedDate]="selectedDate()"
-        (dateSelected)="onDateSelected($event)"
-      />
-
-      <!-- Daily member report -->
-      <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div class="px-5 py-3 bg-gray-50 border-b border-gray-200">
-          <h2 class="text-lg font-medium text-gray-800">
-            {{ selectedDate() }}
-          </h2>
-        </div>
-        <div class="p-4">
-          @if (isLoading()) {
-            <p class="text-gray-500 text-sm">{{ 'common.loading' | translate }}</p>
-          } @else if (dailyReport().length === 0) {
-            <p class="text-gray-500 text-sm">{{ 'reports.noReports' | translate }}</p>
-          } @else {
-            <ul class="space-y-2">
-              @for (entry of dailyReport(); track entry.userId) {
-                <li
-                  role="button"
-                  tabindex="0"
-                  class="flex items-center justify-between px-4 py-3 border border-gray-200 rounded-lg cursor-pointer hover:border-gray-300 hover:shadow-sm transition-all"
-                  (click)="openMember(entry)"
-                  (keydown.enter)="openMember(entry)"
-                >
-                  <div class="flex items-center gap-3">
-                    <div class="h-9 w-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-medium flex-shrink-0">
-                      {{ entry.firstName.charAt(0) }}{{ entry.lastName.charAt(0) }}
-                    </div>
-                    <div>
-                      <p class="font-medium text-gray-800 text-sm">{{ entry.firstName }} {{ entry.lastName }}</p>
-                      @if (entry.status !== 'missing') {
-                        <p class="text-xs text-gray-500">{{ entry.totalHours }}h &middot; {{ entry.recordCount }} {{ 'reports.entries' | translate }}</p>
-                      }
-                    </div>
-                  </div>
-
-                  <span
-                    class="px-2.5 py-1 rounded-full text-xs font-medium"
-                    [class.bg-green-100]="entry.status === 'reported'"
-                    [class.text-green-700]="entry.status === 'reported'"
-                    [class.bg-yellow-100]="entry.status === 'bad_rating'"
-                    [class.text-yellow-700]="entry.status === 'bad_rating'"
-                    [class.bg-gray-100]="entry.status === 'missing'"
-                    [class.text-gray-600]="entry.status === 'missing'"
-                  >
-                    {{ 'reports.status.' + entry.status | translate }}
-                  </span>
-                </li>
-              }
-            </ul>
-          }
-        </div>
-      </div>
-    </div>
-  }
+  </div>
 </div>

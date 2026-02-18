@@ -41,7 +41,7 @@ export class TeamManaging implements OnInit {
     }));
   });
 
-  private organizationId = '';
+  protected organizationId = '';
   private teamId = '';
 
   ngOnInit(): void {

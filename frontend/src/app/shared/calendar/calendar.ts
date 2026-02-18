@@ -1,5 +1,7 @@
-import { Component, input, output, computed, signal, OnInit, inject } from '@angular/core';
+import { Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { map } from 'rxjs';
 import { ReportStatus } from '@app/core/models/report.models';
 
 interface CalendarDay {
@@ -38,11 +40,16 @@ export class Calendar implements OnInit {
 
   protected readonly today = new Date().toISOString().slice(0, 10);
   protected readonly currentYear = signal(new Date().getFullYear());
-  protected readonly currentMonth = signal(new Date().getMonth()); // 0-indexed
+  protected readonly currentMonth = signal(new Date().getMonth());
+
+  private readonly currentLang = toSignal(
+    this.translate.onLangChange.pipe(map(e => e.lang)),
+    { initialValue: this.translate.getCurrentLang() || 'de' }
+  );
 
   protected readonly monthLabel = computed(() => {
     const d = new Date(this.currentYear(), this.currentMonth(), 1);
-    const locale = this.translate.getCurrentLang() === 'de' ? 'de-CH' : 'en-US';
+    const locale = this.currentLang() === 'de' ? 'de-CH' : 'en-US';
     return d.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
   });
 

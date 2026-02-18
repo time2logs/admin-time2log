@@ -1,5 +1,6 @@
+import { Location } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { OrganizationService } from '@services/organization.service';
 import { ReportService } from '@services/report.service';
@@ -16,7 +17,7 @@ import { Profession } from '@app/core/models/organizations.models';
 })
 export class MemberDetail implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
+  private readonly location = inject(Location);
   private readonly organizationService = inject(OrganizationService);
   private readonly reportService = inject(ReportService);
 
@@ -92,13 +93,14 @@ export class MemberDetail implements OnInit {
     this.organizationId = this.route.snapshot.queryParams['organizationId'] ?? '';
 
     this.loadMember();
+    this.loadCurriculum();
     this.loadMonthRecords(this.selectedDate());
     this.loadAllRecords();
     this.loadDayRecords(this.selectedDate());
   }
 
   protected goBack(): void {
-    this.router.navigate(['/reports']);
+    this.location.back();
   }
 
   protected onDateSelected(date: string): void {
@@ -120,6 +122,9 @@ export class MemberDetail implements OnInit {
         if (m) this.member.set(m);
       },
     });
+  }
+
+  private loadCurriculum(): void {
     this.organizationService.getProfessions(this.organizationId).subscribe({
       next: (professions) => this.loadCurriculumForFirstProfession(professions),
     });
