@@ -1,6 +1,6 @@
 package ch.time2log.backend.domain;
 
-import ch.time2log.backend.api.rest.exception.EntityNotCreatedException;
+import ch.time2log.backend.domain.exception.EntityNotCreatedException;
 import ch.time2log.backend.domain.models.Profession;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
 import ch.time2log.backend.infrastructure.supabase.responses.ProfessionResponse;

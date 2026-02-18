@@ -1,8 +1,8 @@
 package ch.time2log.backend.domain;
 
-import ch.time2log.backend.api.rest.exception.EntityAlreadyExistsException;
-import ch.time2log.backend.api.rest.exception.EntityNotCreatedException;
-import ch.time2log.backend.api.rest.exception.NoRowsAffectedException;
+import ch.time2log.backend.domain.exception.EntityAlreadyExistsException;
+import ch.time2log.backend.domain.exception.EntityNotCreatedException;
+import ch.time2log.backend.domain.exception.NoRowsAffectedException;
 import ch.time2log.backend.domain.models.Organization;
 import ch.time2log.backend.domain.models.Profile;
 import ch.time2log.backend.infrastructure.supabase.SupabaseApiException;
