@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@env/environment';
-import { Organization } from '@app/core/models/organizations.models';
+import { Organization, Profession } from '@app/core/models/organizations.models';
 import { Profile } from '@app/core/models/profile.models';
 
 @Injectable({ providedIn: 'root' })
@@ -38,5 +38,13 @@ export class OrganizationService {
 
   removeOrganizationMember(organizationId: string, userId: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${organizationId}/members/${userId}`);
+  }
+
+  getProfessions(organizationId: string): Observable<Profession[]> {
+    return this.http.get<Profession[]>(`${this.baseUrl}/${organizationId}/professions`);
+  }
+
+  createProfession(organizationId: string, key: string, label: string): Observable<Profession> {
+    return this.http.post<Profession>(`${this.baseUrl}/${organizationId}/professions`, { key, label });
   }
 }

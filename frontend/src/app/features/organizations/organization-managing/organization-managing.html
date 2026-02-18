@@ -27,13 +27,23 @@
         </button>
         <button
           class="pb-3 text-sm font-medium transition-colors hover:text-blue-500"
-          [class.border-b-2]="activeTab() === 'activities'"
-          [class.border-blue-500]="activeTab() === 'activities'"
-          [class.text-blue-600]="activeTab() === 'activities'"
-          [class.text-gray-500]="activeTab() !== 'activities'"
-          (click)="setTab('activities')"
+          [class.border-b-2]="activeTab() === 'curriculums'"
+          [class.border-blue-500]="activeTab() === 'curriculums'"
+          [class.text-blue-600]="activeTab() === 'curriculums'"
+          [class.text-gray-500]="activeTab() !== 'curriculums'"
+          (click)="setTab('curriculums')"
         >
-          {{ 'organizationManaging.tabs.activities' | translate }}
+          {{ 'organizationManaging.tabs.curriculums' | translate }}
+        </button>
+        <button
+          class="pb-3 text-sm font-medium transition-colors hover:text-blue-500"
+          [class.border-b-2]="activeTab() === 'teams'"
+          [class.border-blue-500]="activeTab() === 'teams'"
+          [class.text-blue-600]="activeTab() === 'teams'"
+          [class.text-gray-500]="activeTab() !== 'teams'"
+          (click)="setTab('teams')"
+        >
+          {{ 'organizationManaging.tabs.teams' | translate }}
         </button>
         <button
           class="pb-3 text-sm font-medium transition-colors hover:text-blue-500"
@@ -117,127 +127,153 @@
       </section>
     }
 
-    <!-- Activities Tab -->
-    @if (activeTab() === 'activities') {
+    <!-- Curriculums Tab -->
+    @if (activeTab() === 'curriculums') {
       <section>
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-medium">{{ 'organizationManaging.activities.title' | translate }}</h2>
-          @if (!showActivityForm()) {
-            <button
-              class="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-              (click)="openAddActivityForm()"
-            >
-              {{ 'organizationManaging.activities.add' | translate }}
-            </button>
-          }
+          <h2 class="text-xl font-medium">{{ 'organizationManaging.tabs.curriculums' | translate }}</h2>
+          <button
+            class="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            (click)="toggleCreateProfession()"
+          >
+            {{ 'organizationManaging.curriculums.add' | translate }}
+          </button>
         </div>
 
-        @if (showActivityForm()) {
+        @if (showCreateProfession()) {
           <div class="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+            <div class="flex flex-col gap-3 sm:flex-row">
               <input
                 type="text"
-                class="px-4 py-2 bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                [placeholder]="'organizationManaging.activities.key' | translate"
-                [ngModel]="activityKey()"
-                (ngModelChange)="activityKey.set($event)"
+                class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                [placeholder]="'organizationManaging.curriculums.keyPlaceholder' | translate"
+                [ngModel]="newProfessionKey()"
+                (ngModelChange)="newProfessionKey.set($event)"
               />
               <input
                 type="text"
-                class="px-4 py-2 bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                [placeholder]="'organizationManaging.activities.label' | translate"
-                [ngModel]="activityLabel()"
-                (ngModelChange)="activityLabel.set($event)"
+                class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                [placeholder]="'organizationManaging.curriculums.labelPlaceholder' | translate"
+                [ngModel]="newProfessionLabel()"
+                (ngModelChange)="newProfessionLabel.set($event)"
               />
-              <input
-                type="text"
-                class="px-4 py-2 bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                [placeholder]="'organizationManaging.activities.description' | translate"
-                [ngModel]="activityDescription()"
-                (ngModelChange)="activityDescription.set($event)"
-              />
-              <input
-                type="text"
-                class="px-4 py-2 bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                [placeholder]="'organizationManaging.activities.category' | translate"
-                [ngModel]="activityCategory()"
-                (ngModelChange)="activityCategory.set($event)"
-              />
-            </div>
-            @if (editingActivity()) {
-              <label class="flex items-center gap-2 mb-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  [ngModel]="activityIsActive()"
-                  (ngModelChange)="activityIsActive.set($event)"
-                />
-                <span class="text-sm text-gray-700">{{ 'organizationManaging.activities.active' | translate }}</span>
-              </label>
-            }
-            <div class="flex gap-2">
               <button
                 class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors disabled:opacity-50"
-                [disabled]="!activityKey().trim() || !activityLabel().trim()"
-                (click)="saveActivity()"
+                [disabled]="isCreatingProfession() || !newProfessionKey().trim() || !newProfessionLabel().trim()"
+                (click)="createProfession()"
               >
-                {{ 'organizationManaging.activities.saveButton' | translate }}
-              </button>
-              <button
-                class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
-                (click)="cancelActivityForm()"
-              >
-                {{ 'common.cancel' | translate }}
+                {{ 'common.save' | translate }}
               </button>
             </div>
           </div>
         }
 
-        @if (activities().length === 0 && !showActivityForm()) {
-          <p class="text-gray-500">{{ 'organizationManaging.activities.empty' | translate }}</p>
+        @if (professions().length === 0) {
+          <p class="text-gray-500">{{ 'organizationManaging.curriculums.empty' | translate }}</p>
         } @else {
           <ul class="space-y-2">
-            @for (activity of activities(); track activity.id) {
-              <li class="px-4 py-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-gray-300 hover:shadow-md transition-all">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    <span class="font-medium text-gray-800">{{ activity.label }}</span>
-                    <span class="px-2 py-0.5 text-xs font-mono bg-gray-100 text-gray-600 rounded">{{ activity.key }}</span>
-                    @if (activity.category) {
-                      <span class="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded">{{ activity.category }}</span>
-                    }
+            @for (profession of professions(); track profession.id) {
+              <li
+                tabindex="0"
+                role="button"
+                class="flex items-center justify-between px-5 py-4 bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer hover:border-blue-300 hover:shadow-md transition-all group"
+                (click)="openProfession(profession)"
+                (keydown.enter)="openProfession(profession)"
+              >
+                <div class="flex items-center gap-3">
+                  <div class="h-9 w-9 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-medium">
+                    {{ profession.label.charAt(0) }}
                   </div>
-                  <div class="flex items-center gap-2">
-                    <span
-                      class="px-2 py-0.5 text-xs rounded"
-                      [class.bg-green-100]="activity.isActive"
-                      [class.text-green-700]="activity.isActive"
-                      [class.bg-gray-100]="!activity.isActive"
-                      [class.text-gray-500]="!activity.isActive"
-                    >
-                      @if (activity.isActive) {
-                        {{ 'organizationManaging.activities.active' | translate }}
-                      } @else {
-                        {{ 'organizationManaging.activities.inactive' | translate }}
-                      }
-                    </span>
-                    <button
-                      class="px-2 py-1 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
-                      (click)="openEditActivityForm(activity)"
-                    >
-                      {{ 'common.edit' | translate }}
-                    </button>
-                    <button
-                      class="px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
-                      (click)="deleteActivity(activity)"
-                    >
-                      {{ 'common.delete' | translate }}
-                    </button>
+                  <div>
+                    <span class="font-medium text-gray-800">{{ profession.label }}</span>
+                    <span class="ml-2 px-2 py-0.5 text-xs font-mono bg-gray-100 text-gray-500 rounded">{{ profession.key }}</span>
                   </div>
                 </div>
-                @if (activity.description) {
-                  <p class="mt-1 text-sm text-gray-500">{{ activity.description }}</p>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+
+    <!-- Teams Tab -->
+    @if (activeTab() === 'teams') {
+      <section>
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-medium">{{ 'organizationManaging.teams.title' | translate }}</h2>
+          <button
+            class="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            (click)="toggleCreateTeam()"
+          >
+            {{ 'organizationManaging.teams.add' | translate }}
+          </button>
+        </div>
+
+        @if (showCreateTeam()) {
+          <div class="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <div class="flex flex-col gap-3 sm:flex-row">
+              <input
+                type="text"
+                class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                [placeholder]="'organizationManaging.teams.namePlaceholder' | translate"
+                [ngModel]="newTeamName()"
+                (ngModelChange)="newTeamName.set($event)"
+              />
+              <select
+                class="px-4 py-2 bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                [ngModel]="newTeamProfessionId()"
+                (ngModelChange)="newTeamProfessionId.set($event)"
+              >
+                <option value="" disabled>{{ 'organizationManaging.teams.professionPlaceholder' | translate }}</option>
+                @for (profession of professions(); track profession.id) {
+                  <option [value]="profession.id">{{ profession.label }}</option>
                 }
+              </select>
+              <button
+                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors disabled:opacity-50"
+                [disabled]="isCreatingTeam() || !newTeamName().trim() || !newTeamProfessionId()"
+                (click)="createTeam()"
+              >
+                {{ 'common.save' | translate }}
+              </button>
+            </div>
+          </div>
+        }
+
+        @if (teams().length === 0) {
+          <p class="text-gray-500">{{ 'organizationManaging.teams.empty' | translate }}</p>
+        } @else {
+          <ul class="space-y-2">
+            @for (team of teams(); track team.id) {
+              <li
+                tabindex="0"
+                role="button"
+                class="flex items-center justify-between px-5 py-4 bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer hover:border-blue-300 hover:shadow-md transition-all group"
+                (click)="openTeam(team)"
+                (keydown.enter)="openTeam(team)"
+              >
+                <div class="flex items-center gap-3">
+                  <div class="h-9 w-9 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-sm font-medium">
+                    {{ team.name.charAt(0) }}
+                  </div>
+                  <div>
+                    <span class="font-medium text-gray-800">{{ team.name }}</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button
+                    class="px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"
+                    (click)="deleteTeam(team); $event.stopPropagation()"
+                  >
+                    {{ 'common.delete' | translate }}
+                  </button>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
               </li>
             }
           </ul>

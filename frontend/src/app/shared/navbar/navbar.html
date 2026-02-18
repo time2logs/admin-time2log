@@ -10,7 +10,7 @@
 </header>
 
 <aside
-  class="fixed bottom-0 left-0 w-full bg-white text-gray-800 border-t border-gray-200 flex flex-col z-50 md:relative md:w-64 md:h-screen md:bg-[#1e293b] md:text-gray-300 md:border-t-0 md:border-r md:border-gray-800"
+  class="fixed bottom-0 left-0 w-full bg-white text-gray-800 border-t border-gray-200 flex flex-col z-50 md:sticky md:top-0 md:w-64 md:h-screen md:overflow-y-auto md:shrink-0 md:bg-[#1e293b] md:text-gray-300 md:border-t-0 md:border-r md:border-gray-800"
 >
   <div class="hidden md:block p-6">
     <div class="pl-6">
@@ -81,11 +81,11 @@ class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md
     </a>
 
     <a
-      routerLink="/activities"
-      #entriesLink="routerLinkActive"
+      routerLink="/reports"
+      #reportsLink="routerLinkActive"
       routerLinkActive="md:bg-[#2d3a4f] md:text-blue-400 shadow-sm"
       class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group hover:md:bg-[#2d3a4f]/50 hover:text-[#717D8E] text-[#8E9AAF]"    >
-      <span class="md:hidden" [class.svg-active]="entriesLink.isActive">
+      <span class="md:hidden" [class.svg-active]="reportsLink.isActive">
         <svg width="90" height="60" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
           <g fill="#8E9AAF">
             <rect x="48" y="15" width="4" height="3" rx="1" />
@@ -96,12 +96,12 @@ class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md
             <rect x="56" y="31" width="16" height="3" rx="1" />
           </g>
           <text x="60" y="58" font-family="Arial, sans-serif" font-size="16" fill="#8E9AAF" text-anchor="middle">
-            {{ 'nav.entries' | translate }}
+            {{ 'nav.reports' | translate }}
           </text>
         </svg>
       </span>
       <i class="hidden md:inline bi bi-list-ul text-lg md:mr-3"></i>
-      <span class="hidden md:inline">{{ 'nav.entries' | translate }}</span>
+      <span class="hidden md:inline">{{ 'nav.reports' | translate }}</span>
     </a>
   }
 </nav>
