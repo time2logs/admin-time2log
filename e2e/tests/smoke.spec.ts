@@ -53,4 +53,18 @@ test.describe('Smoke Tests', () => {
 
   })
 
+  test('create Organization', async ({ page }) => {
+    await page.goto('/auth/login');
+    await page.fill('#email', 'testusertime2log@gmail.com');
+    await page.fill('#password', 'TestUserBLJT2L');
+    await page.click('button[type="submit"]');
+    await expect(page).toHaveURL('/dashboard');
+
+    await page.goto('/organizations');
+    await page.getByTestId('organization-name-input').fill('TestOrg');
+    await page.getByTestId('create-organization-button').click();
+
+    await expect(page.getByText('TestOrg')).toBeVisible();
+  })
+
 });
