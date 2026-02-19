@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import {text} from "node:stream/consumers";
 
 test.describe('Smoke Tests', () => {
   test('app is reachable and loads', async ({ page }) => {
@@ -49,6 +50,25 @@ test.describe('Smoke Tests', () => {
         await page.click('button[type="submit"]');
 
       await expect(page).toHaveURL('/dashboard');
+
+
+  })
+
+  test('create Organization', async ({ page }) => {
+    await page.goto('/auth/login');
+    await page.fill('#email', 'testusertime2log@gmail.com');
+    await page.fill('#password', 'TestUserBLJT2L');
+    await page.click('button[type="submit"]');
+    await expect(page).toHaveURL('/dashboard');
+    await page.goto('/organizations');
+    await page.getByTestId('organization-name-input').fill('TestOrg');
+    await page.getByTestId('create-organization-button').click();
+    await expect(page.getByText('TestOrg')).toBeVisible();
+    await page.getByText('TestOrg').click();
+    await page.getByTestId('open-settings-button').click();
+    await page.getByTestId('delete-organization-button').click();
+    await page.getByTestId('confirm-deleteOrg-button').click();
+    await expect(page.getByTestId('organization-name-input')).toBeVisible()
 
 
   })

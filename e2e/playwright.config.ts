@@ -9,7 +9,7 @@ export default defineConfig({
   reporter: [['html'], ['list']],
 
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:4200',
+    baseURL: process.env.BASE_URL || 'https://dev.admin.time2log.app',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },

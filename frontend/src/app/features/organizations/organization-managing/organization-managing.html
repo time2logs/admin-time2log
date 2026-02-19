@@ -52,18 +52,20 @@
           [class.text-blue-600]="activeTab() === 'settings'"
           [class.text-gray-500]="activeTab() !== 'settings'"
           (click)="setTab('settings')"
+          data-testid="open-settings-button"
+
         >
           {{ 'organizationManaging.tabs.settings' | translate }}
         </button>
       </nav>
     </div>
-
     <!-- Members Tab -->
     @if (activeTab() === 'members') {
       <section>
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-xl font-medium">{{ 'organizationManaging.members.title' | translate }}</h2>
           <button
+            data-testid="add-member-button"
             class="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
             (click)="toggleInviteForm()"
           >
