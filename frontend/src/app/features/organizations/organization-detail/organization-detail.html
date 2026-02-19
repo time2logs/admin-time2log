@@ -70,8 +70,6 @@
           class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors disabled:opacity-50"
           [disabled]="isDeleting()"
           (click)="showDeleteConfirm.set(true)"
-          data-testid="delete-organization-button"
-
         >
           {{ 'organizationDetail.delete' | translate }}
         </button>
@@ -82,7 +80,6 @@
             class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors disabled:opacity-50"
             [disabled]="isDeleting()"
             (click)="deleteOrganization()"
-            data-testid="confirm-deleteOrg-button"
           >
             {{ 'common.delete' | translate }}
           </button>
