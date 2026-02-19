@@ -54,7 +54,7 @@
               class="absolute bottom-1 h-1.5 w-1.5 rounded-full"
               [class.bg-green-500]="getStatus(day.date) === 'reported'"
               [class.bg-yellow-400]="getStatus(day.date) === 'bad_rating'"
-              [class.bg-gray-300]="getStatus(day.date) === 'missing'"
+              [class.bg-red-400]="getStatus(day.date) === 'missing'"
               [class.opacity-0]="selectedDate() === day.date"
             ></span>
           }

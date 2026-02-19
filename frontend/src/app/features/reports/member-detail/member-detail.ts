@@ -41,8 +41,27 @@ export class MemberDetail implements OnInit {
       const hasBad = records.some(r => r.rating !== null && r.rating <= 2);
       map[date] = hasBad ? 'bad_rating' : 'reported';
     }
+
+    // Mark past weekdays without records as 'missing'
+    const today = new Date().toISOString().slice(0, 10);
+    const year = this.currentYear();
+    const month = this.currentMonth();
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    for (let d = 1; d <= lastDay; d++) {
+      const date = new Date(year, month, d);
+      const dateStr = date.toISOString().slice(0, 10);
+      if (dateStr >= today) break;
+      const dow = date.getDay();
+      if (dow === 0 || dow === 6) continue; // skip weekends
+      if (!map[dateStr]) {
+        map[dateStr] = 'missing';
+      }
+    }
     return map;
   });
+
+  protected readonly currentYear = signal(new Date().getFullYear());
+  protected readonly currentMonth = signal(new Date().getMonth());
 
   protected readonly activityProgress = computed<{ id: string; label: string; hours: number }[]>(() => {
     const map = new Map<string, { label: string; hours: number }>();
@@ -109,6 +128,8 @@ export class MemberDetail implements OnInit {
   }
 
   protected onMonthChanged(event: { year: number; month: number }): void {
+    this.currentYear.set(event.year);
+    this.currentMonth.set(event.month - 1);
     const from = `${event.year}-${String(event.month).padStart(2, '0')}-01`;
     const lastDay = new Date(event.year, event.month, 0).getDate();
     const to = `${event.year}-${String(event.month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;

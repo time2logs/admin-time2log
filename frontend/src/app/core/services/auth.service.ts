@@ -119,6 +119,20 @@ export class AuthService implements OnDestroy {
     );
   }
 
+  resetPasswordForEmail(email: string): Promise<{ error: Error | null }> {
+    return this.supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/auth/reset-password',
+    });
+  }
+
+  updatePassword(password: string): Promise<{ error: Error | null }> {
+    return this.supabase.auth.updateUser({ password }).then(({ error }) => ({ error }));
+  }
+
+  updateEmail(email: string): Promise<{ error: Error | null }> {
+    return this.supabase.auth.updateUser({ email }).then(({ error }) => ({ error }));
+  }
+
   logout(): Observable<void> {
     this.currentUserSubject.next(null);
     return from(this.supabase.auth.signOut().then(() => undefined));

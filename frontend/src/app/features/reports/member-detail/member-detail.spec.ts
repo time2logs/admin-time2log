@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { ComponentFixture } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideRouter } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
@@ -45,7 +45,9 @@ describe('MemberDetail computed signals', () => {
     await TestBed.configureTestingModule({
       imports: [MemberDetail],
       providers: [
-        provideHttpClient(),
+        // Intercept all HTTP requests so AuthService cannot reach Supabase
+        // even if a real session is present in the test browser's localStorage.
+        provideHttpClientTesting(),
         provideTranslateService(),
         provideRouter([]),
         { provide: OrganizationService, useValue: orgServiceSpy },
@@ -62,7 +64,11 @@ describe('MemberDetail computed signals', () => {
 
     fixture = TestBed.createComponent(MemberDetail);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+
+    // Do NOT call detectChanges() here. We only test the computed signal logic,
+    // not the data-loading side effects of ngOnInit. Skipping detectChanges()
+    // prevents ngOnInit from running, which means no real or mocked HTTP calls
+    // are triggered and the signals stay in their clean initial state ([]/null).
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -96,12 +102,14 @@ describe('MemberDetail computed signals', () => {
     });
 
     it('produces one entry per distinct date', () => {
+      // Use a future month so the "missing weekday" loop adds nothing.
+      c().currentYear.set(2099);
+      c().currentMonth.set(0);
       c().monthRecords.set([
-        makeRecord({ entryDate: '2024-01-10', rating: 3 }),
-        makeRecord({ entryDate: '2024-01-11', rating: 4 }),
+        makeRecord({ entryDate: '2099-01-10', rating: 3 }),
+        makeRecord({ entryDate: '2099-01-11', rating: 4 }),
       ]);
-      const map = c().statusMap();
-      expect(Object.keys(map)).toHaveSize(2);
+      expect(Object.keys(c().statusMap())).toHaveSize(2);
     });
   });
 

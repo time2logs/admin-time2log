@@ -9,6 +9,10 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
+    path: 'auth/reset-password',
+    loadComponent: () => import('./features/auth/reset-password/reset-password').then((m) => m.ResetPassword),
+  },
+  {
     path: 'auth',
     canActivate: [guestGuard],
     loadChildren: () => import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
