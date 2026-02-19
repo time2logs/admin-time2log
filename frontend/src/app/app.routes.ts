@@ -8,6 +8,11 @@ export const routes: Routes = [
     redirectTo: 'auth',
     pathMatch: 'full',
   },
+  // Unguarded: Supabase creates a temporary recovery session, so guestGuard would redirect to dashboard
+  {
+    path: 'auth/reset-password',
+    loadComponent: () => import('./features/auth/reset-password/reset-password').then((m) => m.ResetPassword),
+  },
   {
     path: 'auth',
     canActivate: [guestGuard],

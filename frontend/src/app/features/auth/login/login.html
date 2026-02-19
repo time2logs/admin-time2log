@@ -71,9 +71,14 @@
     </div>
 
     <div class="mb-6">
-      <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
-        {{ 'auth.login.password' | translate }}
-      </label>
+      <div class="flex items-center justify-between mb-1">
+        <label for="password" class="block text-sm font-medium text-gray-700">
+          {{ 'auth.login.password' | translate }}
+        </label>
+        <a routerLink="/auth/forgot-password" class="text-sm text-blue-600 hover:text-blue-700">
+          {{ 'auth.login.forgotPassword' | translate }}
+        </a>
+      </div>
       <input
         id="password"
         type="password"

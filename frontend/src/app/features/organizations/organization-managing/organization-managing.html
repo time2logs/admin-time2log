@@ -186,10 +186,7 @@
                 (click)="openProfession(profession)"
                 (keydown.enter)="openProfession(profession)"
               >
-                <div class="flex items-center gap-3">
-                  <div class="h-9 w-9 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-medium">
-                    {{ profession.label.charAt(0) }}
-                  </div>
+                <div class="flex items-center">
                   <div>
                     <span class="font-medium text-gray-800">{{ profession.label }}</span>
                     <span class="ml-2 px-2 py-0.5 text-xs font-mono bg-gray-100 text-gray-500 rounded">{{ profession.key }}</span>
@@ -261,10 +258,7 @@
                 (click)="openTeam(team)"
                 (keydown.enter)="openTeam(team)"
               >
-                <div class="flex items-center gap-3">
-                  <div class="h-9 w-9 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-sm font-medium">
-                    {{ team.name.charAt(0) }}
-                  </div>
+                <div class="flex items-center">
                   <div>
                     <span class="font-medium text-gray-800">{{ team.name }}</span>
                   </div>

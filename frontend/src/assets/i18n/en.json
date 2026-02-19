@@ -18,6 +18,7 @@
       "orDivider": "or",
       "noAccount": "Don't have an account?",
       "registerLink": "Sign up now",
+      "forgotPassword": "Forgot password?",
       "emailNotConfirmed": {
         "title": "Email confirmation required",
         "message": "Please confirm your email address using the link we sent you."
@@ -49,6 +50,30 @@
       "firstNameRequired": "First name is required.",
       "lastNameMin": "Last name must be at least 2 characters.",
       "lastNameRequired": "Last name is required."
+    },
+    "forgotPassword": {
+      "title": "Reset Password",
+      "description": "Enter your email address and we'll send you a link to reset your password.",
+      "submit": "Send Reset Link",
+      "backToLogin": "Back to Sign In",
+      "error": "Something went wrong. Please try again.",
+      "success": {
+        "title": "Email Sent",
+        "message": "If this email address is registered, we've sent you a reset link. Please also check your spam folder."
+      }
+    },
+    "resetPassword": {
+      "title": "Set New Password",
+      "description": "Please enter your new password.",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "passwordMismatch": "Passwords do not match.",
+      "submit": "Change Password",
+      "error": "Could not change password. The link may have expired.",
+      "success": {
+        "title": "Password Changed",
+        "message": "Your password has been changed successfully. You will be redirected to sign in."
+      }
     },
     "logout": "Sign Out"
   },
@@ -244,6 +269,14 @@
       "userIdHint": "Share this ID to get invited to organizations.",
       "copy": "Copy",
       "copied": "Copied!"
+    },
+    "emailChange": {
+      "title": "Change Email Address",
+      "placeholder": "New email address",
+      "submit": "Change",
+      "hint": "You will receive a confirmation email at the new address.",
+      "success": "Confirmation email sent. Please confirm your new email address.",
+      "error": "Could not change email address."
     },
     "dangerZone": {
       "title": "Danger Zone",

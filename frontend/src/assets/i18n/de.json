@@ -18,6 +18,7 @@
       "orDivider": "oder",
       "noAccount": "Noch kein Konto?",
       "registerLink": "Jetzt registrieren",
+      "forgotPassword": "Passwort vergessen?",
       "emailNotConfirmed": {
         "title": "E-Mail-Bestätigung erforderlich",
         "message": "Bitte bestätigen Sie Ihre E-Mail-Adresse über den Link, den wir Ihnen gesendet haben."
@@ -49,6 +50,30 @@
       "firstNameRequired": "Vorname ist erforderlich.",
       "lastNameMin": "Nachname muss mindestens 2 Zeichen lang sein.",
       "lastNameRequired": "Nachname ist erforderlich."
+    },
+    "forgotPassword": {
+      "title": "Passwort zurücksetzen",
+      "description": "Gib deine E-Mail-Adresse ein. Wir senden dir einen Link zum Zurücksetzen deines Passworts.",
+      "submit": "Link senden",
+      "backToLogin": "Zurück zur Anmeldung",
+      "error": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+      "success": {
+        "title": "E-Mail gesendet",
+        "message": "Falls diese E-Mail-Adresse registriert ist, haben wir dir einen Link zum Zurücksetzen gesendet. Bitte überprüfe auch deinen Spam-Ordner."
+      }
+    },
+    "resetPassword": {
+      "title": "Neues Passwort setzen",
+      "description": "Bitte gib dein neues Passwort ein.",
+      "newPassword": "Neues Passwort",
+      "confirmPassword": "Passwort bestätigen",
+      "passwordMismatch": "Die Passwörter stimmen nicht überein.",
+      "submit": "Passwort ändern",
+      "error": "Passwort konnte nicht geändert werden. Der Link ist möglicherweise abgelaufen.",
+      "success": {
+        "title": "Passwort geändert",
+        "message": "Dein Passwort wurde erfolgreich geändert. Du wirst zur Anmeldung weitergeleitet."
+      }
     },
     "logout": "Abmelden"
   },
@@ -244,6 +269,14 @@
       "userIdHint": "Teile diese ID, um zu Organisationen eingeladen zu werden.",
       "copy": "Kopieren",
       "copied": "Kopiert!"
+    },
+    "emailChange": {
+      "title": "E-Mail-Adresse ändern",
+      "placeholder": "Neue E-Mail-Adresse",
+      "submit": "Ändern",
+      "hint": "Du erhältst eine Bestätigungs-E-Mail an die neue Adresse.",
+      "success": "Bestätigungs-E-Mail gesendet. Bitte bestätige die neue E-Mail-Adresse.",
+      "error": "E-Mail-Adresse konnte nicht geändert werden."
     },
     "dangerZone": {
       "title": "Gefahrenzone",
