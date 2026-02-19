@@ -102,9 +102,12 @@ describe('MemberDetail computed signals', () => {
     });
 
     it('produces one entry per distinct date', () => {
+      // Use a future month so the "missing weekday" loop adds nothing.
+      c().currentYear.set(2099);
+      c().currentMonth.set(0);
       c().monthRecords.set([
-        makeRecord({ entryDate: '2024-01-10', rating: 3 }),
-        makeRecord({ entryDate: '2024-01-11', rating: 4 }),
+        makeRecord({ entryDate: '2099-01-10', rating: 3 }),
+        makeRecord({ entryDate: '2099-01-11', rating: 4 }),
       ]);
       expect(Object.keys(c().statusMap())).toHaveSize(2);
     });
