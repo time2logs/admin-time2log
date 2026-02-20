@@ -13,11 +13,11 @@ services:
     labels:
       autoheal: "true"
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:9080/actuator/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 60s
+      test: ["CMD-SHELL", "wget -qO- --timeout=5 http://127.0.0.1:9080/actuator/health/liveness | grep -q UP"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   admin-time2log-frontend-dev:
     image: ghcr.io/time2logs/admin-time2log/frontend:dev-latest
