@@ -8,6 +8,14 @@ services:
     networks:
       - time2log-net
     restart: unless-stopped
+    labels:
+      autoheal: "true"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9080/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
 
   admin-time2log-frontend-dev:
     image: ghcr.io/time2logs/admin-time2log/frontend:dev-latest
@@ -17,6 +25,24 @@ services:
     networks:
       - time2log-net
     restart: unless-stopped
+    labels:
+      autoheal: "true"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  autoheal:
+    image: willfarrell/autoheal:latest
+    container_name: autoheal
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      AUTOHEAL_CONTAINER_LABEL: autoheal
+      AUTOHEAL_INTERVAL: 10
 
 networks:
   time2log-net:
