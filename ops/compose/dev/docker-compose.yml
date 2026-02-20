@@ -1,3 +1,5 @@
+name: admin-time2log-dev
+
 services:
   admin-time2log-backend-dev:
     image: ghcr.io/time2logs/admin-time2log/backend:dev-latest

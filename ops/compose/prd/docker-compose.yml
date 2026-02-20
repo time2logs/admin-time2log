@@ -1,3 +1,5 @@
+name: admin-time2log-prd
+
 services:
   admin-time2log-backend-prd:
     image: ghcr.io/time2logs/admin-time2log/backend:latest
