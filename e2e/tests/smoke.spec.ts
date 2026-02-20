@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import {text} from "node:stream/consumers";
+import {getRawAsset} from "node:sea";
 
 test.describe('Smoke Tests', () => {
   test('app is reachable and loads', async ({ page }) => {
@@ -67,10 +68,25 @@ test.describe('Smoke Tests', () => {
     await expect(page.getByText('TestOrg')).toBeVisible();
 
     await page.getByText('TestOrg').click();
+    await page.getByTestId('open-curriculums-button').click();
+    await page.getByTestId('create-profession-button').click();
+    await page.getByTestId('profession-key-input').fill('Maurer');
+    await page.getByTestId('profession-label-input').fill('Maurer/in EFZ');
+    await page.getByTestId('profession-add-button').click();
+    await expect(page.getByText('Maurer/in EFZ')).toBeVisible();
+
+    await page.getByTestId('open-teams-button').click();
+    await page.getByTestId('create-team-button').click();
+    await page.getByTestId('team-name-input').fill('TestTeam');
+    await page.getByTestId('team-profession-select').selectOption({ label: 'Maurer/in EFZ'});
+    await page.getByTestId('add-team-button').click();
+    await expect(page.getByText('TestTeam')).toBeVisible();
+
     await page.getByTestId('open-settings-button').click();
     await page.getByTestId('delete-organization-button').click();
-
-
+    await page.getByTestId('confirm-delete-organization-button').click();
+    await expect(page).toHaveURL('/organizations');
+    await expect(page.getByTestId('organization-name-input')).toBeVisible();
   })
 
 });
