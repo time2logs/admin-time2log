@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>You've been invited</title>
+  <style>
+    body { margin: 0; padding: 0; background: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .wrapper { padding: 40px 16px; }
+    .card { background: #ffffff; border-radius: 16px; overflow: hidden; max-width: 480px; margin: 0 auto; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    .header { background: #1e293b; padding: 36px 40px; }
+    .logo { font-size: 16px; font-weight: 700; color: #ffffff; letter-spacing: 0.02em; margin-bottom: 20px; }
+    .logo span { color: #60a5fa; }
+    .header h1 { margin: 0; font-size: 22px; font-weight: 700; color: #ffffff; line-height: 1.3; }
+    .header p { margin: 8px 0 0; font-size: 14px; color: #94a3b8; }
+    .body { padding: 36px 40px; }
+    .org-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .org-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+    .org-name { font-size: 15px; font-weight: 600; color: #0f172a; }
+    .role-badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 100px; white-space: nowrap; }
+    .role-admin { background: #f3e8ff; color: #7c3aed; }
+    .role-member { background: #dbeafe; color: #1d4ed8; }
+    .message { font-size: 14px; color: #475569; line-height: 1.7; margin: 0 0 28px; }
+    .btn { display: block; background: #1e293b; color: #ffffff !important; text-decoration: none; text-align: center; padding: 14px 24px; border-radius: 12px; font-size: 15px; font-weight: 600; }
+    .btn:hover { background: #334155; }
+    .footer { padding: 20px 40px 32px; text-align: center; }
+    .footer p { margin: 0; font-size: 12px; color: #94a3b8; line-height: 1.6; }
+    .divider { height: 1px; background: #f1f5f9; margin: 0 40px; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="card">
+
+    <div class="header">
+      <div class="logo">Time<span>2</span>Log</div>
+      <h1>{{SUBJECT}}</h1>
+      <p>Set up your account and join the organization.</p>
+    </div>
+
+    <div class="body">
+      <div class="org-card">
+        <div>
+          <div class="org-label">Invited to</div>
+          <div class="org-name">{{ORGANIZATION_NAME}}</div>
+        </div>
+        <span class="role-badge {{ROLE_CLASS}}">{{ROLE_LABEL}}</span>
+      </div>
+
+      <p class="message">
+        You've been invited to join <strong>{{ORGANIZATION_NAME}}</strong> on Time2Log.
+        Click the button below to accept your invitation and set up your account.
+        This link expires after <strong>24 hours</strong>.
+      </p>
+
+      <a href="{{ACTION_LINK}}" class="btn">Accept Invitation</a>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="footer">
+      <p>
+        If you weren't expecting this invitation, you can ignore this email.<br/>
+        If the button doesn't work, copy this link into your browser:<br/>
+        <span style="color:#60a5fa; word-break:break-all;">{{ACTION_LINK}}</span>
+      </p>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

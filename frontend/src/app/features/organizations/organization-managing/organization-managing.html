@@ -59,78 +59,115 @@
         </button>
       </nav>
     </div>
+
     <!-- Members Tab -->
     @if (activeTab() === 'members') {
-      <section>
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-medium">{{ 'organizationManaging.members.title' | translate }}</h2>
-          <button
-            data-testid="add-member-button"
-            class="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-            (click)="toggleInviteForm()"
-          >
-            {{ 'organizationManaging.members.inviteToggle' | translate }}
-          </button>
-        </div>
+      <section class="space-y-6">
 
-        @if (showInviteForm()) {
-          <div class="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-            <div class="flex flex-col gap-3 sm:flex-row">
-              <input
-                type="text"
-                class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                [placeholder]="'organizationManaging.members.userIdPlaceholder' | translate"
-                [ngModel]="inviteUserId()"
-                (ngModelChange)="inviteUserId.set($event)"
-              />
-              <select
-                class="px-4 py-2 bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                [ngModel]="inviteRole()"
-                (ngModelChange)="inviteRole.set($event)"
-              >
-                <option value="member">{{ 'organizationManaging.members.roleMember' | translate }}</option>
-                <option value="admin">{{ 'organizationManaging.members.roleAdmin' | translate }}</option>
-              </select>
-              <button
-                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors disabled:opacity-50"
-                [disabled]="isInviting() || !inviteUserId().trim()"
-                (click)="invite()"
-              >
-                {{ 'organizationManaging.members.inviteButton' | translate }}
-              </button>
-            </div>
+        <!-- Active Members -->
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-medium">{{ 'organizationManaging.members.title' | translate }}</h2>
+            <button
+              data-testid="add-member-button"
+              class="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              (click)="toggleInviteForm()"
+            >
+              {{ 'organizationManaging.members.inviteToggle' | translate }}
+            </button>
           </div>
-        }
 
-        @if (members().length === 0) {
-          <p class="text-gray-500">{{ 'organizationManaging.members.noMembers' | translate }}</p>
-        } @else {
-          <ul class="space-y-2">
-            @for (member of members(); track member.id) {
-              <li
-                class="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-gray-300 hover:shadow-md transition-all group cursor-pointer"
-                role="button"
-                tabindex="0"
-                (click)="openMemberReport(member)"
-                (keydown.enter)="openMemberReport(member)"
-              >
-                <div class="flex items-center gap-3">
-                  <div class="h-9 w-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-medium">
-                    {{ member.firstName.charAt(0) }}{{ member.lastName.charAt(0) }}
-                  </div>
-                  <div>
+          <!-- Invite Form -->
+          @if (showInviteForm()) {
+            <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-3">
+              <p class="text-sm font-medium text-blue-800">{{ 'organizationManaging.members.inviteTitle' | translate }}</p>
+              <div class="flex flex-col gap-3 sm:flex-row">
+                <input
+                  type="email"
+                  class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  [placeholder]="'organizationManaging.members.emailPlaceholder' | translate"
+                  [ngModel]="inviteEmail()"
+                  (ngModelChange)="inviteEmail.set($event)"
+                />
+                <select
+                  class="px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  [ngModel]="inviteRole()"
+                  (ngModelChange)="inviteRole.set($event)"
+                >
+                  <option value="member">{{ 'organizationManaging.members.roleMember' | translate }}</option>
+                  <option value="admin">{{ 'organizationManaging.members.roleAdmin' | translate }}</option>
+                </select>
+                <button
+                  class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+                  [disabled]="isInviting() || !inviteEmail().trim()"
+                  (click)="invite()"
+                >
+                  {{ isInviting() ? ('common.loading' | translate) : ('organizationManaging.members.inviteButton' | translate) }}
+                </button>
+              </div>
+            </div>
+          }
+
+          @if (members().length === 0) {
+            <p class="text-gray-500 text-sm">{{ 'organizationManaging.members.noMembers' | translate }}</p>
+          } @else {
+            <ul class="space-y-2">
+              @for (member of members(); track member.id) {
+                <li
+                  class="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-gray-300 hover:shadow-md transition-all group cursor-pointer"
+                  role="button"
+                  tabindex="0"
+                  (click)="openMemberReport(member)"
+                  (keydown.enter)="openMemberReport(member)"
+                >
+                  <div class="flex items-center gap-3">
+                    <div class="h-9 w-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-medium">
+                      {{ member.firstName.charAt(0) }}{{ member.lastName.charAt(0) }}
+                    </div>
                     <span class="text-gray-800 font-medium">{{ member.firstName }} {{ member.lastName }}</span>
                   </div>
-                </div>
-                <button
-                  class="px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"
-                  (click)="removeMember(member); $event.stopPropagation()"
-                >
-                  {{ 'organizationManaging.members.remove' | translate }}
-                </button>
-              </li>
-            }
-          </ul>
+                  <button
+                    class="px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"
+                    (click)="removeMember(member); $event.stopPropagation()"
+                  >
+                    {{ 'organizationManaging.members.remove' | translate }}
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+
+        <!-- Pending Invites -->
+        @if (invites().length > 0) {
+          <div>
+            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3">
+              {{ 'organizationManaging.members.pendingInvites' | translate }}
+            </h3>
+            <ul class="space-y-2">
+              @for (invite of invites(); track invite.id) {
+                <li class="flex items-center justify-between px-4 py-3 bg-white border border-dashed border-gray-300 rounded-lg group">
+                  <div class="flex items-center gap-3">
+                    <div class="h-9 w-9 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-gray-800 text-sm font-medium">{{ invite.email }}</p>
+                      <p class="text-gray-400 text-xs">{{ getRoleLabel(invite.userRole) }}</p>
+                    </div>
+                  </div>
+                  <button
+                    class="px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"
+                    (click)="cancelInvite(invite)"
+                  >
+                    {{ 'organizationManaging.members.cancelInvite' | translate }}
+                  </button>
+                </li>
+              }
+            </ul>
+          </div>
         }
       </section>
     }
@@ -309,7 +346,6 @@
                 class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors disabled:opacity-50"
                 [disabled]="isDeleting()"
                 (click)="showDeleteConfirm.set(true)"
-                data-testid="delete-organization-button"
               >
                 {{ 'organizationManaging.settings.deleteOrganization' | translate }}
               </button>

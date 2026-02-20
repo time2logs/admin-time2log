@@ -43,7 +43,7 @@ export class OrganizationDetailComponent implements OnInit {
     this.inviteError.set(false);
     this.inviteSuccess.set(false);
 
-    this.organizationService.inviteToOrganization(this.organizationId, userId, this.inviteRole()).subscribe({
+    this.organizationService.createInvite(this.organizationId, userId, this.inviteRole()).subscribe({
       next: () => {
         this.inviteUserId.set('');
         this.inviteRole.set('member');
