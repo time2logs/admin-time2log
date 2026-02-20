@@ -6,11 +6,26 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${SUPABASE_AUTH_URL:anyplaceholderfortests}
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:1025}
+    username: ${SMTP_USER:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${SMTP_TLS:false}
+      mail.smtp.starttls.required: ${SMTP_TLS:false}
 
 supabase:
   url: ${SUPABASE_URL:anyplaceholderfortests}
   anon-key: ${SUPABASE_ANON_KEY:anyplaceholderfortests}
   service-role-key: ${SUPABASE_SERVICE_ROLE_KEY:anyplaceholderfortests}
+
+app:
+  url: ${APP_URL:http://localhost:4300}
+  mail:
+    from: ${MAIL_FROM:noreply@time2log.app}
+
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:anyplaceholderfortests}

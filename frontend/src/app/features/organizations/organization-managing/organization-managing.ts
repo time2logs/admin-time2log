@@ -5,7 +5,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { OrganizationService } from '@services/organization.service';
 import { TeamService } from '@services/team.service';
 import { ToastService } from '@services/toast.service';
-import {Organization, Profession} from '@app/core/models/organizations.models';
+import { Invite, Organization, Profession } from '@app/core/models/organizations.models';
 import { Profile } from '@app/core/models/profile.models';
 import { Team } from '@app/core/models/team.models';
 
@@ -29,8 +29,9 @@ export class OrganizationManaging implements OnInit {
   protected readonly organization = signal<Organization | null>(null);
 
   protected readonly members = signal<Profile[]>([]);
+  protected readonly invites = signal<Invite[]>([]);
   protected readonly showInviteForm = signal(false);
-  protected readonly inviteUserId = signal('');
+  protected readonly inviteEmail = signal('');
   protected readonly inviteRole = signal('member');
   protected readonly isInviting = signal(false);
 
@@ -61,6 +62,7 @@ export class OrganizationManaging implements OnInit {
 
     this.loadOrganization();
     this.loadMembers();
+    this.loadInvites();
     this.loadProfessions();
     this.loadTeams();
   }
@@ -76,24 +78,38 @@ export class OrganizationManaging implements OnInit {
 
   protected toggleInviteForm(): void {
     this.showInviteForm.update((v) => !v);
+    if (!this.showInviteForm()) {
+      this.inviteEmail.set('');
+      this.inviteRole.set('member');
+    }
   }
 
   protected invite(): void {
-    const userId = this.inviteUserId().trim();
-    if (!userId) return;
+    const email = this.inviteEmail().trim();
+    if (!email) return;
 
     this.isInviting.set(true);
 
-    this.organizationService.inviteToOrganization(this.organizationId, userId, this.inviteRole()).subscribe({
+    this.organizationService.createInvite(this.organizationId, email, this.inviteRole()).subscribe({
       next: () => {
-        this.inviteUserId.set('');
+        this.inviteEmail.set('');
         this.inviteRole.set('member');
         this.isInviting.set(false);
-        this.toast.success(this.translate.instant('toast.inviteSuccess'));
-        this.loadMembers();
+        this.showInviteForm.set(false);
+        this.toast.success(this.translate.instant('toast.inviteSent'));
+        this.loadInvites();
       },
       error: () => {
         this.isInviting.set(false);
+      },
+    });
+  }
+
+  protected cancelInvite(invite: Invite): void {
+    this.organizationService.deleteInvite(this.organizationId, invite.id).subscribe({
+      next: () => {
+        this.toast.success(this.translate.instant('toast.inviteCancelled'));
+        this.loadInvites();
       },
     });
   }
@@ -130,6 +146,12 @@ export class OrganizationManaging implements OnInit {
   private loadMembers(): void {
     this.organizationService.getOrganizationMembers(this.organizationId).subscribe({
       next: (members) => this.members.set(members),
+    });
+  }
+
+  private loadInvites(): void {
+    this.organizationService.listInvites(this.organizationId).subscribe({
+      next: (invites) => this.invites.set(invites.filter((i) => i.status === 'pending')),
     });
   }
 
@@ -216,5 +238,11 @@ export class OrganizationManaging implements OnInit {
     this.teamService.getTeams(this.organizationId).subscribe({
       next: (teams) => this.teams.set(teams),
     });
+  }
+
+  protected getRoleLabel(role: string): string {
+    return role === 'admin'
+      ? this.translate.instant('organizationManaging.members.roleAdmin')
+      : this.translate.instant('organizationManaging.members.roleMember');
   }
 }

@@ -1,8 +1,6 @@
 package ch.time2log.backend.api.rest.dto.inbound;
 
-import java.util.UUID;
-
-public record InviteRequest(
-        UUID userId,
+public record CreateInviteRequest(
+        String email,
         String userRole
 ) {}
