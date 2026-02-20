@@ -6,11 +6,18 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://127.0.0.1:54321/auth/v1
+  mail:
+    host: localhost
+    port: 54325
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
 
 supabase:
   url: http://127.0.0.1:54321
   anon-key: ${SUPABASE_ANON_KEY:sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH}
   service-role-key: ${SUPABASE_SERVICE_ROLE_KEY}
+
 
 cors:
   allowed-origins: http://localhost:4200

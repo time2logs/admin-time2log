@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@env/environment';
-import { Organization, Profession } from '@app/core/models/organizations.models';
+import { Invite, Organization, Profession } from '@app/core/models/organizations.models';
 import { Profile } from '@app/core/models/profile.models';
 
 @Injectable({ providedIn: 'root' })
@@ -31,9 +31,17 @@ export class OrganizationService {
     admin: 'admin',
   };
 
-  inviteToOrganization(organizationId: string, userId: string, userRole: string): Observable<void> {
+  createInvite(organizationId: string, email: string, userRole: string): Observable<Invite> {
     const backendRole = OrganizationService.ROLE_MAPPING[userRole] ?? userRole;
-    return this.http.post<void>(`${this.baseUrl}/${organizationId}/invite`, { userId, userRole: backendRole });
+    return this.http.post<Invite>(`${this.baseUrl}/${organizationId}/invites`, { email, userRole: backendRole });
+  }
+
+  listInvites(organizationId: string): Observable<Invite[]> {
+    return this.http.get<Invite[]>(`${this.baseUrl}/${organizationId}/invites`);
+  }
+
+  deleteInvite(organizationId: string, inviteId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${organizationId}/invites/${inviteId}`);
   }
 
   removeOrganizationMember(organizationId: string, userId: string): Observable<void> {

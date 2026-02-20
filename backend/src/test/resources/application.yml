@@ -9,6 +9,9 @@ spring:
           issuer-uri: http://localhost:54321/auth/v1
           # Use a static public key for tests instead of fetching from issuer
           public-key-location: classpath:test-public-key.pem
+  mail:
+    host: localhost
+    port: 25
 
 supabase:
   url: http://localhost:54321
@@ -20,6 +23,9 @@ cors:
 
 server:
   port: 0
+
+app:
+  url: http://localhost:4300
 
 logging:
   level:
