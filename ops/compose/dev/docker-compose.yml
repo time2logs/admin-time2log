@@ -27,14 +27,6 @@ services:
     networks:
       - time2log-net
     restart: unless-stopped
-    labels:
-      autoheal: "true"
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
 
   autoheal:
     image: willfarrell/autoheal:latest
