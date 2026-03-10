@@ -5,6 +5,7 @@ import ch.time2log.backend.api.rest.dto.outbound.MemberActivityRecordDto;
 import ch.time2log.backend.domain.ReportsDomainService;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,5 +34,12 @@ public class ReportsController {
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to) {
         return MemberActivityRecordDto.ofList(reportsDomainService.getMemberRecords(organizationId, userId, date, from, to));
+    }
+
+    @GetMapping("/members/{userId}/last-entry-date")
+    public OffsetDateTime getLastEntryDate(
+            @PathVariable UUID organizationId,
+            @PathVariable UUID userId){
+        return reportsDomainService.getLastEntryDate(organizationId, userId);
     }
 }
