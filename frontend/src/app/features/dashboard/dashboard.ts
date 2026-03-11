@@ -67,14 +67,14 @@ export class DashboardComponent implements OnInit {
     }
 
     const memberRequests = orgs.map((org) =>
-      this.organizationService.getOrganizationMembers(org.id)
+      this.organizationService.getOnlyOrganizationMembers(org.id)
     );
 
     forkJoin(memberRequests).subscribe({
       next: (results) => {
         const allMembers = results.flatMap((members, orgIndex) =>
           members.map((m: Profile) => ({ ...m, organizationId: orgs[orgIndex].id }))
-        ) //.filter((m) => m.role === 'admin' || m.role === 'member'); // Filter only members and admins
+        );
 
         if (allMembers.length === 0) {
           this.membersWithActivity.set([]);
