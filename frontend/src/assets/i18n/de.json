@@ -80,6 +80,13 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Willkommen!",
+    "members": "Alle Mitglieder",
+    "inactive_members": "Inaktive Mitglieder",
+    "inactive_members_desc": "Mitglieder, die in den letzten Tagen nicht aktiv waren",
+    "days": "Tage",
+    "members_label": "Mitglieder",
+    "inactive": "Inaktiv",
+    "never": "Nie",
     "organizations": {
       "title": "Organisationen",
       "description": "Organisationen verwalten und erstellen"

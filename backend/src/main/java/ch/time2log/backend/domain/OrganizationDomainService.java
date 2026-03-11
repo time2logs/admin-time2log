@@ -86,7 +86,6 @@ public class OrganizationDomainService {
                 OrganizationResponse.class
         );
         var orgName = organizations.isEmpty() ? "the organization" : organizations.get(0).name();
-        System.out.println(appUrl);
         var redirectTo = appUrl + "/onboarding?invite_token=" + invite.token();
         var metadata = Map.<String, Object>of(
                 "invite_token", invite.token().toString(),
@@ -142,6 +141,16 @@ public class OrganizationDomainService {
         var members = supabaseService.getListWithQuery(
                 "admin.organization_members",
                 "organization_id=eq." + organizationId,
+                OrganizationMemberResponse.class
+        );
+        var ids = members.stream().map(OrganizationMemberResponse::user_id).toList();
+        return profileDomainService.getByIds(ids);
+    }
+
+    public List<Profile> getOnlyOrganizationMemberProfiles(UUID organizationId) {
+        var members = supabaseService.getListWithQuery(
+                "admin.organization_members",
+                "organization_id=eq." + organizationId + "&user_role=eq.user",
                 OrganizationMemberResponse.class
         );
         var ids = members.stream().map(OrganizationMemberResponse::user_id).toList();

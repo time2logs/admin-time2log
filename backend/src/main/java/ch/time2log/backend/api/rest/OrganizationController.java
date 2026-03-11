@@ -68,4 +68,9 @@ public class OrganizationController {
     public void deleteInvite(@PathVariable UUID id, @PathVariable UUID inviteId) {
         orgDomainService.deleteInvite(id, inviteId);
     }
+
+    @GetMapping("/{id}/onlyMembers")
+    public List<ProfileDto> getOnlyOrganizationMembers(@PathVariable UUID id){
+        return ProfileDto.ofList(orgDomainService.getOnlyOrganizationMemberProfiles(id));
+    }
 }

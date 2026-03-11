@@ -80,6 +80,13 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome!",
+    "members": "All Members",
+    "inactive_members": "Inactive Members",
+    "inactive_members_desc": "Members who have not been active in the last few days",
+    "days": "Days",
+    "members_label": "Members",
+    "inactive": "Inactive",
+    "never": "Never",
     "organizations": {
       "title": "Organizations",
       "description": "Manage and create organizations"

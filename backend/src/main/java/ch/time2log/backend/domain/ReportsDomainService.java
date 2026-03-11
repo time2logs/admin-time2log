@@ -7,6 +7,7 @@ import ch.time2log.backend.infrastructure.supabase.responses.ActivityRecordRespo
 import ch.time2log.backend.infrastructure.supabase.responses.CurriculumNodeResponse;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -100,5 +101,16 @@ public class ReportsDomainService {
                 r.notes(),
                 r.rating()
         )).toList();
+    }
+    public OffsetDateTime getLastEntryDate(UUID organizationId, UUID userId) {
+        var records = supabaseService.getListWithQuery(
+                "app.activity_records",
+                "organization_id=eq." + organizationId + "&user_id=eq." + userId + "&order=entry_date.desc&limit=1",
+                ActivityRecordResponse.class
+        );
+
+        if (records.isEmpty()) return null;
+
+        return records.getFirst().created_at();
     }
 }

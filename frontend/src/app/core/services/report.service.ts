@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@env/environment';
 import { CurriculumOverview, DailyMemberReport, MemberActivityRecord } from '@app/core/models/report.models';
+import { map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class ReportService {
@@ -32,4 +33,12 @@ export class ReportService {
       `${this.baseUrl}/${organizationId}/professions/${professionId}/curriculum`
     );
   }
+
+ getLastEntryDate(organizationId: string, userId: string): Observable<Date | null> {
+  return this.http.get<string | null>(
+    `${this.baseUrl}/${organizationId}/reports/members/${userId}/last-entry-date`
+  ).pipe(
+    map((date) => (date ? new Date(date) : null))
+  );
+}
 }

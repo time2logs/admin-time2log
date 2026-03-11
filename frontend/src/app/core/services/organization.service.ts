@@ -55,4 +55,8 @@ export class OrganizationService {
   createProfession(organizationId: string, key: string, label: string): Observable<Profession> {
     return this.http.post<Profession>(`${this.baseUrl}/${organizationId}/professions`, { key, label });
   }
+
+  getOnlyOrganizationMembers(id: string): Observable<Profile[]> {
+    return this.http.get<Profile[]>(`${this.baseUrl}/${id}/onlyMembers`);
+  }
 }

@@ -2,6 +2,7 @@ package ch.time2log.backend.api.rest.dto.outbound;
 
 import ch.time2log.backend.domain.models.MemberActivityRecord;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
 
