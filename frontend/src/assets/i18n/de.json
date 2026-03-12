@@ -130,7 +130,8 @@
       "inviteButton": "Einladung senden",
       "pendingInvites": "Offene Einladungen",
       "cancelInvite": "Widerrufen",
-      "remove": "Entfernen"
+      "remove": "Entfernen",
+      "confirmRemoveIrreversible": "Entfernen bestätigen"
     },
     "activities": {
       "title": "Aktivitäten",
@@ -159,7 +160,8 @@
       "add": "Team erstellen",
       "empty": "Noch keine Teams vorhanden.",
       "namePlaceholder": "Teamname",
-      "professionPlaceholder": "Beruf auswählen"
+      "professionPlaceholder": "Beruf auswählen",
+      "confirmDeleteIrreversible": "Entfernen bestätigen"
     },
     "settings": {
       "title": "Einstellungen",

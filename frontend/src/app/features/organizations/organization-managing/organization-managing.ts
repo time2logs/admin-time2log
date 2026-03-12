@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, HostListener } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -51,6 +51,8 @@ export class OrganizationManaging implements OnInit {
   protected readonly isDeleting = signal(false);
 
   private organizationId = '';
+  protected readonly memberToConfirmRemoval = signal<string | null>(null);
+  protected readonly teamToConfirmDeletion = signal<string | null>(null);
 
   ngOnInit(): void {
     this.organizationId = this.route.snapshot.params['id'];
@@ -244,5 +246,34 @@ export class OrganizationManaging implements OnInit {
     return role === 'admin'
       ? this.translate.instant('organizationManaging.members.roleAdmin')
       : this.translate.instant('organizationManaging.members.roleMember');
+  }
+
+  protected confirmRemoveMember(member: Profile, event: Event): void {
+    event.stopPropagation();
+
+    if (this.memberToConfirmRemoval() === member.id) {
+      this.removeMember(member);
+      this.memberToConfirmRemoval.set(null);
+    } else {
+      this.memberToConfirmRemoval.set(member.id);
+    }
+  }
+
+
+protected confirmDeleteTeam(team: Team, event: Event): void {
+  event.stopPropagation();
+
+  if (this.teamToConfirmDeletion() === team.id) {
+    this.deleteTeam(team);
+    this.teamToConfirmDeletion.set(null);
+  } else {
+    this.teamToConfirmDeletion.set(team.id);
+  }
+}
+
+  @HostListener('document:click')
+    onDocumentClick(): void {
+    this.memberToConfirmRemoval.set(null);
+    this.teamToConfirmDeletion.set(null);
   }
 }
