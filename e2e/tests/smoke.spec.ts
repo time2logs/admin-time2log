@@ -27,7 +27,6 @@ test.describe('Smoke Tests', () => {
   test('main content is visible', async ({ page }) => {
     await page.goto('/');
 
-    // App-Root sollte existieren
     await expect(page.locator('app-root')).toBeVisible();
   });
 

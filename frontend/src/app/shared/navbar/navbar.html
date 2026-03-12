@@ -42,13 +42,29 @@
         <rect x="62" y="23" width="8" height="11" rx="1.5" />
       </g>
       <text x="60" y="58" font-family="Arial, sans-serif" font-size="16" fill="currentColor" text-anchor="middle">
-        {{ 'nav.dashboard' | translate }}
+      {{ 'nav.dashboard' | translate }}
       </text>
     </svg>
   </span>
 
   <i class="hidden md:inline bi bi-grid-fill text-lg md:mr-3 transition-colors"></i>
-  <span class="hidden md:inline transition-colors">{{ 'nav.dashboard' | translate }}</span>
+
+  <!-- Desktop Icon + Text -->
+  <span class="hidden md:flex items-center gap-2" [class.svg-active]="dashboardLink.isActive">
+  <svg class="w-5 h-5 md:w-[18px] md:h-[18px] md:mr-3 shrink-0"
+       viewBox="0 0 24 24"
+       fill="none"
+       stroke="currentColor"
+       stroke-width="1.75"
+       stroke-linecap="round"
+       stroke-linejoin="round">
+    <rect x="3" y="3" width="7" height="7" rx="1"/>
+    <rect x="14" y="3" width="7" height="7" rx="1"/>
+    <rect x="3" y="14" width="7" height="7" rx="1"/>
+    <rect x="14" y="14" width="7" height="7" rx="1"/>
+  </svg>
+  <span class="text-sm mt-0 leading-tight">{{ 'nav.dashboard' | translate }}</span>
+</span>
 </a>
 
     <a
@@ -76,8 +92,11 @@ class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md
           </text>
         </svg>
       </span>
-      <i class="hidden md:inline bi bi-people-fill text-lg md:mr-3"></i>
-      <span class="hidden md:inline">{{ 'nav.organizations' | translate }}</span>
+      <!-- Desktop only -->
+      <span class="hidden md:flex items-center gap-2">
+      <i class="bi bi-people-fill text-lg md:mr-3"></i>
+      <span class="text-[10px] md:text-sm mt-1 md:mt-0 leading-tight">{{ 'nav.organizations' | translate }}</span>
+    </span>
     </a>
 
     <a
@@ -101,7 +120,15 @@ class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md
         </svg>
       </span>
       <i class="hidden md:inline bi bi-list-ul text-lg md:mr-3"></i>
-      <span class="hidden md:inline">{{ 'nav.reports' | translate }}</span>
+      <svg class="w-5 h-5 md:w-[18px] md:h-[18px] md:mr-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/>
+        <line x1="8" y1="12" x2="21" y2="12"/>
+        <line x1="8" y1="18" x2="21" y2="18"/>
+        <circle cx="3" cy="6" r="0.5" fill="currentColor"/>
+        <circle cx="3" cy="12" r="0.5" fill="currentColor"/>
+        <circle cx="3" cy="18" r="0.5" fill="currentColor"/>
+      </svg>
+      <span class="text-[10px] md:text-sm mt-1 md:mt-0 leading-tight">{{ 'nav.reports' | translate }}</span>
     </a>
   }
 </nav>
@@ -149,13 +176,13 @@ class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md
         >
           @for (lang of languages; track lang.code) {
             <button
-              (click)="switchLanguage(lang.code); toggleLangMenu()"
+              (click)="switchLanguage(lang.code)"
               class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left transition-colors"
               [class.bg-blue-600]="languageService.currentLang === lang.code"
               [class.text-white]="languageService.currentLang === lang.code"
               [class.text-gray-300]="languageService.currentLang !== lang.code"
-              [class.hover:bg-[#3d4b63]]="languageService.currentLang !== lang.code"
             >
+              <span>{{ lang.code === 'de' ? '🇩🇪' : '🇬🇧' }}</span>
               <span>{{ lang.label }}</span>
             </button>
           }
@@ -165,20 +192,29 @@ class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md
 
     @if (authService.isAuthenticated()) {
       <button
-        (click)="logout()"
-        class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 md:rounded-lg hover:md:bg-[#2d3a4f]/50 hover:text-red-400 transition-colors"
+        (click)="settings()"
+        class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 rounded-lg hover:bg-[#2d3a4f]/50 hover:text-gray-200 transition-colors"
       >
-        <i class="bi bi-box-arrow-right text-lg"></i>
-        <span>{{ 'auth.logout' | translate }}</span>
+        <svg class="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        <span>{{ 'settings.title' | translate }}</span>
       </button>
 
       <button
-        (click)="settings()"
-        class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 md:rounded-lg hover:md:bg-[#2d3a4f]/50 hover:text-[#717D8E] transition-colors"
-        >
-        <i class="bi bi-gear text-lg"></i>
-        <span>{{ 'settings.title' | translate }}</span>
+        (click)="logout()"
+        class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 rounded-lg hover:bg-[#2d3a4f]/50 hover:text-red-400 transition-colors"
+      >
+        <svg class="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        <span>{{ 'auth.logout' | translate }}</span>
       </button>
+
+
     }
   </div>
 </aside>
