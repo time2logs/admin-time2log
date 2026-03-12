@@ -5,7 +5,7 @@ ARG BUILD_CONFIGURATION=production
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm cache clean --force && npm ci --force
+RUN npm ci
 
 COPY . .
 RUN npm run build -- --configuration=$BUILD_CONFIGURATION
