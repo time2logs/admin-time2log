@@ -100,7 +100,6 @@ test.describe('Smoke Tests', () => {
     await expect(page).toHaveURL('/organizations');
     await expect(page.getByTestId('organization-name-input')).toBeVisible();
   })
-
 });
 
 
