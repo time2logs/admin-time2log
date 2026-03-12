@@ -130,7 +130,8 @@
       "inviteButton": "Send Invite",
       "pendingInvites": "Pending Invites",
       "cancelInvite": "Revoke",
-      "remove": "Remove"
+      "remove": "Remove",
+      "confirmRemoveIrreversible": "Confirm removal"
     },
     "activities": {
       "title": "Activities",

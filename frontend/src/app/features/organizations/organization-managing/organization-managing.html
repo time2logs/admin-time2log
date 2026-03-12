@@ -111,7 +111,7 @@
             </div>
           }
 
-          @if (members().length === 0) {
+       @if (members().length === 0) {
             <p class="text-gray-500 text-sm">{{ 'organizationManaging.members.noMembers' | translate }}</p>
           } @else {
             <ul class="space-y-2">
@@ -130,15 +130,27 @@
                     </div>
                     <span class="text-gray-800 font-medium">{{ member.firstName }} {{ member.lastName }}</span>
                   </div>
-                  <button
-                    class="px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"
-                    (click)="removeMember(member); $event.stopPropagation()"
-                  >
-                    {{ 'organizationManaging.members.remove' | translate }}
-                  </button>
+                  @if (memberToConfirmRemoval() === member.id) {
+                    <button
+                      class="px-3 py-1.5 text-xs text-white bg-red-600 hover:bg-red-700 rounded transition-colors font-medium"
+                      (click)="confirmRemoveMember(member, $event)"
+                      data-testid="confirm-remove-member-button"
+                    >
+                      {{ 'organizationManaging.members.confirmRemoveIrreversible' | translate }}
+                    </button>
+                  } @else {
+                    <button
+                      class="px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"
+                      (click)="confirmRemoveMember(member, $event)"
+                      data-testid="remove-member-button"
+                    >
+                      {{ 'organizationManaging.members.remove' | translate }}
+                    </button>
+                  }
                 </li>
               }
             </ul>
+          
           }
         </div>
 
@@ -317,12 +329,23 @@
                   </div>
                 </div>
                 <div class="flex items-center gap-2">
-                  <button
-                    class="px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"
-                    (click)="deleteTeam(team); $event.stopPropagation()"
-                  >
-                    {{ 'common.delete' | translate }}
-                  </button>
+                  @if (teamToConfirmDeletion() === team.id) {
+                    <button
+                      class="px-3 py-1.5 text-xs text-white bg-red-600 hover:bg-red-700 rounded transition-colors font-medium"
+                      (click)="confirmDeleteTeam(team, $event)"
+                      data-testid="confirm-delete-team-button"
+                    >
+                      {{ 'organizationManaging.teams.confirmDeleteIrreversible' | translate }}
+                    </button>
+                  } @else {
+                    <button
+                      class="px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"
+                      (click)="confirmDeleteTeam(team, $event)"
+                      data-testid="delete-team-button"
+                    >
+                      {{ 'common.delete' | translate }}
+                    </button>
+                  }
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                   </svg>
