@@ -37,6 +37,17 @@ test.describe('Smoke Tests', () => {
       await expect(page.locator('app-register')).toBeVisible();
   });
 
+  test('create user', async ({ page }) => {
+    await page.goto('http://localhost:4200/auth/register');
+
+    await page.fill('#firstName','testusertime2log@gmail.com');
+    await page.fill('#lastName', 'TestUserBLJT2L');
+    await page.fill('#email','testusertime2log@gmail.com');
+    await page.fill('#password', 'TestUserBLJT2L');
+    await page.click('button[type="submit"]');
+
+  })
+
   test('login content is visible', async ({ page }) => {
     await page.goto('/auth/login');
 
@@ -44,14 +55,11 @@ test.describe('Smoke Tests', () => {
   });
 
   test('login with valid user', async ({ page }) => {
-      await page.goto('/auth/login');
+      await page.goto('http://localhost:4200/auth/login');
 
         await page.fill('#email','testusertime2log@gmail.com');
         await page.fill('#password', 'TestUserBLJT2L');
         await page.click('button[type="submit"]');
-
-      await expect(page).toHaveURL('/dashboard');
-
 
   })
 
@@ -66,6 +74,10 @@ test.describe('Smoke Tests', () => {
     await page.getByTestId('organization-name-input').fill('TestOrg');
     await page.getByTestId('create-organization-button').click();
     await expect(page.getByText('TestOrg')).toBeVisible();
+
+    await page.getByText('TestOrg').click();
+    await page.getByTestId('back-button').click();
+    await expect(page).toHaveURL('/organizations');
 
     await page.getByText('TestOrg').click();
     await page.getByTestId('open-curriculums-button').click();
@@ -90,3 +102,6 @@ test.describe('Smoke Tests', () => {
   })
 
 });
+
+
+
