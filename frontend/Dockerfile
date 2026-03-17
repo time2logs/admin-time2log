@@ -1,6 +1,6 @@
 FROM node:25.8.0-alpine AS build
 
-ARG BUILD_CONFIGURATION=production
+ARG BUILD_CONFIGURATION=development
 
 WORKDIR /app
 
