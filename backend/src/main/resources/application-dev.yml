@@ -12,7 +12,7 @@ spring:
       mail.smtp.starttls.required: true
 
 cors:
-  allowed-origins: https://dev-admin.aeristo.cc
+  allowed-origins: https://dev-admin.aeristo.cc, https://icakwycwpldldvcyhpqe.supabase.co
 
 logging:
   level:
