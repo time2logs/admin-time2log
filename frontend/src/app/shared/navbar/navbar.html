@@ -27,35 +27,55 @@
   class="flex flex-row md:flex-col flex-1 justify-around md:justify-start items-center md:items-stretch md:px-4 md:space-y-2"
 >
   @if (authService.isAuthenticated()) {
-<a
-  routerLink="/dashboard"
-  #dashboardLink="routerLinkActive"
-  routerLinkActive="md:bg-[#2d3a4f] md:text-blue-400 shadow-sm"
-  class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group hover:md:bg-[#2d3a4f]/50 hover:text-[#717D8E] text-[#8E9AAF]"
->
-  <span class="md:hidden" [class.svg-active]="dashboardLink.isActive">
-    <svg width="90" height="60" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
-      <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
-        <rect x="50" y="14" width="7" height="10" rx="1.5" />
-        <rect x="61" y="14" width="9" height="6" rx="1.5" />
-        <rect x="50" y="27" width="9" height="7" rx="1.5" />
-        <rect x="62" y="23" width="8" height="11" rx="1.5" />
-      </g>
-      <text x="60" y="58" font-family="Arial, sans-serif" font-size="16" fill="currentColor" text-anchor="middle">
-        {{ 'nav.dashboard' | translate }}
-      </text>
-    </svg>
-  </span>
 
-  <i class="hidden md:inline bi bi-grid-fill text-lg md:mr-3 transition-colors"></i>
-  <span class="hidden md:inline transition-colors">{{ 'nav.dashboard' | translate }}</span>
-</a>
+    <!-- ==================== DASHBOARD ==================== -->
+    <a
+      routerLink="/dashboard"
+      #dashboardLink="routerLinkActive"
+      routerLinkActive="md:bg-[#2d3a4f] md:!text-blue-400 shadow-sm"
+      class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group text-[#8E9AAF] hover:md:bg-[#2d3a4f]/50 hover:md:text-gray-200"
+    >
+      <!-- Mobile Icon + Text -->
+      <span class="md:hidden" [class.svg-active]="dashboardLink.isActive">
+        <svg width="90" height="60" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
+            <rect x="50" y="14" width="7" height="10" rx="1.5" />
+            <rect x="61" y="14" width="9" height="6" rx="1.5" />
+            <rect x="50" y="27" width="9" height="7" rx="1.5" />
+            <rect x="62" y="23" width="8" height="11" rx="1.5" />
+          </g>
+          <text x="60" y="58" font-family="Arial, sans-serif" font-size="16" fill="currentColor" text-anchor="middle">
+            {{ 'nav.dashboard' | translate }}
+          </text>
+        </svg>
+      </span>
 
+      <!-- Desktop Icon + Text -->
+      <span class="hidden md:flex items-center" [class.svg-active]="dashboardLink.isActive">
+        <svg class="w-[18px] h-[18px] mr-3 shrink-0"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="1.75"
+             stroke-linecap="round"
+             stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        <span class="text-sm leading-tight">{{ 'nav.dashboard' | translate }}</span>
+      </span>
+    </a>
+
+    <!-- ==================== ORGANIZATIONS ==================== -->
     <a
       routerLink="/organizations"
       #organizationLink="routerLinkActive"
-      routerLinkActive="md:bg-[#2d3a4f] md:text-blue-400 shadow-sm"
-class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group hover:md:bg-[#2d3a4f]/50 hover:text-[#717D8E] text-[#8E9AAF]"    >
+      routerLinkActive="md:bg-[#2d3a4f] md:!text-blue-400 shadow-sm"
+      class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group text-[#8E9AAF] hover:md:bg-[#2d3a4f]/50 hover:md:text-gray-200"
+    >
+      <!-- Mobile Icon + Text -->
       <span class="md:hidden" [class.svg-active]="organizationLink.isActive">
         <svg width="90" height="60" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -66,28 +86,46 @@ class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md
             </mask>
           </defs>
           <g mask="url(#teams-cutout)">
-            <circle cx="63" cy="20" r="4.5" stroke="#8E9AAF" stroke-width="2.5" fill="none" />
-            <path d="M58 31C58 28 61 26 64 26H65C68 26 71 28 71 31V36" stroke="#8E9AAF" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+            <circle cx="63" cy="20" r="4.5" stroke="currentColor" stroke-width="2.5" fill="none" />
+            <path d="M58 31C58 28 61 26 64 26H65C68 26 71 28 71 31V36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none"/>
           </g>
-          <circle cx="53" cy="21" r="4.5" stroke="#8E9AAF" stroke-width="2.5" fill="none" />
-          <path d="M46 38V35C46 31 49 28 53 28H55C59 28 62 31 62 35V38" stroke="#8E9AAF" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-          <text x="60" y="58" font-family="Arial, sans-serif" font-size="16" fill="#8E9AAF" text-anchor="middle">
+          <circle cx="53" cy="21" r="4.5" stroke="currentColor" stroke-width="2.5" fill="none" />
+          <path d="M46 38V35C46 31 49 28 53 28H55C59 28 62 31 62 35V38" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <text x="60" y="58" font-family="Arial, sans-serif" font-size="16" fill="currentColor" text-anchor="middle">
             {{ 'nav.organizations' | translate }}
           </text>
         </svg>
       </span>
-      <i class="hidden md:inline bi bi-people-fill text-lg md:mr-3"></i>
-      <span class="hidden md:inline">{{ 'nav.organizations' | translate }}</span>
+
+      <!-- Desktop Icon + Text -->
+      <span class="hidden md:flex items-center" [class.svg-active]="organizationLink.isActive">
+        <svg class="w-[18px] h-[18px] mr-3 shrink-0"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="1.75"
+             stroke-linecap="round"
+             stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        <span class="text-sm leading-tight">{{ 'nav.organizations' | translate }}</span>
+      </span>
     </a>
 
+    <!-- ==================== REPORTS ==================== -->
     <a
       routerLink="/reports"
       #reportsLink="routerLinkActive"
-      routerLinkActive="md:bg-[#2d3a4f] md:text-blue-400 shadow-sm"
-      class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group hover:md:bg-[#2d3a4f]/50 hover:text-[#717D8E] text-[#8E9AAF]"    >
+      routerLinkActive="md:bg-[#2d3a4f] md:!text-blue-400 shadow-sm"
+      class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group text-[#8E9AAF] hover:md:bg-[#2d3a4f]/50 hover:md:text-gray-200"
+    >
+      <!-- Mobile Icon + Text -->
       <span class="md:hidden" [class.svg-active]="reportsLink.isActive">
         <svg width="90" height="60" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
-          <g fill="#8E9AAF">
+          <g fill="currentColor">
             <rect x="48" y="15" width="4" height="3" rx="1" />
             <rect x="56" y="15" width="16" height="3" rx="1" />
             <rect x="48" y="23" width="4" height="3" rx="1" />
@@ -95,14 +133,32 @@ class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md
             <rect x="48" y="31" width="4" height="3" rx="1" />
             <rect x="56" y="31" width="16" height="3" rx="1" />
           </g>
-          <text x="60" y="58" font-family="Arial, sans-serif" font-size="16" fill="#8E9AAF" text-anchor="middle">
+          <text x="60" y="58" font-family="Arial, sans-serif" font-size="16" fill="currentColor" text-anchor="middle">
             {{ 'nav.reports' | translate }}
           </text>
         </svg>
       </span>
-      <i class="hidden md:inline bi bi-list-ul text-lg md:mr-3"></i>
-      <span class="hidden md:inline">{{ 'nav.reports' | translate }}</span>
+
+      <!-- Desktop Icon + Text -->
+      <span class="hidden md:flex items-center" [class.svg-active]="reportsLink.isActive">
+        <svg class="w-[18px] h-[18px] mr-3 shrink-0"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="1.75"
+             stroke-linecap="round"
+             stroke-linejoin="round">
+          <line x1="8" y1="6" x2="21" y2="6"/>
+          <line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/>
+          <circle cx="3" cy="6" r="0.5" fill="currentColor"/>
+          <circle cx="3" cy="12" r="0.5" fill="currentColor"/>
+          <circle cx="3" cy="18" r="0.5" fill="currentColor"/>
+        </svg>
+        <span class="text-sm leading-tight">{{ 'nav.reports' | translate }}</span>
+      </span>
     </a>
+
   }
 </nav>
 
@@ -149,13 +205,13 @@ class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md
         >
           @for (lang of languages; track lang.code) {
             <button
-              (click)="switchLanguage(lang.code); toggleLangMenu()"
+              (click)="switchLanguage(lang.code)"
               class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left transition-colors"
               [class.bg-blue-600]="languageService.currentLang === lang.code"
               [class.text-white]="languageService.currentLang === lang.code"
               [class.text-gray-300]="languageService.currentLang !== lang.code"
-              [class.hover:bg-[#3d4b63]]="languageService.currentLang !== lang.code"
             >
+              <span>{{ lang.code === 'de' ? '🇩🇪' : '🇬🇧' }}</span>
               <span>{{ lang.label }}</span>
             </button>
           }
@@ -164,21 +220,32 @@ class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md
     </div>
 
     @if (authService.isAuthenticated()) {
+      <a
+        routerLink="/settings"
+        #settingsLink="routerLinkActive"
+        routerLinkActive="bg-[#2d3a4f] !text-blue-400 shadow-sm"
+        class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 rounded-lg hover:bg-[#2d3a4f]/50 hover:text-gray-200 transition-colors"
+      >
+        <svg class="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        <span>{{ 'settings.title' | translate }}</span>
+      </a>
+
       <button
         (click)="logout()"
-        class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 md:rounded-lg hover:md:bg-[#2d3a4f]/50 hover:text-red-400 transition-colors"
+        class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 rounded-lg hover:bg-[#2d3a4f]/50 hover:text-red-400 transition-colors"
       >
-        <i class="bi bi-box-arrow-right text-lg"></i>
+        <svg class="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
         <span>{{ 'auth.logout' | translate }}</span>
       </button>
 
-      <button
-        (click)="settings()"
-        class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 md:rounded-lg hover:md:bg-[#2d3a4f]/50 hover:text-[#717D8E] transition-colors"
-        >
-        <i class="bi bi-gear text-lg"></i>
-        <span>{{ 'settings.title' | translate }}</span>
-      </button>
+
     }
   </div>
 </aside>

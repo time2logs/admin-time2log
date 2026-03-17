@@ -12,7 +12,7 @@ spring:
       mail.smtp.starttls.required: true
 
 cors:
-  allowed-origins: https://dev.admin.time2log.app
+  allowed-origins: https://dev-admin.aeristo.cc
 
 logging:
   level:
