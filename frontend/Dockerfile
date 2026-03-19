@@ -1,4 +1,4 @@
-FROM node:25.8.0-alpine AS build
+FROM node:25.8.1-alpine AS build
 
 ARG BUILD_CONFIGURATION=development
 
