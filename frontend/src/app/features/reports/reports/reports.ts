@@ -24,12 +24,10 @@ export class Reports {
 
   private readonly dailyReport = signal<DailyMemberReport[]>([]);
 
-  protected readonly filteredReport = computed(() => {
-    const members = this.members();
-    if (members.length === 0) return this.dailyReport();
-    const ids = new Set(members.map(m => m.id));
+protected readonly filteredReport = computed(() => {
+    const ids = new Set(this.members().map(m => m.id));
     return this.dailyReport().filter(r => ids.has(r.userId));
-  });
+});
 
   constructor() {
     effect(() => {

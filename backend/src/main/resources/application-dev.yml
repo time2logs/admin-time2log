@@ -7,9 +7,9 @@ spring:
     username: ${SMTP_USER}
     password: ${SMTP_PASSWORD}
     properties:
-      mail.smtp.auth: true
-      mail.smtp.starttls.enable: true
-      mail.smtp.starttls.required: true
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
+      mail.smtp.starttls.required: false
 
 cors:
   allowed-origins: https://dev-admin.aeristo.cc
