@@ -1,11 +1,11 @@
 <div class="max-w-4xl mx-auto">
-  <h1 class="text-3xl font-semibold mt-10 mb-6">{{ 'organizations.title' | translate }}</h1>
+  <h1 class="text-3xl font-semibold mt-10 mb-6 dark:text-[hsl(210,15%,90%)]">{{ 'organizations.title' | translate }}</h1>
 
-  <div class="flex flex-col sm:flex-row gap-3 mb-8 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+  <div class="flex flex-col sm:flex-row gap-3 mb-8 p-4 bg-gray-50 dark:bg-[hsl(215,25%,16%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg">
     <input
       data-testid="organization-name-input"
       type="text"
-      class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      class="flex-1 px-4 py-2 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-[hsl(210,15%,90%)] placeholder-gray-400 dark:placeholder-[hsl(210,15%,55%)]"
       [placeholder]="'organizations.namePlaceholder' | translate"
       [ngModel]="newName()"
       (ngModelChange)="newName.set($event)"
@@ -23,7 +23,7 @@
   </div>
 
   @if (organizations().length === 0) {
-    <p class="text-gray-500">{{ 'organizations.empty' | translate }}</p>
+    <p class="text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ 'organizations.empty' | translate }}</p>
   } @else {
     <ul class="space-y-3">
       @for (org of organizations(); track org.id) {
@@ -31,21 +31,21 @@
           tabindex="0"
           role="button"
           data-testid="organization-item-button"
-          class="flex items-center justify-between px-5 py-4 bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer hover:border-blue-300 hover:shadow-md transition-all"
+          class="flex items-center justify-between px-5 py-4 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm cursor-pointer hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all"
           (click)="openOrganization(org)"
           (keydown.enter)="openOrganization(org)"
         >
           <div>
-            <span class="font-medium text-gray-800">{{ org.name }}</span>
+            <span class="font-medium text-gray-800 dark:text-[hsl(210,15%,90%)]">{{ org.name }}</span>
             @if (memberCounts()[org.id] !== undefined) {
-              <p class="text-sm text-gray-500">
+              <p class="text-sm text-gray-500 dark:text-[hsl(210,15%,55%)]">
                 {{ 'organizations.memberCount' | translate:{ count: memberCounts()[org.id] } }}
               </p>
             }
           </div>
 
           <svg xmlns="http://www.w3.org/2000/svg"
-               class="h-5 w-5 text-gray-400"
+               class="h-5 w-5 text-gray-400 dark:text-[hsl(210,15%,45%)]"
                fill="none"
                viewBox="0 0 24 24"
                stroke="currentColor">
