@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { OrganizationService } from '@services/organization.service';
 import { Organization } from '@app/core/models/organizations.models';
+import { Profile } from '@app/core/models/profile.models';
 import { Reports } from '@app/features/reports/reports/reports';
 
 @Component({
@@ -15,13 +16,14 @@ export class ReportsPage implements OnInit {
 
   protected readonly organizations = signal<Organization[]>([]);
   protected readonly selectedOrgId = signal('');
+  protected readonly onlyMembers = signal<Profile[]>([]);
 
   ngOnInit(): void {
     this.organizationService.getOrganizations().subscribe({
       next: (orgs) => {
         this.organizations.set(orgs);
         if (orgs.length === 1) {
-          this.selectedOrgId.set(orgs[0].id);
+          this.selectOrg(orgs[0].id);
         }
       },
     });
@@ -29,5 +31,8 @@ export class ReportsPage implements OnInit {
 
   protected selectOrg(orgId: string): void {
     this.selectedOrgId.set(orgId);
+    this.organizationService.getOnlyOrganizationMembers(orgId).subscribe({
+      next: (members) => this.onlyMembers.set(members),
+    });
   }
 }

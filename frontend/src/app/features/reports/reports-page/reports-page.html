@@ -23,6 +23,6 @@
   @if (!selectedOrgId()) {
     <p class="text-gray-500">{{ 'reports.selectOrganization' | translate }}</p>
   } @else {
-    <app-reports [organizationId]="selectedOrgId()" />
+    <app-reports [organizationId]="selectedOrgId()" [members]="onlyMembers()" />
   }
 </div>

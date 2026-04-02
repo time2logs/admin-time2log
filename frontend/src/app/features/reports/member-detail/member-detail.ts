@@ -137,7 +137,7 @@ export class MemberDetail implements OnInit {
   }
 
   private loadMember(): void {
-    this.organizationService.getOrganizationMembers(this.organizationId).subscribe({
+    this.organizationService.getOnlyOrganizationMembers(this.organizationId).subscribe({
       next: (members) => {
         const m = members.find(p => p.id === this.userId);
         if (m) this.member.set(m);
