@@ -6,3 +6,4 @@ describe('Routes', () => {
     expect(Array.isArray(routes)).toBeTrue();
   });
 });
+
