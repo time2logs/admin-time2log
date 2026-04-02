@@ -1,5 +1,5 @@
 <header
-  class="md:hidden fixed top-0 left-0 w-full bg-[#1e293b] p-4 pl-6 z-50 border-b border-gray-800"
+  class="md:hidden fixed top-0 left-0 w-full bg-[#1e293b] dark:bg-[hsl(215,25%,8%)] p-4 pl-6 z-50 border-b border-gray-800 dark:border-[hsl(215,20%,22%)]"
 >
   <a routerLink="/dashboard" class="block flex flex-col">
     <div class="text-2xl font-semibold text-white">
@@ -10,7 +10,7 @@
 </header>
 
 <aside
-  class="fixed bottom-0 left-0 w-full bg-white text-gray-800 border-t border-gray-200 flex flex-col z-50 md:sticky md:top-0 md:w-64 md:h-screen md:overflow-y-auto md:shrink-0 md:bg-[#1e293b] md:text-gray-300 md:border-t-0 md:border-r md:border-gray-800"
+  class="fixed bottom-0 left-0 w-full bg-white dark:bg-[hsl(215,25%,8%)] text-gray-800 dark:text-[hsl(210,15%,70%)] border-t border-gray-200 dark:border-[hsl(215,20%,22%)] flex flex-col z-50 md:sticky md:top-0 md:w-64 md:h-screen md:overflow-y-auto md:shrink-0 md:bg-[#1e293b] md:text-gray-300 md:border-t-0 md:border-r md:border-gray-800"
 >
   <div class="hidden md:block p-6">
     <a routerLink="/dashboard" class="block flex flex-col">
@@ -33,6 +33,7 @@
       routerLink="/dashboard"
       #dashboardLink="routerLinkActive"
       routerLinkActive="md:bg-[#2d3a4f] md:!text-blue-400 shadow-sm"
+      [class.dark:md:bg-[#1f252e]]="dashboardLink.isActive"
       class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group text-[#8E9AAF] hover:md:bg-[#2d3a4f]/50 hover:md:text-gray-200"
     >
       <!-- Mobile Icon + Text -->
@@ -73,6 +74,7 @@
       routerLink="/organizations"
       #organizationLink="routerLinkActive"
       routerLinkActive="md:bg-[#2d3a4f] md:!text-blue-400 shadow-sm"
+      [class.dark:md:bg-[#1f252e]]="organizationLink.isActive"
       class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group text-[#8E9AAF] hover:md:bg-[#2d3a4f]/50 hover:md:text-gray-200"
     >
       <!-- Mobile Icon + Text -->
@@ -120,6 +122,7 @@
       routerLink="/reports"
       #reportsLink="routerLinkActive"
       routerLinkActive="md:bg-[#2d3a4f] md:!text-blue-400 shadow-sm"
+      [class.dark:md:bg-[#1f252e]]="reportsLink.isActive"
       class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group text-[#8E9AAF] hover:md:bg-[#2d3a4f]/50 hover:md:text-gray-200"
     >
       <!-- Mobile Icon + Text -->
@@ -162,7 +165,7 @@
   }
 </nav>
 
-  <div class="hidden md:block p-4 border-t border-gray-800 space-y-2">
+  <div class="hidden md:block p-4 border-t border-gray-800 dark:border-[hsl(215,20%,22%)] space-y-2">
     <div class="relative">
       @if (isLangMenuOpen()) {
         <div
@@ -177,7 +180,7 @@
 
       <button
         (click)="toggleLangMenu()"
-        class="relative z-50 w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-400 hover:text-white hover:bg-[#2d3a4f] rounded-lg transition-all"
+        class="relative z-50 w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-400 hover:text-white hover:bg-[#2d3a4f] dark:hover:bg-[#1f252e] hover:md:text-gray-200 rounded-lg transition-all"
       >
         <div class="flex items-center gap-3">
           <i class="bi bi-translate text-lg"></i>
@@ -201,15 +204,17 @@
 
       @if (isLangMenuOpen()) {
         <div
-          class="absolute bottom-full left-0 mb-2 w-full bg-[#2d3a4f] border border-gray-700 rounded-lg shadow-2xl z-50 overflow-hidden"
+          class="absolute bottom-full left-0 mb-2 w-full bg-[#2d3a4f] dark:bg-[#1f252e] border border-gray-700 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-2xl z-50 overflow-hidden"
         >
           @for (lang of languages; track lang.code) {
             <button
               (click)="switchLanguage(lang.code)"
               class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left transition-colors"
               [class.bg-blue-600]="languageService.currentLang === lang.code"
+              [class.dark:bg-blue-700]="languageService.currentLang === lang.code"
               [class.text-white]="languageService.currentLang === lang.code"
               [class.text-gray-300]="languageService.currentLang !== lang.code"
+              [class.dark:text-[hsl(210,15%,70%)]]="languageService.currentLang !== lang.code"
             >
               <span>{{ lang.code === 'de' ? '🇩🇪' : '🇬🇧' }}</span>
               <span>{{ lang.label }}</span>
@@ -224,7 +229,8 @@
         routerLink="/settings"
         #settingsLink="routerLinkActive"
         routerLinkActive="bg-[#2d3a4f] !text-blue-400 shadow-sm"
-        class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 rounded-lg hover:bg-[#2d3a4f]/50 hover:text-gray-200 transition-colors"
+        [class.dark:bg-[#1f252e]]="settingsLink.isActive"
+        class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 rounded-lg hover:bg-[#2d3a4f]/50 hover:md:text-gray-200 transition-colors"
       >
         <svg class="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"/>

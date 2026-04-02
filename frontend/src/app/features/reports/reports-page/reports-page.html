@@ -1,17 +1,19 @@
 <div class="max-w-4xl mx-auto space-y-6">
-  <h1 class="text-3xl font-semibold">{{ 'reports.title' | translate }}</h1>
+  <h1 class="text-3xl font-semibold dark:text-[hsl(210,15%,90%)]">{{ 'reports.title' | translate }}</h1>
 
   @if (organizations().length > 1) {
     <div class="flex flex-wrap gap-2">
       @for (org of organizations(); track org.id) {
         <button
-          class="px-4 py-2 text-sm rounded-full border transition-colors"
+          class="px-4 py-2 text-sm rounded-full border transition-colors dark:text-[hsl(210,15%,70%)]"
           [class.bg-blue-500]="selectedOrgId() === org.id"
           [class.text-white]="selectedOrgId() === org.id"
           [class.border-blue-500]="selectedOrgId() === org.id"
           [class.border-gray-300]="selectedOrgId() !== org.id"
+          [class.dark:border-[hsl(215,20%,25%)]]="selectedOrgId() !== org.id"
           [class.text-gray-700]="selectedOrgId() !== org.id"
           [class.hover:bg-gray-50]="selectedOrgId() !== org.id"
+          [class.dark:hover:bg-[hsl(215,25%,20%)]]="selectedOrgId() !== org.id"
           (click)="selectOrg(org.id)"
         >
           {{ org.name }}
@@ -21,7 +23,7 @@
   }
 
   @if (!selectedOrgId()) {
-    <p class="text-gray-500">{{ 'reports.selectOrganization' | translate }}</p>
+    <p class="text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ 'reports.selectOrganization' | translate }}</p>
   } @else {
     <app-reports [organizationId]="selectedOrgId()" [members]="onlyMembers()" />
   }

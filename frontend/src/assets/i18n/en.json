@@ -287,7 +287,11 @@
   "settings": {
     "title": "Settings",
     "language": "Language",
-    "theme": "Theme",
+    "theme": {
+      "title": "Design",
+      "light": "Light",
+      "dark": "Dark"
+    },
     "account": "Account",
     "profile": {
       "title": "Profile",

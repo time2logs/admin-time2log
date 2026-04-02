@@ -1,20 +1,20 @@
 <div class="max-w-4xl mx-auto">
-  <h1 class="text-3xl font-semibold mb-2">{{ 'dashboard.title' | translate }}</h1>
-  <p class="text-gray-600 mb-6">{{ 'dashboard.welcome' | translate }}</p>
+  <h1 class="text-3xl font-semibold mb-2 dark:text-[hsl(210,15%,90%)]">{{ 'dashboard.title' | translate }}</h1>
+  <p class="text-gray-600 mb-6 dark:text-[hsl(210,15%,55%)]">{{ 'dashboard.welcome' | translate }}</p>
 
-  <div class="inline-block bg-white border border-gray-200 rounded-xl p-4 min-w-[180px]">
-    <p class="text-sm text-gray-500 mb-1">{{ 'dashboard.members' | translate }}</p>
-    <p class="text-3xl font-bold">{{ totalMemberCount() }}</p>
+  <div class="inline-block bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-xl p-4 min-w-[180px]">
+    <p class="text-sm text-gray-500 dark:text-[hsl(210,15%,55%)] mb-1">{{ 'dashboard.members' | translate }}</p>
+    <p class="text-3xl font-bold dark:text-[hsl(210,15%,90%)]">{{ totalMemberCount() }}</p>
   </div>
 
-  <div class="mt-6 bg-white border border-gray-200 rounded-xl p-5">
+  <div class="mt-6 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-xl p-5">
     <div class="flex items-center justify-between mb-4">
       <div>
-        <p class="text-lg font-semibold">{{ 'dashboard.inactive_members' | translate }}</p>
-        <p class="text-sm text-gray-500">{{ 'dashboard.inactive_members_desc' | translate }}</p>
+        <p class="text-lg font-semibold dark:text-[hsl(210,15%,90%)]">{{ 'dashboard.inactive_members' | translate }}</p>
+        <p class="text-sm text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ 'dashboard.inactive_members_desc' | translate }}</p>
       </div>
       <select
-        class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-[hsl(215,25%,16%)] dark:text-[hsl(210,15%,90%)] focus:outline-none focus:ring-2 focus:ring-blue-500"
         [ngModel]="inactiveDays()"
         (ngModelChange)="onDaysChange($event)"
       >
@@ -26,31 +26,31 @@
     </div>
 
     @for (member of inactiveRanking(); track member.id; let i = $index) {
-      <div class="flex items-center justify-between py-3 border-t border-gray-100">
+      <div class="flex items-center justify-between py-3 border-t border-gray-100 dark:border-[hsl(215,20%,22%)]">
         <div class="flex items-center gap-3">
           <div
             class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-            [ngClass]="i < 3 ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'"
+            [ngClass]="i < 3 ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'bg-gray-100 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400'"
           >
             {{ i + 1 }}
           </div>
           <div
-            class="w-9 h-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-semibold"
+            class="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm font-semibold"
           >
             {{ member.name.split(' ')[0].charAt(0).toUpperCase() }}{{ member.name.split(' ')[1]?.charAt(0)?.toUpperCase() }}
           </div>
-          <p class="font-medium">{{ member.name }}</p>
+          <p class="font-medium dark:text-[hsl(210,15%,90%)]">{{ member.name }}</p>
         </div>
         <div
           class="px-3 py-1 rounded-full text-sm font-medium"
           [ngClass]="
             !member.lastEntry
-              ? 'bg-red-100 text-red-700'
+              ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
               : member.daysInactive > 14
-                ? 'bg-red-100 text-red-700'
+                ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                 : member.daysInactive > 7
-                  ? 'bg-yellow-100 text-yellow-700'
-                  : 'bg-yellow-50 text-yellow-600'
+                  ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
+                  : 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400'
           "
         >
           @if (!member.lastEntry) {
@@ -63,7 +63,7 @@
     }
 
     @if (inactiveRanking().length === 0) {
-      <div class="text-center py-6 text-gray-400 text-sm">
+      <div class="text-center py-6 text-gray-400 dark:text-[hsl(210,15%,45%)] text-sm">
         {{ 'dashboard.all_active' | translate }}
       </div>
     }

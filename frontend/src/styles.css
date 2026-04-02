@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-surface: hsl(0 0% 97%);
+  --color-surface-card: hsl(0 0% 100%);
+  --color-surface-header: hsl(0 0% 97%);
+  --color-surface-sidebar: hsl(215 25% 15%);
+  --color-text-primary: hsl(0 0% 10%);
+  --color-text-secondary: hsl(0 0% 40%);
+  --color-text-muted: hsl(0 0% 60%);
+  --color-border: hsl(0 0% 85%);
+  --color-border-light: hsl(0 0% 92%);
+  --color-accent: hsl(199 80% 52%);
+}
