@@ -61,4 +61,8 @@ export class HeaderComponent {
   settings(): void {
     this.router.navigate(['/settings']);
   }
+  isSettingsMenuOpen = signal(false);
+  toggleSettingsMenu() {
+    this.isSettingsMenuOpen.update(v => !v);
+  }
 }
