@@ -121,7 +121,12 @@ export class Calendar implements OnInit {
   }
 
   private buildDay(d: Date, isCurrentMonth: boolean, today: string): CalendarDay {
-    const date = d.toISOString().slice(0, 10);
+    // Ersetze d.toISOString().slice(0, 10) durch eine lokale Formatierung:
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const date = `${year}-${month}-${day}`; // Format: YYYY-MM-DD (Lokal)
+
     const dow = d.getDay();
     return {
       date,
