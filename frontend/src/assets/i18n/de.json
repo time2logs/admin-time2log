@@ -95,6 +95,10 @@
       "activities": {
         "title": "Verrichtete Arbeiten",
         "desc": "Stundenverteilung nach Aktivität"
+      },
+      "locations": {
+        "title": "Stunden pro Standort",
+        "desc": "Wo wurden die Stunden geleistet"
       }
     },
     "noData": "Keine Daten für diesen Zeitraum.",

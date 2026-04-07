@@ -47,6 +47,11 @@ export interface ActivitySummary {
   totalHours: number;
 }
 
+export interface LocationSummary {
+  location: string;
+  totalHours: number;
+}
+
 export interface NgxChartEntry {
   name: string;
   value: number;

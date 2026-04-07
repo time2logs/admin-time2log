@@ -95,6 +95,10 @@
       "activities": {
         "title": "Work Activities",
         "desc": "Hours distribution by activity"
+      },
+      "locations": {
+        "title": "Hours per Location",
+        "desc": "Where were the hours worked"
       }
     },
     "noData": "No data for this period.",

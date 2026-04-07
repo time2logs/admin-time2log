@@ -13,6 +13,7 @@ public record ActivityRecordResponse(
    int hours,
    String notes,
    Integer rating,
+   String location,
    OffsetDateTime created_at,
    OffsetDateTime updated_at
 ) {}
