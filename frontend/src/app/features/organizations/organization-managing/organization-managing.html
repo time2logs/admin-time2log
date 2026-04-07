@@ -1,6 +1,6 @@
 <div class="max-w-4xl mx-auto">
   <button
-    class="text-blue-500 hover:text-blue-700 mt-12 mb-6 inline-flex items-center gap-1"
+    class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 mt-12 mb-6 inline-flex items-center gap-1"
     (click)="goBack()"
     data-testid="back-button"
   >
@@ -11,28 +11,32 @@
   </button>
 
   @if (organization()) {
-    <h1 class="text-3xl font-semibold mb-6">{{ organization()!.name }}</h1>
+    <h1 class="text-3xl font-semibold mb-6 dark:text-[hsl(210,15%,90%)]">{{ organization()!.name }}</h1>
 
     <!-- Tabs -->
-    <div class="border-b border-gray-200 mb-6">
+    <div class="border-b border-gray-200 dark:border-[hsl(215,20%,22%)] mb-6">
       <nav class="flex gap-6 -mb-px">
         <button
-          class="pb-3 text-sm font-medium transition-colors hover:text-blue-500"
+          class="pb-3 text-sm font-medium transition-colors hover:text-blue-500 dark:hover:text-blue-400"
           [class.border-b-2]="activeTab() === 'members'"
           [class.border-blue-500]="activeTab() === 'members'"
           [class.text-blue-600]="activeTab() === 'members'"
+          [class.dark:text-blue-400]="activeTab() === 'members'"
           [class.text-gray-500]="activeTab() !== 'members'"
+          [class.dark:text-[hsl(210,15%,55%)]]="activeTab() !== 'members'"
           (click)="setTab('members')"
           data-testid="open-members-button"
         >
           {{ 'organizationManaging.tabs.members' | translate }}
         </button>
         <button
-          class="pb-3 text-sm font-medium transition-colors hover:text-blue-500"
+          class="pb-3 text-sm font-medium transition-colors hover:text-blue-500 dark:hover:text-blue-400"
           [class.border-b-2]="activeTab() === 'curriculums'"
           [class.border-blue-500]="activeTab() === 'curriculums'"
           [class.text-blue-600]="activeTab() === 'curriculums'"
+          [class.dark:text-blue-400]="activeTab() === 'curriculums'"
           [class.text-gray-500]="activeTab() !== 'curriculums'"
+          [class.dark:text-[hsl(210,15%,55%)]]="activeTab() !== 'curriculums'"
           (click)="setTab('curriculums')"
           data-testid="open-curriculums-button"
 
@@ -40,22 +44,26 @@
           {{ 'organizationManaging.tabs.curriculums' | translate }}
         </button>
         <button
-          class="pb-3 text-sm font-medium transition-colors hover:text-blue-500"
+          class="pb-3 text-sm font-medium transition-colors hover:text-blue-500 dark:hover:text-blue-400"
           [class.border-b-2]="activeTab() === 'teams'"
           [class.border-blue-500]="activeTab() === 'teams'"
           [class.text-blue-600]="activeTab() === 'teams'"
+          [class.dark:text-blue-400]="activeTab() === 'teams'"
           [class.text-gray-500]="activeTab() !== 'teams'"
+          [class.dark:text-[hsl(210,15%,55%)]]="activeTab() !== 'teams'"
           (click)="setTab('teams')"
           data-testid="open-teams-button"
         >
           {{ 'organizationManaging.tabs.teams' | translate }}
         </button>
         <button
-          class="pb-3 text-sm font-medium transition-colors hover:text-blue-500"
+          class="pb-3 text-sm font-medium transition-colors hover:text-blue-500 dark:hover:text-blue-400"
           [class.border-b-2]="activeTab() === 'settings'"
           [class.border-blue-500]="activeTab() === 'settings'"
           [class.text-blue-600]="activeTab() === 'settings'"
+          [class.dark:text-blue-400]="activeTab() === 'settings'"
           [class.text-gray-500]="activeTab() !== 'settings'"
+          [class.dark:text-[hsl(210,15%,55%)]]="activeTab() !== 'settings'"
           (click)="setTab('settings')"
           data-testid="open-settings-button"
 
@@ -71,7 +79,7 @@
         <!-- Active Members -->
         <div>
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-medium">{{ 'organizationManaging.members.title' | translate }}</h2>
+            <h2 class="text-xl font-medium dark:text-[hsl(210,15%,90%)]">{{ 'organizationManaging.members.title' | translate }}</h2>
             <button
               data-testid="invite-member-button"
               class="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
@@ -83,19 +91,19 @@
 
           <!-- Invite Form -->
           @if (showInviteForm()) {
-            <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-3">
-              <p class="text-sm font-medium text-blue-800">{{ 'organizationManaging.members.inviteTitle' | translate }}</p>
+            <div class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900/50 rounded-lg space-y-3">
+              <p class="text-sm font-medium text-blue-800 dark:text-blue-400">{{ 'organizationManaging.members.inviteTitle' | translate }}</p>
               <div class="flex flex-col gap-3 sm:flex-row">
                 <input
                   type="email"
-                  class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="flex-1 px-4 py-2 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-[hsl(210,15%,90%)] placeholder-gray-400 dark:placeholder-[hsl(210,15%,55%)]"
                   [placeholder]="'organizationManaging.members.emailPlaceholder' | translate"
                   [ngModel]="inviteEmail()"
                   (ngModelChange)="inviteEmail.set($event)"
                   data-testid="email-invite-button"
                 />
                 <select
-                  class="px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="px-4 py-2 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-[hsl(210,15%,90%)]"
                   [ngModel]="inviteRole()"
                   (ngModelChange)="inviteRole.set($event)"
                 >
@@ -115,12 +123,12 @@
           }
 
        @if (members().length === 0) {
-            <p class="text-gray-500 text-sm">{{ 'organizationManaging.members.noMembers' | translate }}</p>
+            <p class="text-gray-500 dark:text-[hsl(210,15%,55%)] text-sm">{{ 'organizationManaging.members.noMembers' | translate }}</p>
           } @else {
             <ul class="space-y-2">
               @for (member of members(); track member.id) {
                 <li
-                  class="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-gray-300 hover:shadow-md transition-all group cursor-pointer"
+                  class="flex items-center justify-between px-4 py-3 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm hover:border-gray-300 dark:hover:border-[hsl(215,20%,25%)] hover:shadow-md transition-all group cursor-pointer"
                   role="button"
                   tabindex="0"
                   (click)="openMemberReport(member)"
@@ -128,10 +136,10 @@
                   data-testid="open-member-report-button"
                 >
                   <div class="flex items-center gap-3">
-                    <div class="h-9 w-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-medium">
+                    <div class="h-9 w-9 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm font-medium">
                       {{ member.firstName.charAt(0) }}{{ member.lastName.charAt(0) }}
                     </div>
-                    <span class="text-gray-800 font-medium">{{ member.firstName }} {{ member.lastName }}</span>
+                    <span class="text-gray-800 dark:text-[hsl(210,15%,90%)] font-medium">{{ member.firstName }} {{ member.lastName }}</span>
                   </div>
                   @if (memberToConfirmRemoval() === member.id) {
                     <button
@@ -143,7 +151,7 @@
                     </button>
                   } @else {
                     <button
-                      class="px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
+                      class="px-2 py-1 text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
                       (click)="confirmRemoveMember(member, $event)"
                       data-testid="remove-member-button"
                     >
@@ -160,25 +168,25 @@
         <!-- Pending Invites -->
         @if (invites().length > 0) {
           <div>
-            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] uppercase tracking-wide mb-3">
               {{ 'organizationManaging.members.pendingInvites' | translate }}
             </h3>
             <ul class="space-y-2">
               @for (invite of invites(); track invite.id) {
-                <li class="flex items-center justify-between px-4 py-3 bg-white border border-dashed border-gray-300 rounded-lg group">
+                <li class="flex items-center justify-between px-4 py-3 bg-white dark:bg-[hsl(215,25%,13%)] border border-dashed border-gray-300 dark:border-[hsl(215,20%,25%)] rounded-lg group">
                   <div class="flex items-center gap-3">
-                    <div class="h-9 w-9 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center">
+                    <div class="h-9 w-9 rounded-full bg-gray-100 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 flex items-center justify-center">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
                     </div>
                     <div>
-                      <p class="text-gray-800 text-sm font-medium">{{ invite.email }}</p>
-                      <p class="text-gray-400 text-xs">{{ getRoleLabel(invite.userRole) }}</p>
+                      <p class="text-gray-800 dark:text-[hsl(210,15%,90%)] text-sm font-medium">{{ invite.email }}</p>
+                      <p class="text-gray-400 dark:text-[hsl(210,15%,45%)] text-xs">{{ getRoleLabel(invite.userRole) }}</p>
                     </div>
                   </div>
                   <button
-                    class="px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
+                    class="px-2 py-1 text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
                     (click)="cancelInvite(invite)"
                     data-testid="cancel-invite-button"
                   >
@@ -196,7 +204,7 @@
     @if (activeTab() === 'curriculums') {
       <section>
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-medium">{{ 'organizationManaging.tabs.curriculums' | translate }}</h2>
+          <h2 class="text-xl font-medium dark:text-[hsl(210,15%,90%)]">{{ 'organizationManaging.tabs.curriculums' | translate }}</h2>
           <button
             class="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
             (click)="toggleCreateProfession()"
@@ -208,11 +216,11 @@
         </div>
 
         @if (showCreateProfession()) {
-          <div class="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+          <div class="mb-6 p-4 bg-gray-50 dark:bg-[hsl(215,25%,16%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg">
             <div class="flex flex-col gap-3 sm:flex-row">
               <input
                 type="text"
-                class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="flex-1 px-4 py-2 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-[hsl(210,15%,90%)] placeholder-gray-400 dark:placeholder-[hsl(210,15%,55%)]"
                 [placeholder]="'organizationManaging.curriculums.keyPlaceholder' | translate"
                 [ngModel]="newProfessionKey()"
                 (ngModelChange)="newProfessionKey.set($event)"
@@ -220,7 +228,7 @@
               />
               <input
                 type="text"
-                class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="flex-1 px-4 py-2 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-[hsl(210,15%,90%)] placeholder-gray-400 dark:placeholder-[hsl(210,15%,55%)]"
                 [placeholder]="'organizationManaging.curriculums.labelPlaceholder' | translate"
                 [ngModel]="newProfessionLabel()"
                 (ngModelChange)="newProfessionLabel.set($event)"
@@ -239,24 +247,24 @@
         }
 
         @if (professions().length === 0) {
-          <p class="text-gray-500">{{ 'organizationManaging.curriculums.empty' | translate }}</p>
+          <p class="text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ 'organizationManaging.curriculums.empty' | translate }}</p>
         } @else {
           <ul class="space-y-2">
             @for (profession of professions(); track profession.id) {
               <li
                 tabindex="0"
                 role="button"
-                class="flex items-center justify-between px-5 py-4 bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer hover:border-blue-300 hover:shadow-md transition-all group"
+                class="flex items-center justify-between px-5 py-4 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm cursor-pointer hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all group"
                 (click)="openProfession(profession)"
                 (keydown.enter)="openProfession(profession)"
               >
                 <div class="flex items-center">
                   <div>
-                    <span class="font-medium text-gray-800">{{ profession.label }}</span>
-                    <span class="ml-2 px-2 py-0.5 text-xs font-mono bg-gray-100 text-gray-500 rounded">{{ profession.key }}</span>
+                    <span class="font-medium text-gray-800 dark:text-[hsl(210,15%,90%)]">{{ profession.label }}</span>
+                    <span class="ml-2 px-2 py-0.5 text-xs font-mono bg-gray-100 dark:bg-[hsl(215,25%,16%)] text-gray-500 dark:text-[hsl(210,15%,45%)] rounded">{{ profession.key }}</span>
                   </div>
                 </div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 dark:text-[hsl(210,15%,45%)] group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
               </li>
@@ -270,7 +278,7 @@
     @if (activeTab() === 'teams') {
       <section>
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-medium">{{ 'organizationManaging.teams.title' | translate }}</h2>
+          <h2 class="text-xl font-medium dark:text-[hsl(210,15%,90%)]">{{ 'organizationManaging.teams.title' | translate }}</h2>
           <button
             class="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
             (click)="toggleCreateTeam()"
@@ -282,18 +290,18 @@
         </div>
 
         @if (showCreateTeam()) {
-          <div class="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+          <div class="mb-6 p-4 bg-gray-50 dark:bg-[hsl(215,25%,16%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg">
             <div class="flex flex-col gap-3 sm:flex-row">
               <input
                 type="text"
-                class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="flex-1 px-4 py-2 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-[hsl(210,15%,90%)] placeholder-gray-400 dark:placeholder-[hsl(210,15%,55%)]"
                 [placeholder]="'organizationManaging.teams.namePlaceholder' | translate"
                 [ngModel]="newTeamName()"
                 (ngModelChange)="newTeamName.set($event)"
                 data-testid="team-name-input"
               />
               <select
-                class="px-4 py-2 bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="px-4 py-2 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-[hsl(210,15%,90%)]"
                 [ngModel]="newTeamProfessionId()"
                 (ngModelChange)="newTeamProfessionId.set($event)"
                 data-testid="team-profession-select"
@@ -316,20 +324,20 @@
         }
 
         @if (teams().length === 0) {
-          <p class="text-gray-500">{{ 'organizationManaging.teams.empty' | translate }}</p>
+          <p class="text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ 'organizationManaging.teams.empty' | translate }}</p>
         } @else {
           <ul class="space-y-2">
             @for (team of teams(); track team.id) {
               <li
                 tabindex="0"
                 role="button"
-                class="flex items-center justify-between px-5 py-4 bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer hover:border-blue-300 hover:shadow-md transition-all group"
+                class="flex items-center justify-between px-5 py-4 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm cursor-pointer hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all group"
                 (click)="openTeam(team)"
                 (keydown.enter)="openTeam(team)"
               >
                 <div class="flex items-center">
                   <div>
-                    <span class="font-medium text-gray-800">{{ team.name }}</span>
+                    <span class="font-medium text-gray-800 dark:text-[hsl(210,15%,90%)]">{{ team.name }}</span>
                   </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -343,14 +351,14 @@
                     </button>
                   } @else {
                     <button
-                      class="px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
+                      class="px-2 py-1 text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
                       (click)="confirmDeleteTeam(team, $event)"
                       data-testid="delete-team-button"
                     >
                       {{ 'common.delete' | translate }}
                     </button>
                   }
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 dark:text-[hsl(210,15%,45%)] group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
@@ -365,23 +373,23 @@
     @if (activeTab() === 'settings') {
       <section class="space-y-6">
         <!-- General Section -->
-        <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-          <div class="px-5 py-3 bg-gray-50 border-b border-gray-200">
-            <h2 class="text-lg font-medium text-gray-800">{{ 'organizationManaging.settings.general' | translate }}</h2>
+        <div class="bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm overflow-hidden">
+          <div class="px-5 py-3 bg-gray-50 dark:bg-[hsl(215,25%,16%)] border-b border-gray-200 dark:border-[hsl(215,20%,22%)]">
+            <h2 class="text-lg font-medium text-gray-800 dark:text-[hsl(210,15%,90%)]">{{ 'organizationManaging.settings.general' | translate }}</h2>
           </div>
           <div class="p-5">
-            <p class="block text-sm font-medium text-gray-500 mb-1">{{ 'organizationManaging.settings.organizationName' | translate }}</p>
-            <p class="text-gray-800 text-lg">{{ organization()!.name }}</p>
+            <p class="block text-sm font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] mb-1">{{ 'organizationManaging.settings.organizationName' | translate }}</p>
+            <p class="text-gray-800 dark:text-[hsl(210,15%,90%)] text-lg">{{ organization()!.name }}</p>
           </div>
         </div>
 
         <!-- Danger Zone -->
-        <div class="bg-white border border-red-200 rounded-lg shadow-sm overflow-hidden">
-          <div class="px-5 py-3 bg-red-50 border-b border-red-200">
-            <h2 class="text-lg font-medium text-red-700">{{ 'organizationManaging.settings.dangerZone' | translate }}</h2>
+        <div class="bg-white dark:bg-[hsl(215,25%,13%)] border border-red-200 dark:border-red-900/50 rounded-lg shadow-sm overflow-hidden">
+          <div class="px-5 py-3 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-900/50">
+            <h2 class="text-lg font-medium text-red-700 dark:text-red-400">{{ 'organizationManaging.settings.dangerZone' | translate }}</h2>
           </div>
           <div class="p-5">
-            <p class="text-sm text-gray-600 mb-4">{{ 'organizationManaging.settings.dangerDescription' | translate }}</p>
+            <p class="text-sm text-gray-600 dark:text-[hsl(210,15%,70%)] mb-4">{{ 'organizationManaging.settings.dangerDescription' | translate }}</p>
             @if (!showDeleteConfirm()) {
               <button
                 class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors disabled:opacity-50"
@@ -392,8 +400,8 @@
                 {{ 'organizationManaging.settings.deleteOrganization' | translate }}
               </button>
             } @else {
-              <div class="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded">
-                <p class="text-red-600 text-sm">{{ 'organizationManaging.settings.deleteConfirm' | translate }}</p>
+              <div class="flex items-center gap-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded">
+                <p class="text-red-600 dark:text-red-400 text-sm">{{ 'organizationManaging.settings.deleteConfirm' | translate }}</p>
                 <button
                   class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors disabled:opacity-50"
                   [disabled]="isDeleting()"
@@ -403,7 +411,7 @@
                   {{ 'common.delete' | translate }}
                 </button>
                 <button
-                  class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+                  class="px-4 py-2 bg-gray-200 dark:bg-[hsl(215,25%,16%)] text-gray-700 dark:text-[hsl(210,15%,70%)] rounded hover:bg-gray-300 dark:hover:bg-[hsl(215,25%,20%)] transition-colors"
                   (click)="showDeleteConfirm.set(false)"
                 >
                   {{ 'common.cancel' | translate }}
@@ -415,6 +423,6 @@
       </section>
     }
   } @else {
-    <p class="text-gray-500">{{ 'common.loading' | translate }}</p>
+    <p class="text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ 'common.loading' | translate }}</p>
   }
 </div>

@@ -5,6 +5,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from '@services/auth.service';
 import { LanguageService } from '@services/language.service';
+import { ThemeService } from '@services/theme.service';
 
 @Component({
   selector: 'app-settings',
@@ -17,6 +18,7 @@ export class Settings {
   private readonly fb = inject(FormBuilder);
   protected readonly authService = inject(AuthService);
   protected readonly languageService = inject(LanguageService);
+  protected readonly themeService = inject(ThemeService);
 
   protected readonly showDeleteConfirm = signal(false);
   protected readonly isDeleting = signal(false);
