@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@env/environment';
-import { ActivitySummary, CurriculumOverview, DailyMemberReport, MemberActivityRecord } from '@app/core/models/report.models';
+import { ActivitySummary, CurriculumOverview, DailyMemberReport, LocationSummary, MemberActivityRecord } from '@app/core/models/report.models';
 import { map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
@@ -42,6 +42,16 @@ export class ReportService {
     if (to) params.push(`to=${to}`);
     if (params.length) url += '?' + params.join('&');
     return this.http.get<ActivitySummary[]>(url);
+  }
+
+ getLocationSummary(organizationId: string, userId?: string | null, from?: string, to?: string): Observable<LocationSummary[]> {
+    let url = `${this.baseUrl}/${organizationId}/reports/locations/summary`;
+    const params: string[] = [];
+    if (userId) params.push(`userId=${userId}`);
+    if (from) params.push(`from=${from}`);
+    if (to) params.push(`to=${to}`);
+    if (params.length) url += '?' + params.join('&');
+    return this.http.get<LocationSummary[]>(url);
   }
 
  getLastEntryDate(organizationId: string, userId: string): Observable<Date | null> {

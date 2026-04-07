@@ -150,6 +150,20 @@ public class ReportsDomainService {
                 .toList();
     }
 
+    public Map<String, Integer> getLocationSummary(UUID organizationId, UUID userId, String from, String to) {
+        if (userId == null) return Map.of();
+
+        String query = "organization_id=eq." + organizationId + "&user_id=eq." + userId;
+        if (from != null && !from.isBlank()) query += "&entry_date=gte." + from;
+        if (to != null && !to.isBlank()) query += "&entry_date=lte." + to;
+
+        return supabaseService.getListWithQuery("app.activity_records", query, ActivityRecordResponse.class)
+                .stream()
+                .filter(r -> r.location() != null && !r.location().isBlank())
+                .collect(Collectors.groupingBy(ActivityRecordResponse::location,
+                        Collectors.summingInt(ActivityRecordResponse::hours)));
+    }
+
     public OffsetDateTime getLastEntryDate(UUID organizationId, UUID userId) {
         var records = supabaseService.getListWithQuery(
                 "app.activity_records",

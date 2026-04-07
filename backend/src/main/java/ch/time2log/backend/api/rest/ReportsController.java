@@ -2,6 +2,7 @@ package ch.time2log.backend.api.rest;
 
 import ch.time2log.backend.api.rest.dto.outbound.ActivitySummaryDto;
 import ch.time2log.backend.api.rest.dto.outbound.DailyMemberReportDto;
+import ch.time2log.backend.api.rest.dto.outbound.LocationSummaryDto;
 import ch.time2log.backend.api.rest.dto.outbound.MemberActivityRecordDto;
 import ch.time2log.backend.domain.ReportsDomainService;
 import org.springframework.web.bind.annotation.*;
@@ -44,6 +45,15 @@ public class ReportsController {
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to) {
         return ActivitySummaryDto.ofList(reportsDomainService.getActivitySummary(organizationId, userId, from, to));
+    }
+
+    @GetMapping("/locations/summary")
+    public List<LocationSummaryDto> getLocationSummary(
+            @PathVariable UUID organizationId,
+            @RequestParam(required = false) UUID userId,
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to) {
+        return LocationSummaryDto.ofMap(reportsDomainService.getLocationSummary(organizationId, userId, from, to));
     }
 
     @GetMapping("/members/{userId}/last-entry-date")

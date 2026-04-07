@@ -7,7 +7,7 @@ import { OrganizationService } from '@services/organization.service';
 import { Profile } from '@app/core/models/profile.models';
 import { Organization } from '@app/core/models/organizations.models';
 import { ReportService } from '@services/report.service';
-import { NgxChartEntry } from '@app/core/models/report.models';
+import { NgxChartEntry, LocationSummary } from '@app/core/models/report.models';
 import { forkJoin } from 'rxjs';
 
 type DateRange = '30d' | '90d' | '1y' | 'all';
@@ -39,6 +39,7 @@ export class DashboardComponent implements OnInit {
   protected readonly selectedUserId = signal<string | null>(null);
   protected readonly range = signal<DateRange>('30d');
   protected readonly activityChartData = signal<NgxChartEntry[]>([]);
+  protected readonly locationChartData = signal<NgxChartEntry[]>([]);
   protected readonly chartLoading = signal(false);
 
   protected readonly orgMembers = computed(() => {
@@ -85,6 +86,7 @@ export class DashboardComponent implements OnInit {
       const range = this.range();
       if (!orgId || !userId) return;
       this.loadActivityChart(orgId, userId, range);
+      this.loadLocationChart(orgId, userId, range);
     });
   }
 
@@ -127,6 +129,17 @@ export class DashboardComponent implements OnInit {
     else if (range === '1y') from.setFullYear(today.getFullYear() - 1);
 
     return { from: fmt(from), to };
+  }
+
+  private loadLocationChart(orgId: string, userId: string, range: DateRange): void {
+    const { from, to } = this.getDateParams(range);
+    this.reportService.getLocationSummary(orgId, userId, from, to).subscribe({
+      next: (data) => {
+        this.locationChartData.set(
+          data.map((l: LocationSummary) => ({ name: l.location, value: l.totalHours }))
+        );
+      },
+    });
   }
 
   private loadActivityChart(orgId: string, userId: string, range: DateRange): void {

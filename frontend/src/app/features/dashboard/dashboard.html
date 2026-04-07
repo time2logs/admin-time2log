@@ -135,4 +135,32 @@
       </div>
     }
   </div>
+
+  <!-- Bar Chart: Stunden pro Standort -->
+  <div class="mt-6 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-xl p-5">
+    <div class="mb-5">
+      <p class="text-lg font-semibold dark:text-[hsl(210,15%,90%)]">{{ 'dashboard.charts.locations.title' | translate }}</p>
+      <p class="text-sm text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ 'dashboard.charts.locations.desc' | translate }}</p>
+    </div>
+
+    @if (locationChartData().length === 0) {
+      <div class="flex items-center justify-center h-48 text-gray-400 dark:text-[hsl(210,15%,45%)] text-sm">
+        {{ 'dashboard.noData' | translate }}
+      </div>
+    } @else {
+      <div class="flex justify-center">
+        <ngx-charts-bar-vertical
+          [results]="locationChartData()"
+          [scheme]="colorScheme"
+          [xAxis]="true"
+          [yAxis]="true"
+          [showXAxisLabel]="false"
+          [showYAxisLabel]="true"
+          [yAxisLabel]="'Stunden'"
+          [showDataLabel]="true"
+          [view]="[560, 300]"
+        />
+      </div>
+    }
+  </div>
 </div>
