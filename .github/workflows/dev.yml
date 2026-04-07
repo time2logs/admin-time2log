@@ -78,21 +78,6 @@ jobs:
             ghcr.io/${{ github.repository }}/frontend:dev-${{ github.sha }}
             ghcr.io/${{ github.repository }}/frontend:dev-latest
 
-  deploy:
-    needs: [build-push-backend, build-push-frontend]
-    if: |
-      always() &&
-      (needs.build-push-backend.result == 'success' || needs.build-push-backend.result == 'skipped') &&
-      (needs.build-push-frontend.result == 'success' || needs.build-push-frontend.result == 'skipped')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to Hetzner
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.HETZNER_SSH_HOST }}
-          username: ${{ secrets.HETZNER_SSH_USER }}
-          key: ${{ secrets.HETZNER_SSH_KEY }}
-          script: /opt/admin-time2log/ops/deploy/hetzner/deploy.sh dev
 
   smoke-tests:
     needs: deploy

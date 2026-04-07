@@ -24,7 +24,7 @@ public class CurriculumDomainService {
 
     public List<CurriculumNode> getNodes(UUID organizationId, UUID professionId) {
         var nodeResponses = supabaseService.getListWithQuery(
-                "app.curriculum_nodes",
+                "admin.curriculum_nodes",
                 "organization_id=eq." + organizationId
                         + "&profession_id=eq." + professionId
                         + "&is_active=eq.true"
@@ -39,7 +39,7 @@ public class CurriculumDomainService {
                 .collect(Collectors.joining(","));
 
         var mappings = supabaseService.getListWithQuery(
-                "app.curriculum_node_competencies",
+                "admin.curriculum_node_competencies",
                 "curriculum_node_id=in.(" + nodeIds + ")",
                 CurriculumNodeCompetencyResponse.class
         );
@@ -57,7 +57,7 @@ public class CurriculumDomainService {
 
     public List<Competency> getCompetencies(UUID organizationId, UUID professionId) {
         var responses = supabaseService.getListWithQuery(
-                "app.competencies",
+                "admin.competencies",
                 "organization_id=eq." + organizationId + "&profession_id=eq." + professionId,
                 CompetencyResponse.class
         );
