@@ -1,4 +1,4 @@
-<div class="max-w-4xl mx-auto">
+<div class="max-w-5xl mx-auto">
   <h1 class="text-3xl font-semibold mb-2 dark:text-[hsl(210,15%,90%)]">{{ 'dashboard.title' | translate }}</h1>
   <p class="text-gray-600 mb-6 dark:text-[hsl(210,15%,55%)]">{{ 'dashboard.welcome' | translate }}</p>
 
@@ -7,6 +7,9 @@
     <p class="text-3xl font-bold dark:text-[hsl(210,15%,90%)]">{{ totalMemberCount() }}</p>
   </div>
 
+
+
+  <!-- Inactive members ranking -->
   <div class="mt-6 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-xl p-5">
     <div class="flex items-center justify-between mb-4">
       <div>
@@ -65,6 +68,70 @@
     @if (inactiveRanking().length === 0) {
       <div class="text-center py-6 text-gray-400 dark:text-[hsl(210,15%,45%)] text-sm">
         {{ 'dashboard.all_active' | translate }}
+      </div>
+    }
+  </div>
+
+    <!-- Pie Chart: Verrichtete Arbeiten -->
+  <div class="mt-6 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-xl p-5">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+      <div>
+        <p class="text-lg font-semibold dark:text-[hsl(210,15%,90%)]">{{ 'dashboard.charts.activities.title' | translate }}</p>
+        <p class="text-sm text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ 'dashboard.charts.activities.desc' | translate }}</p>
+      </div>
+      <div class="flex flex-wrap gap-2 items-center">
+        <!-- User selector -->
+        @if (membersWithActivity().length > 0) {
+          <select
+            class="border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-[hsl(215,25%,16%)] dark:text-[hsl(210,15%,90%)] focus:outline-none focus:ring-2 focus:ring-[hsl(199,80%,52%)]"
+            [value]="selectedUserId()"
+            (change)="selectUser($any($event.target).value)"
+          >
+            @for (member of membersWithActivity(); track member.id) {
+              <option [value]="member.id">{{ member.name }}</option>
+            }
+          </select>
+        }
+        <!-- Range buttons -->
+        <div class="flex rounded-lg border border-gray-200 dark:border-[hsl(215,20%,22%)] overflow-hidden text-sm">
+          @for (r of [['30d','30T'],['90d','90T'],['1y','1J'],['all','Alle']] ; track r[0]) {
+            <button
+              class="px-3 py-1.5 transition-colors"
+              [ngClass]="range() === r[0]
+                ? 'bg-[hsl(199,80%,52%)] text-white'
+                : 'bg-white dark:bg-[hsl(215,25%,16%)] text-gray-600 dark:text-[hsl(210,15%,70%)] hover:bg-gray-50 dark:hover:bg-[hsl(215,25%,20%)]'"
+              (click)="setRange($any(r[0]))"
+            >{{ r[1] }}</button>
+          }
+        </div>
+      </div>
+    </div>
+
+    @if (chartLoading()) {
+      <div class="flex items-center justify-center h-64 text-gray-400 dark:text-[hsl(210,15%,45%)] text-sm">
+        <svg class="animate-spin w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+        </svg>
+        Laden...
+      </div>
+    } @else if (activityChartData().length === 0) {
+      <div class="flex items-center justify-center h-64 text-gray-400 dark:text-[hsl(210,15%,45%)] text-sm">
+        {{ 'dashboard.noData' | translate }}
+      </div>
+    } @else {
+      <div class="flex justify-center">
+        <ngx-charts-pie-chart
+          [results]="activityChartData()"
+          [scheme]="colorScheme"
+          [legend]="true"
+          [legendTitle]="''"
+          [legendPosition]="legendPosition"
+          [labels]="false"
+          [doughnut]="false"
+          [tooltipDisabled]="false"
+          [view]="[560, 320]"
+        />
       </div>
     }
   </div>

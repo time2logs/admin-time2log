@@ -90,7 +90,15 @@
     "organizations": {
       "title": "Organisationen",
       "description": "Organisationen verwalten und erstellen"
-    }
+    },
+    "charts": {
+      "activities": {
+        "title": "Verrichtete Arbeiten",
+        "desc": "Stundenverteilung nach Aktivität"
+      }
+    },
+    "noData": "Keine Daten für diesen Zeitraum.",
+    "all_active": "Alle Mitglieder sind aktiv."
   },
   "organizations": {
     "title": "Organisationen",

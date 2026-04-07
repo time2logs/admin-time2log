@@ -90,7 +90,15 @@
     "organizations": {
       "title": "Organizations",
       "description": "Manage and create organizations"
-    }
+    },
+    "charts": {
+      "activities": {
+        "title": "Work Activities",
+        "desc": "Hours distribution by activity"
+      }
+    },
+    "noData": "No data for this period.",
+    "all_active": "All members are active."
   },
   "organizations": {
     "title": "Organizations",

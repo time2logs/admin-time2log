@@ -1,5 +1,6 @@
 package ch.time2log.backend.domain;
 
+import ch.time2log.backend.domain.models.ActivitySummary;
 import ch.time2log.backend.domain.models.DailyMemberReport;
 import ch.time2log.backend.domain.models.MemberActivityRecord;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
@@ -8,6 +9,7 @@ import ch.time2log.backend.infrastructure.supabase.responses.CurriculumNodeRespo
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -84,7 +86,7 @@ public class ReportsDomainService {
         Map<UUID, String> labelMap = Map.of();
         if (!activityIds.isBlank()) {
             var nodes = supabaseService.getListWithQuery(
-                    "app.curriculum_nodes",
+                    "admin.curriculum_nodes",
                     "id=in.(" + activityIds + ")",
                     CurriculumNodeResponse.class
             );
@@ -102,6 +104,52 @@ public class ReportsDomainService {
                 r.rating()
         )).toList();
     }
+    public List<ActivitySummary> getActivitySummary(UUID organizationId, UUID userId, String from, String to) {
+        if (userId == null) {
+            return List.of();
+            // Alternativ: throw new IllegalArgumentException("userId darf nicht null sein");
+        }
+
+        String query = "organization_id=eq." + organizationId + "&user_id=eq." + userId;
+
+        if (from != null && !from.isBlank()) query += "&entry_date=gte." + from;
+        if (to != null && !to.isBlank()) query += "&entry_date=lte." + to;
+
+        var records = supabaseService.getListWithQuery("app.activity_records", query, ActivityRecordResponse.class);
+        if (records.isEmpty()) return List.of();
+
+        Map<UUID, Integer> hoursByActivity = records.stream()
+                .filter(r -> r.curriculum_activity_id() != null)
+                .collect(Collectors.groupingBy(
+                        ActivityRecordResponse::curriculum_activity_id,
+                        Collectors.summingInt(ActivityRecordResponse::hours)
+                ));
+
+        if (hoursByActivity.isEmpty()) return List.of();
+
+        var activityIds = hoursByActivity.keySet().stream()
+                .map(UUID::toString)
+                .collect(Collectors.joining(","));
+
+        var nodes = supabaseService.getListWithQuery(
+                "admin.curriculum_nodes",
+                "id=in.(" + activityIds + ")",
+                CurriculumNodeResponse.class
+        );
+
+        var labelMap = nodes.stream()
+                .collect(Collectors.toMap(CurriculumNodeResponse::id, CurriculumNodeResponse::label));
+
+        return hoursByActivity.entrySet().stream()
+                .map(e -> new ActivitySummary(
+                        e.getKey(),
+                        labelMap.getOrDefault(e.getKey(), "Unbekannt"),
+                        e.getValue()
+                ))
+                .sorted(Comparator.comparingInt(ActivitySummary::totalHours).reversed())
+                .toList();
+    }
+
     public OffsetDateTime getLastEntryDate(UUID organizationId, UUID userId) {
         var records = supabaseService.getListWithQuery(
                 "app.activity_records",

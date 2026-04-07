@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@env/environment';
-import { CurriculumOverview, DailyMemberReport, MemberActivityRecord } from '@app/core/models/report.models';
+import { ActivitySummary, CurriculumOverview, DailyMemberReport, MemberActivityRecord } from '@app/core/models/report.models';
 import { map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
@@ -32,6 +32,16 @@ export class ReportService {
     return this.http.get<CurriculumOverview>(
       `${this.baseUrl}/${organizationId}/professions/${professionId}/curriculum`
     );
+  }
+
+ getActivitySummary(organizationId: string, userId: string, from?: string, to?: string): Observable<ActivitySummary[]> {
+    let url = `${this.baseUrl}/${organizationId}/reports/activities/summary`;
+    const params: string[] = [];
+    if (userId) params.push(`userId=${userId}`);
+    if (from) params.push(`from=${from}`);
+    if (to) params.push(`to=${to}`);
+    if (params.length) url += '?' + params.join('&');
+    return this.http.get<ActivitySummary[]>(url);
   }
 
  getLastEntryDate(organizationId: string, userId: string): Observable<Date | null> {
