@@ -135,7 +135,7 @@ export class DashboardComponent implements OnInit {
     this.reportService.getActivitySummary(orgId, userId, from, to).subscribe({
       next: (data) => {
         this.activityChartData.set(
-          data.map((a) => ({ name: a.activityName, value: a.totalHours }))
+          data.map((a) => ({ name: `${a.activityName} (${a.totalHours}h)`, value: a.totalHours }))
         );
         this.chartLoading.set(false);
       },
