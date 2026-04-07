@@ -40,3 +40,14 @@ export interface CurriculumOverview {
   nodes: CurriculumNodeDto[];
   competencies: CompetencyDto[];
 }
+
+export interface ActivitySummary {
+  activityId: string;
+  activityName: string;
+  totalHours: number;
+}
+
+export interface NgxChartEntry {
+  name: string;
+  value: number;
+}
