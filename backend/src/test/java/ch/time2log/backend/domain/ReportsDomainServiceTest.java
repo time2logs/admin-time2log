@@ -121,10 +121,10 @@ class ReportsDomainServiceTest {
     }
 
     private ActivityRecordResponse record(UUID uid, int hours, int rating) {
-        return new ActivityRecordResponse(UUID.randomUUID(), orgId, uid, null, null, date, hours, null, rating, null, null, null);
+        return new ActivityRecordResponse(UUID.randomUUID(), orgId, uid, null, null, date, hours, null, rating, null, null, null, null);
     }
 
     private ActivityRecordResponse recordNoRating(UUID uid, int hours) {
-        return new ActivityRecordResponse(UUID.randomUUID(), orgId, uid, null, null, date, hours, null, null, null, null, null);
+        return new ActivityRecordResponse(UUID.randomUUID(), orgId, uid, null, null, date, hours, null, null, null, null, null, null);
     }
 }

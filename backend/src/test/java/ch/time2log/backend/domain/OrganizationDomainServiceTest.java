@@ -70,7 +70,7 @@ class OrganizationDomainServiceTest {
         when(supabaseAdminClient.generateInviteLink(anyString(), anyString(), any()))
                 .thenReturn(Mono.just(actionLink));
 
-        Invite result = organizationDomainService.createInvite(orgId, email, userRole, invitedBy);
+        Invite result = organizationDomainService.createInvite(orgId, email, userRole, "1", invitedBy);
 
         assertThat(result.email()).isEqualTo(email);
         assertThat(result.userRole()).isEqualTo(userRole);
@@ -87,7 +87,7 @@ class OrganizationDomainServiceTest {
         when(supabaseAdminClient.generateInviteLink(anyString(), anyString(), any()))
                 .thenReturn(Mono.just(actionLink));
 
-        organizationDomainService.createInvite(orgId, email, userRole, invitedBy);
+        organizationDomainService.createInvite(orgId, email, userRole, "1", invitedBy);
 
         verify(inviteMailService).sendInvite(email, "Acme Corp", userRole, actionLink);
     }
@@ -101,7 +101,7 @@ class OrganizationDomainServiceTest {
         when(supabaseAdminClient.generateInviteLink(anyString(), anyString(), any()))
                 .thenReturn(Mono.just(actionLink));
 
-        organizationDomainService.createInvite(orgId, email, userRole, invitedBy);
+        organizationDomainService.createInvite(orgId, email, userRole, "1", invitedBy);
 
         verify(inviteMailService).sendInvite(eq(email), eq("the organization"), eq(userRole), anyString());
     }
@@ -115,7 +115,7 @@ class OrganizationDomainServiceTest {
         when(supabaseAdminClient.generateInviteLink(anyString(), anyString(), any()))
                 .thenReturn(Mono.just(actionLink));
 
-        organizationDomainService.createInvite(orgId, email, userRole, invitedBy);
+        organizationDomainService.createInvite(orgId, email, userRole, "1", invitedBy);
 
         verify(supabaseAdminClient).generateInviteLink(
                 eq(email),
@@ -129,7 +129,7 @@ class OrganizationDomainServiceTest {
         when(supabaseService.post(eq("admin.invites"), any(), eq(InviteResponse[].class)))
                 .thenReturn(null);
 
-        assertThatThrownBy(() -> organizationDomainService.createInvite(orgId, email, userRole, invitedBy))
+        assertThatThrownBy(() -> organizationDomainService.createInvite(orgId, email, userRole, "1", invitedBy))
                 .isInstanceOf(EntityNotCreatedException.class);
     }
 
@@ -138,7 +138,7 @@ class OrganizationDomainServiceTest {
         when(supabaseService.post(eq("admin.invites"), any(), eq(InviteResponse[].class)))
                 .thenReturn(new InviteResponse[]{});
 
-        assertThatThrownBy(() -> organizationDomainService.createInvite(orgId, email, userRole, invitedBy))
+        assertThatThrownBy(() -> organizationDomainService.createInvite(orgId, email, userRole, "1", invitedBy))
                 .isInstanceOf(EntityNotCreatedException.class);
     }
 
@@ -148,7 +148,7 @@ class OrganizationDomainServiceTest {
     void listInvites_returnsMappedList() {
         var invite1 = inviteResponse();
         var invite2 = new InviteResponse(UUID.randomUUID(), orgId, "other@example.com", "admin",
-                UUID.randomUUID(), "pending", invitedBy, OffsetDateTime.now(), OffsetDateTime.now().plusDays(7));
+                UUID.randomUUID(), "pending", invitedBy, OffsetDateTime.now(), OffsetDateTime.now().plusDays(7), null);
         when(supabaseService.getListWithQuery(eq("admin.invites"), anyString(), eq(InviteResponse.class)))
                 .thenReturn(List.of(invite1, invite2));
 
@@ -232,7 +232,7 @@ class OrganizationDomainServiceTest {
 
     private InviteResponse inviteResponse() {
         return new InviteResponse(inviteId, orgId, email, userRole, token, "pending",
-                invitedBy, OffsetDateTime.now(), OffsetDateTime.now().plusDays(7));
+                invitedBy, OffsetDateTime.now(), OffsetDateTime.now().plusDays(7), null);
     }
 
     private OrganizationResponse orgResponse(String name) {
