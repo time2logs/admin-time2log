@@ -9,6 +9,8 @@ import { Organization } from '@app/core/models/organizations.models';
 import { ReportService } from '@services/report.service';
 import { NgxChartEntry, LocationSummary } from '@app/core/models/report.models';
 import { forkJoin } from 'rxjs';
+import { HostListener } from '@angular/core';
+
 
 type DateRange = '30d' | '90d' | '1y' | 'all';
 type FilterMode = 'range' | 'semester';
@@ -175,6 +177,21 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  chartView = signal<[number, number]>(this.getChartSize());
+
+  private getChartSize(): [number, number] {
+    const width = window.innerWidth;
+    if (width < 640) return [width - 48, 300];      // Mobile
+    if (width < 1024) return [500, 340];             // Tablet
+    return [560, 380];                               // Desktop
+  }
+
+  @HostListener('window:resize')
+  onResize() {
+    this.chartView.set(this.getChartSize());
+  }
+
+
   private loadActivityChart(orgId: string, userId: string, range: DateRange, mode: FilterMode, semesters: string[]): void {
     if (mode === 'semester' && semesters.length === 0) {
       this.activityChartData.set([]);
@@ -256,6 +273,7 @@ export class DashboardComponent implements OnInit {
             }
           },
         });
+
       },
     });
   }
