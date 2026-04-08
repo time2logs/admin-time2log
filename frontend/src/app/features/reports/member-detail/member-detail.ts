@@ -7,6 +7,7 @@ import { ReportService } from '@services/report.service';
 import { Profile } from '@app/core/models/profile.models';
 import { CurriculumOverview, MemberActivityRecord, ReportStatus } from '@app/core/models/report.models';
 import { Calendar } from '@app/shared/calendar/calendar';
+import { formatLocalDate } from '@app/shared/utils/date.utils';
 import { Profession } from '@app/core/models/organizations.models';
 
 @Component({
@@ -22,7 +23,7 @@ export class MemberDetail implements OnInit {
   private readonly reportService = inject(ReportService);
 
   protected readonly member = signal<Profile | null>(null);
-  protected readonly selectedDate = signal(new Date().toISOString().slice(0, 10));
+  protected readonly selectedDate = signal(formatLocalDate(new Date()));
   protected readonly monthRecords = signal<MemberActivityRecord[]>([]);
   protected readonly allRecords = signal<MemberActivityRecord[]>([]);
   protected readonly selectedDayRecords = signal<MemberActivityRecord[]>([]);
@@ -43,13 +44,13 @@ export class MemberDetail implements OnInit {
     }
 
     // Mark past weekdays without records as 'missing'
-    const today = new Date().toISOString().slice(0, 10);
+    const today = formatLocalDate(new Date());
     const year = this.currentYear();
     const month = this.currentMonth();
     const lastDay = new Date(year, month + 1, 0).getDate();
     for (let d = 1; d <= lastDay; d++) {
       const date = new Date(year, month, d);
-      const dateStr = date.toISOString().slice(0, 10);
+      const dateStr = formatLocalDate(date);
       if (dateStr >= today) break;
       const dow = date.getDay();
       if (dow === 0 || dow === 6) continue; // skip weekends

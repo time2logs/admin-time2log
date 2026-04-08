@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { map } from 'rxjs';
 import { ReportStatus } from '@app/core/models/report.models';
+import { formatLocalDate } from '@app/shared/utils/date.utils';
 
 interface CalendarDay {
   date: string; // 'YYYY-MM-DD'
@@ -38,7 +39,7 @@ export class Calendar implements OnInit {
     'reports.calendar.sun',
   ];
 
-  protected readonly today = new Date().toISOString().slice(0, 10);
+  protected readonly today = formatLocalDate(new Date());
   protected readonly currentYear = signal(new Date().getFullYear());
   protected readonly currentMonth = signal(new Date().getMonth());
 
@@ -120,12 +121,8 @@ export class Calendar implements OnInit {
     return this.statusMap()[date] ?? null;
   }
 
-  private buildDay(d: Date, isCurrentMonth: boolean, today: string): CalendarDay {
-    // Ersetze d.toISOString().slice(0, 10) durch eine lokale Formatierung:
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const date = `${year}-${month}-${day}`; // Format: YYYY-MM-DD (Lokal)
+ private buildDay(d: Date, isCurrentMonth: boolean, today: string): CalendarDay {
+    const date = formatLocalDate(d);
 
     const dow = d.getDay();
     return {
