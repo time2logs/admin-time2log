@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -67,14 +68,16 @@ public class OrganizationDomainService {
         }
     }
 
-    public Invite createInvite(UUID organizationId, String email, String userRole, UUID invitedBy) {
-        var body = Map.of(
-                "organization_id", organizationId,
-                "email", email,
-                "user_role", userRole,
-                "invited_by", invitedBy
-        );
+    public Invite createInvite(UUID organizationId, String email, String userRole, String semester, UUID invitedBy) {
+        var body = new HashMap<String, Object>();
+        body.put("organization_id", organizationId);
+        body.put("email", email);
+        body.put("user_role", userRole);
+        body.put("invited_by", invitedBy);
+        body.put("current_semester", semester);
+        log.info("Creating invite with body={}", body);
         var created = supabaseService.post("admin.invites", body, InviteResponse[].class);
+        log.info("Supabase returned invite={}", created == null ? null : (created.length == 0 ? "[]" : created[0]));
         if (created == null || created.length == 0) {
             throw new EntityNotCreatedException("Supabase returned no created invite");
         }

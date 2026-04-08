@@ -102,7 +102,14 @@
       }
     },
     "noData": "Keine Daten für diesen Zeitraum.",
-    "all_active": "Alle Mitglieder sind aktiv."
+    "all_active": "Alle Mitglieder sind aktiv.",
+    "filter": {
+      "range": "Zeitraum",
+      "semester": "Semester",
+      "semesterHint": "Wähle ein oder mehrere Semester aus",
+      "semesterPrefix": "Semester",
+      "noSemesters": "Keine Semester verfügbar."
+    }
   },
   "organizations": {
     "title": "Organisationen",
@@ -118,6 +125,8 @@
     "userIdPlaceholder": "Benutzer-ID",
     "roleMember": "Mitglied",
     "roleAdmin": "Admin",
+    "semesterLabel": "Semester",
+    "semesterOption": "Semester {{ semester }}",
     "inviteButton": "Einladen",
     "inviteError": "Einladung fehlgeschlagen. Bitte überprüfen Sie die Benutzer-ID und versuchen Sie es erneut.",
     "inviteSuccess": "Benutzer erfolgreich eingeladen.",
@@ -139,6 +148,8 @@
       "emailPlaceholder": "E-Mail-Adresse",
       "roleMember": "Mitglied",
       "roleAdmin": "Admin",
+      "semesterLabel": "Semester",
+      "semesterOption": "Semester {{ semester }}",
       "inviteButton": "Einladung senden",
       "pendingInvites": "Offene Einladungen",
       "cancelInvite": "Widerrufen",

@@ -110,6 +110,16 @@
                   <option value="member">{{ 'organizationManaging.members.roleMember' | translate }}</option>
                   <option value="admin">{{ 'organizationManaging.members.roleAdmin' | translate }}</option>
                 </select>
+                <select
+                  class="px-4 py-2 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-[hsl(210,15%,90%)]"
+                  [attr.aria-label]="'organizationManaging.members.semesterLabel' | translate"
+                  [ngModel]="inviteSemester()"
+                  (ngModelChange)="inviteSemester.set($event)"
+                >
+                  @for (s of semesterOptions; track s) {
+                    <option [value]="s">{{ 'organizationManaging.members.semesterOption' | translate: { semester: s } }}</option>
+                  }
+                </select>
                 <button
                   class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
                   [disabled]="isInviting() || !inviteEmail().trim()"
