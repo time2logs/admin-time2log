@@ -130,7 +130,7 @@
           [labels]="true"
           [doughnut]="false"
           [tooltipDisabled]="false"
-          [view]="[560, 380]"
+          [view]="chartView()"
         />
       </div>
     }
@@ -158,9 +158,10 @@
           [showYAxisLabel]="true"
           [yAxisLabel]="'Stunden'"
           [showDataLabel]="true"
-          [view]="[560, 300]"
+          [view]="chartView()"
         />
       </div>
     }
   </div>
 </div>
+
