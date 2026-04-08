@@ -43,8 +43,9 @@ public class ReportsController {
             @PathVariable UUID organizationId,
             @RequestParam(required = false) UUID userId,
             @RequestParam(required = false) String from,
-            @RequestParam(required = false) String to) {
-        return ActivitySummaryDto.ofList(reportsDomainService.getActivitySummary(organizationId, userId, from, to));
+            @RequestParam(required = false) String to,
+            @RequestParam(required = false) List<String> semesters) {
+        return ActivitySummaryDto.ofList(reportsDomainService.getActivitySummary(organizationId, userId, from, to, semesters));
     }
 
     @GetMapping("/locations/summary")
@@ -52,8 +53,16 @@ public class ReportsController {
             @PathVariable UUID organizationId,
             @RequestParam(required = false) UUID userId,
             @RequestParam(required = false) String from,
-            @RequestParam(required = false) String to) {
-        return LocationSummaryDto.ofMap(reportsDomainService.getLocationSummary(organizationId, userId, from, to));
+            @RequestParam(required = false) String to,
+            @RequestParam(required = false) List<String> semesters) {
+        return LocationSummaryDto.ofMap(reportsDomainService.getLocationSummary(organizationId, userId, from, to, semesters));
+    }
+
+    @GetMapping("/semesters/available")
+    public List<String> getAvailableSemesters(
+            @PathVariable UUID organizationId,
+            @RequestParam UUID userId) {
+        return reportsDomainService.getAvailableSemesters(organizationId, userId);
     }
 
     @GetMapping("/members/{userId}/last-entry-date")

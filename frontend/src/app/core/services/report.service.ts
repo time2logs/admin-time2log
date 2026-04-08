@@ -34,24 +34,38 @@ export class ReportService {
     );
   }
 
- getActivitySummary(organizationId: string, userId: string, from?: string, to?: string): Observable<ActivitySummary[]> {
+ getActivitySummary(organizationId: string, userId: string, from?: string, to?: string, semesters?: string[]): Observable<ActivitySummary[]> {
     let url = `${this.baseUrl}/${organizationId}/reports/activities/summary`;
     const params: string[] = [];
     if (userId) params.push(`userId=${userId}`);
-    if (from) params.push(`from=${from}`);
-    if (to) params.push(`to=${to}`);
+    if (semesters && semesters.length > 0) {
+      params.push(`semesters=${semesters.join(',')}`);
+    } else {
+      if (from) params.push(`from=${from}`);
+      if (to) params.push(`to=${to}`);
+    }
     if (params.length) url += '?' + params.join('&');
     return this.http.get<ActivitySummary[]>(url);
   }
 
- getLocationSummary(organizationId: string, userId?: string | null, from?: string, to?: string): Observable<LocationSummary[]> {
+ getLocationSummary(organizationId: string, userId?: string | null, from?: string, to?: string, semesters?: string[]): Observable<LocationSummary[]> {
     let url = `${this.baseUrl}/${organizationId}/reports/locations/summary`;
     const params: string[] = [];
     if (userId) params.push(`userId=${userId}`);
-    if (from) params.push(`from=${from}`);
-    if (to) params.push(`to=${to}`);
+    if (semesters && semesters.length > 0) {
+      params.push(`semesters=${semesters.join(',')}`);
+    } else {
+      if (from) params.push(`from=${from}`);
+      if (to) params.push(`to=${to}`);
+    }
     if (params.length) url += '?' + params.join('&');
     return this.http.get<LocationSummary[]>(url);
+  }
+
+  getAvailableSemesters(organizationId: string, userId: string): Observable<string[]> {
+    return this.http.get<string[]>(
+      `${this.baseUrl}/${organizationId}/reports/semesters/available?userId=${userId}`
+    );
   }
 
  getLastEntryDate(organizationId: string, userId: string): Observable<Date | null> {

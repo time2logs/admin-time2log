@@ -104,16 +104,19 @@ public class ReportsDomainService {
                 r.rating()
         )).toList();
     }
-    public List<ActivitySummary> getActivitySummary(UUID organizationId, UUID userId, String from, String to) {
+    public List<ActivitySummary> getActivitySummary(UUID organizationId, UUID userId, String from, String to, List<String> semesters) {
         if (userId == null) {
             return List.of();
-            // Alternativ: throw new IllegalArgumentException("userId darf nicht null sein");
         }
 
         String query = "organization_id=eq." + organizationId + "&user_id=eq." + userId;
 
-        if (from != null && !from.isBlank()) query += "&entry_date=gte." + from;
-        if (to != null && !to.isBlank()) query += "&entry_date=lte." + to;
+        if (semesters != null && !semesters.isEmpty()) {
+            query += "&current_semester=in.(" + semesters.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")) + ")";
+        } else {
+            if (from != null && !from.isBlank()) query += "&entry_date=gte." + from;
+            if (to != null && !to.isBlank()) query += "&entry_date=lte." + to;
+        }
 
         var records = supabaseService.getListWithQuery("app.activity_records", query, ActivityRecordResponse.class);
         if (records.isEmpty()) return List.of();
@@ -150,18 +153,37 @@ public class ReportsDomainService {
                 .toList();
     }
 
-    public Map<String, Integer> getLocationSummary(UUID organizationId, UUID userId, String from, String to) {
+    public Map<String, Integer> getLocationSummary(UUID organizationId, UUID userId, String from, String to, List<String> semesters) {
         if (userId == null) return Map.of();
 
         String query = "organization_id=eq." + organizationId + "&user_id=eq." + userId;
-        if (from != null && !from.isBlank()) query += "&entry_date=gte." + from;
-        if (to != null && !to.isBlank()) query += "&entry_date=lte." + to;
+        if (semesters != null && !semesters.isEmpty()) {
+            query += "&current_semester=in.(" + semesters.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")) + ")";
+        } else {
+            if (from != null && !from.isBlank()) query += "&entry_date=gte." + from;
+            if (to != null && !to.isBlank()) query += "&entry_date=lte." + to;
+        }
 
         return supabaseService.getListWithQuery("app.activity_records", query, ActivityRecordResponse.class)
                 .stream()
                 .filter(r -> r.location() != null && !r.location().isBlank())
                 .collect(Collectors.groupingBy(ActivityRecordResponse::location,
                         Collectors.summingInt(ActivityRecordResponse::hours)));
+    }
+
+    public List<String> getAvailableSemesters(UUID organizationId, UUID userId) {
+        if (userId == null) return List.of();
+        var records = supabaseService.getListWithQuery(
+                "app.activity_records",
+                "organization_id=eq." + organizationId + "&user_id=eq." + userId + "&select=current_semester",
+                ActivityRecordResponse.class
+        );
+        return records.stream()
+                .map(ActivityRecordResponse::current_semester)
+                .filter(s -> s != null && !s.isBlank())
+                .distinct()
+                .sorted()
+                .toList();
     }
 
     public OffsetDateTime getLastEntryDate(UUID organizationId, UUID userId) {

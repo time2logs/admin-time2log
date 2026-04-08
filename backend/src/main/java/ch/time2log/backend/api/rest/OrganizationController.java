@@ -56,7 +56,7 @@ public class OrganizationController {
             @RequestBody CreateInviteRequest request,
             @AuthenticationPrincipal AuthenticatedUser user
     ) {
-        return InviteDto.of(orgDomainService.createInvite(id, request.email(), request.userRole(), user.id()));
+        return InviteDto.of(orgDomainService.createInvite(id, request.email(), request.userRole(), request.semester(), user.id()));
     }
 
     @GetMapping("/{id}/invites")

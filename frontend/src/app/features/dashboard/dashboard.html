@@ -92,20 +92,65 @@
             }
           </select>
         }
-        <!-- Range buttons -->
+        <!-- Filter mode toggle -->
         <div class="flex rounded-lg border border-gray-200 dark:border-[hsl(215,20%,22%)] overflow-hidden text-sm">
-          @for (r of [['30d','30T'],['90d','90T'],['1y','1J'],['all','Alle']] ; track r[0]) {
-            <button
-              class="px-3 py-1.5 transition-colors"
-              [ngClass]="range() === r[0]
-                ? 'bg-[hsl(199,80%,52%)] text-white'
-                : 'bg-white dark:bg-[hsl(215,25%,16%)] text-gray-600 dark:text-[hsl(210,15%,70%)] hover:bg-gray-50 dark:hover:bg-[hsl(215,25%,20%)]'"
-              (click)="setRange($any(r[0]))"
-            >{{ r[1] }}</button>
+          <button
+            class="px-3 py-1.5 transition-colors"
+            [ngClass]="filterMode() === 'range'
+              ? 'bg-[hsl(199,80%,52%)] text-white'
+              : 'bg-white dark:bg-[hsl(215,25%,16%)] text-gray-600 dark:text-[hsl(210,15%,70%)] hover:bg-gray-50 dark:hover:bg-[hsl(215,25%,20%)]'"
+            (click)="setFilterMode('range')"
+          >{{ 'dashboard.filter.range' | translate }}</button>
+          <button
+            class="px-3 py-1.5 transition-colors border-l border-gray-200 dark:border-[hsl(215,20%,22%)]"
+            [ngClass]="filterMode() === 'semester'
+              ? 'bg-[hsl(199,80%,52%)] text-white'
+              : 'bg-white dark:bg-[hsl(215,25%,16%)] text-gray-600 dark:text-[hsl(210,15%,70%)] hover:bg-gray-50 dark:hover:bg-[hsl(215,25%,20%)]'"
+            (click)="setFilterMode('semester')"
+          >{{ 'dashboard.filter.semester' | translate }}</button>
+        </div>
+
+        <!-- Range buttons (only in range mode) -->
+        @if (filterMode() === 'range') {
+          <div class="flex rounded-lg border border-gray-200 dark:border-[hsl(215,20%,22%)] overflow-hidden text-sm">
+            @for (r of [['30d','30T'],['90d','90T'],['1y','1J'],['all','Alle']] ; track r[0]) {
+              <button
+                class="px-3 py-1.5 transition-colors"
+                [ngClass]="range() === r[0]
+                  ? 'bg-[hsl(199,80%,52%)] text-white'
+                  : 'bg-white dark:bg-[hsl(215,25%,16%)] text-gray-600 dark:text-[hsl(210,15%,70%)] hover:bg-gray-50 dark:hover:bg-[hsl(215,25%,20%)]'"
+                (click)="setRange($any(r[0]))"
+              >{{ r[1] }}</button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Semester multi-select (only in semester mode) -->
+    @if (filterMode() === 'semester') {
+      <div class="mb-5 p-3 rounded-lg border border-gray-200 dark:border-[hsl(215,20%,22%)] bg-gray-50 dark:bg-[hsl(215,25%,11%)]">
+        <p class="text-sm text-gray-600 dark:text-[hsl(210,15%,70%)] mb-2">{{ 'dashboard.filter.semesterHint' | translate }}</p>
+        <div class="flex flex-wrap gap-2">
+          @for (s of allSemesters; track s) {
+            <label
+              class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm cursor-pointer transition-colors"
+              [ngClass]="isSemesterSelected(s)
+                ? 'bg-[hsl(199,80%,52%)] text-white border-[hsl(199,80%,52%)]'
+                : 'bg-white dark:bg-[hsl(215,25%,16%)] text-gray-700 dark:text-[hsl(210,15%,70%)] border-gray-200 dark:border-[hsl(215,20%,22%)] hover:bg-gray-50 dark:hover:bg-[hsl(215,25%,20%)]'"
+            >
+              <input
+                type="checkbox"
+                class="sr-only"
+                [checked]="isSemesterSelected(s)"
+                (change)="toggleSemester(s)"
+              />
+              {{ 'dashboard.filter.semesterPrefix' | translate }} {{ s }}
+            </label>
           }
         </div>
       </div>
-    </div>
+    }
 
     @if (chartLoading()) {
       <div class="flex items-center justify-center h-64 text-gray-400 dark:text-[hsl(210,15%,45%)] text-sm">
