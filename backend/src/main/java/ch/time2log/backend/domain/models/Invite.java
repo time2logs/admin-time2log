@@ -15,7 +15,8 @@ public record Invite(
         String status,
         UUID invitedBy,
         OffsetDateTime createdAt,
-        OffsetDateTime expiresAt
+        OffsetDateTime expiresAt,
+        SemesterType currentSemester
 ) {
 
     public static Invite of(InviteResponse r) {
@@ -28,7 +29,8 @@ public record Invite(
                 r.status(),
                 r.invited_by(),
                 r.created_at(),
-                r.expires_at()
+                r.expires_at(),
+                r.current_semester()
         );
     }
 

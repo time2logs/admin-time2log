@@ -1,5 +1,7 @@
 package ch.time2log.backend.infrastructure.supabase.responses;
 
+import ch.time2log.backend.domain.models.SemesterType;
+
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -12,5 +14,6 @@ public record InviteResponse(
         String status,
         UUID invited_by,
         OffsetDateTime created_at,
-        OffsetDateTime expires_at
+        OffsetDateTime expires_at,
+        SemesterType current_semester
 ) {}

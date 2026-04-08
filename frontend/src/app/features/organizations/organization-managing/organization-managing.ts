@@ -33,6 +33,8 @@ export class OrganizationManaging implements OnInit {
   protected readonly showInviteForm = signal(false);
   protected readonly inviteEmail = signal('');
   protected readonly inviteRole = signal('member');
+  protected readonly inviteSemester = signal('1');
+  protected readonly semesterOptions = ['1', '2', '3', '4', '5', '6', '7', '8'] as const;
   protected readonly isInviting = signal(false);
 
   protected readonly professions = signal<Profession[]>([]);
@@ -83,6 +85,7 @@ export class OrganizationManaging implements OnInit {
     if (!this.showInviteForm()) {
       this.inviteEmail.set('');
       this.inviteRole.set('member');
+      this.inviteSemester.set('1');
     }
   }
 
@@ -92,10 +95,11 @@ export class OrganizationManaging implements OnInit {
 
     this.isInviting.set(true);
 
-    this.organizationService.createInvite(this.organizationId, email, this.inviteRole()).subscribe({
+    this.organizationService.createInvite(this.organizationId, email, this.inviteRole(), this.inviteSemester()).subscribe({
       next: () => {
         this.inviteEmail.set('');
         this.inviteRole.set('member');
+        this.inviteSemester.set('1');
         this.isInviting.set(false);
         this.showInviteForm.set(false);
         this.toast.success(this.translate.instant('toast.inviteSent'));

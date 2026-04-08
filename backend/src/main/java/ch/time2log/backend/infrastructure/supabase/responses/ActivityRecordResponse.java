@@ -14,6 +14,7 @@ public record ActivityRecordResponse(
    String notes,
    Integer rating,
    String location,
+   String current_semester,
    OffsetDateTime created_at,
    OffsetDateTime updated_at
 ) {}

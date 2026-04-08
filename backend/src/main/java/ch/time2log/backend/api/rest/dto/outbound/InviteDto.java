@@ -1,6 +1,7 @@
 package ch.time2log.backend.api.rest.dto.outbound;
 
 import ch.time2log.backend.domain.models.Invite;
+import ch.time2log.backend.domain.models.SemesterType;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -14,7 +15,8 @@ public record InviteDto(
         UUID token,
         String status,
         OffsetDateTime createdAt,
-        OffsetDateTime expiresAt
+        OffsetDateTime expiresAt,
+        SemesterType currentSemester
 ) {
 
     public static InviteDto of(Invite invite) {
@@ -26,7 +28,8 @@ public record InviteDto(
                 invite.token(),
                 invite.status(),
                 invite.createdAt(),
-                invite.expiresAt()
+                invite.expiresAt(),
+                invite.currentSemester()
         );
     }
 
