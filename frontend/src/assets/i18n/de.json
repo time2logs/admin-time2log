@@ -229,6 +229,7 @@
       "applySuccess": "Bildungsplan erfolgreich importiert.",
       "applyFailed": "Import fehlgeschlagen.",
       "invalidJson": "Ungültige JSON-Datei.",
+      "invalidCsv": "Ungültige CSV-Datei.",
       "version": "Version",
       "statusPending": "Ausstehend",
       "statusApplied": "Angewendet",
