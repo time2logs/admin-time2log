@@ -13,6 +13,7 @@ import { HostListener } from '@angular/core';
 
 
 type DateRange = '30d' | '90d' | '1y' | 'all';
+type FilterMode = 'range' | 'semester';
 
 interface MemberWithActivity {
   id: string;
@@ -40,6 +41,9 @@ export class DashboardComponent implements OnInit {
   protected readonly selectedOrgId = signal<string | null>(null);
   protected readonly selectedUserId = signal<string | null>(null);
   protected readonly range = signal<DateRange>('30d');
+  protected readonly filterMode = signal<FilterMode>('range');
+  protected readonly allSemesters = ['1', '2', '3', '4', '5', '6', '7', '8'] as const;
+  protected readonly selectedSemesters = signal<string[]>([]);
   protected readonly activityChartData = signal<NgxChartEntry[]>([]);
   protected readonly locationChartData = signal<NgxChartEntry[]>([]);
   protected readonly chartLoading = signal(false);
@@ -85,11 +89,15 @@ export class DashboardComponent implements OnInit {
     effect(() => {
       const orgId = this.selectedOrgId();
       const userId = this.selectedUserId();
+      // Read all reactive deps so the effect re-runs on any change.
       const range = this.range();
+      const mode = this.filterMode();
+      const semesters = this.selectedSemesters();
       if (!orgId || !userId) return;
-      this.loadActivityChart(orgId, userId, range);
-      this.loadLocationChart(orgId, userId, range);
+      this.loadActivityChart(orgId, userId, range, mode, semesters);
+      this.loadLocationChart(orgId, userId, range, mode, semesters);
     });
+
   }
 
   ngOnInit(): void {
@@ -117,6 +125,30 @@ export class DashboardComponent implements OnInit {
     this.range.set(range);
   }
 
+  protected setFilterMode(mode: FilterMode): void {
+    if (this.filterMode() === mode) return;
+    this.filterMode.set(mode);
+    // Clear the other filter's state to avoid confusing overlaps.
+    if (mode === 'range') {
+      this.selectedSemesters.set([]);
+    } else {
+      this.range.set('all');
+    }
+  }
+
+  protected toggleSemester(semester: string): void {
+    const current = this.selectedSemesters();
+    if (current.includes(semester)) {
+      this.selectedSemesters.set(current.filter((s) => s !== semester));
+    } else {
+      this.selectedSemesters.set([...current, semester].sort());
+    }
+  }
+
+  protected isSemesterSelected(semester: string): boolean {
+    return this.selectedSemesters().includes(semester);
+  }
+
   protected getDateParams(range: DateRange): { from?: string; to?: string } {
     const today = new Date();
     const pad = (n: number) => String(n).padStart(2, '0');
@@ -133,9 +165,10 @@ export class DashboardComponent implements OnInit {
     return { from: fmt(from), to };
   }
 
-  private loadLocationChart(orgId: string, userId: string, range: DateRange): void {
-    const { from, to } = this.getDateParams(range);
-    this.reportService.getLocationSummary(orgId, userId, from, to).subscribe({
+  private loadLocationChart(orgId: string, userId: string, range: DateRange, mode: FilterMode, semesters: string[]): void {
+    const useSemesters = mode === 'semester' && semesters.length > 0;
+    const { from, to } = useSemesters ? {} as { from?: string; to?: string } : this.getDateParams(range);
+    this.reportService.getLocationSummary(orgId, userId, from, to, useSemesters ? semesters : undefined).subscribe({
       next: (data) => {
         this.locationChartData.set(
           data.map((l: LocationSummary) => ({ name: l.location, value: l.totalHours }))
@@ -158,10 +191,17 @@ export class DashboardComponent implements OnInit {
     this.chartView.set(this.getChartSize());
   }
 
-  private loadActivityChart(orgId: string, userId: string, range: DateRange): void {
+
+  private loadActivityChart(orgId: string, userId: string, range: DateRange, mode: FilterMode, semesters: string[]): void {
+    if (mode === 'semester' && semesters.length === 0) {
+      this.activityChartData.set([]);
+      this.locationChartData.set([]);
+      return;
+    }
     this.chartLoading.set(true);
-    const { from, to } = this.getDateParams(range);
-    this.reportService.getActivitySummary(orgId, userId, from, to).subscribe({
+    const useSemesters = mode === 'semester' && semesters.length > 0;
+    const { from, to } = useSemesters ? {} as { from?: string; to?: string } : this.getDateParams(range);
+    this.reportService.getActivitySummary(orgId, userId, from, to, useSemesters ? semesters : undefined).subscribe({
       next: (data) => {
         this.activityChartData.set(
           data.map((a) => ({ name: `${a.activityName} (${a.totalHours}h)`, value: a.totalHours }))

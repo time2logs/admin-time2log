@@ -31,9 +31,9 @@ export class OrganizationService {
     admin: 'admin',
   };
 
-  createInvite(organizationId: string, email: string, userRole: string): Observable<Invite> {
+  createInvite(organizationId: string, email: string, userRole: string, semester: string): Observable<Invite> {
     const backendRole = OrganizationService.ROLE_MAPPING[userRole] ?? userRole;
-    return this.http.post<Invite>(`${this.baseUrl}/${organizationId}/invites`, { email, userRole: backendRole });
+    return this.http.post<Invite>(`${this.baseUrl}/${organizationId}/invites`, { email, userRole: backendRole, semester });
   }
 
   listInvites(organizationId: string): Observable<Invite[]> {

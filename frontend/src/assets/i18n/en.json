@@ -102,7 +102,14 @@
       }
     },
     "noData": "No data for this period.",
-    "all_active": "All members are active."
+    "all_active": "All members are active.",
+    "filter": {
+      "range": "Time range",
+      "semester": "Semester",
+      "semesterHint": "Select one or more semesters",
+      "semesterPrefix": "Semester",
+      "noSemesters": "No semesters available."
+    }
   },
   "organizations": {
     "title": "Organizations",
@@ -118,6 +125,8 @@
     "userIdPlaceholder": "User ID",
     "roleMember": "Member",
     "roleAdmin": "Admin",
+    "semesterLabel": "Semester",
+    "semesterOption": "Semester {{ semester }}",
     "inviteButton": "Invite",
     "inviteError": "Failed to invite user. Please check the User ID and try again.",
     "inviteSuccess": "User invited successfully.",
@@ -139,6 +148,8 @@
       "emailPlaceholder": "Email address",
       "roleMember": "Member",
       "roleAdmin": "Admin",
+      "semesterLabel": "Semester",
+      "semesterOption": "Semester {{ semester }}",
       "inviteButton": "Send Invite",
       "pendingInvites": "Pending Invites",
       "cancelInvite": "Revoke",
