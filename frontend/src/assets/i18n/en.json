@@ -228,6 +228,7 @@
       "applySuccess": "Curriculum imported successfully.",
       "applyFailed": "Import failed.",
       "invalidJson": "Invalid JSON file.",
+      "invalidCsv": "Invalid CSV file.",
       "version": "Version",
       "statusPending": "Pending",
       "statusApplied": "Applied",
