@@ -219,7 +219,7 @@
     },
     "import": {
       "title": "Neuer Import",
-      "description": "Laden Sie eine JSON-Datei mit dem Bildungsplan hoch.",
+      "description": "Laden Sie eine JSON oder CSV-Datei mit dem Bildungsplan hoch.",
       "selectFile": "Datei auswählen",
       "upload": "Hochladen",
       "uploading": "Wird hochgeladen...",
