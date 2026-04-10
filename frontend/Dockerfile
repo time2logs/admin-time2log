@@ -1,7 +1,6 @@
 FROM node:25.9.0-alpine AS build
 
 ARG BUILD_CONFIGURATION=development
-ARG API_BASE_URL
 
 WORKDIR /app
 
@@ -9,7 +8,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --legacy-peer-deps
 
 COPY . .
-RUN npm run build -- --configuration=$BUILD_CONFIGURATION --define "ENV_API_BASE_URL=\"$API_BASE_URL\""
+RUN npm run build -- --configuration=$BUILD_CONFIGURATION
 
 FROM nginx:alpine
 
