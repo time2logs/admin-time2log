@@ -2,6 +2,11 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+.dark ngx-charts-pie-chart text,
+.dark ngx-charts-bar-vertical text {
+  fill: #ffffff !important;
+}
+
 @theme {
   --color-surface: hsl(0 0% 97%);
   --color-surface-card: hsl(0 0% 100%);
