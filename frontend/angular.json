@@ -31,7 +31,10 @@
             ],
             "styles": [
               "src/styles.css"
-            ]
+            ],
+            "define": {
+              "ENV_API_BASE_URL": "''"
+            }
           },
           "configurations": {
             "production": {
