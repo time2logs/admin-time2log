@@ -160,15 +160,15 @@
                       {{ 'organizationManaging.members.confirmRemoveIrreversible' | translate }}
                     </button>
                   } @else {
-                    @if (i > 0) {
-                      <button
-                        class="px-2 py-1 text-xs text-red-600 ..."
-                        (click)="confirmRemoveMember(member, $event)"
-                        data-testid="remove-member-button"
-                      >
-                        {{ 'organizationManaging.members.remove' | translate }}
-                      </button>
-                    }
+              @if (member.id !== organization()?.createdBy) {
+                <button
+                  class="px-2 py-1 text-xs text-red-600 ..."
+                  (click)="confirmRemoveMember(member, $event)"
+                  data-testid="remove-member-button"
+                >
+                  {{ 'organizationManaging.members.remove' | translate }}
+                </button>
+              }
                   }
                 </li>
               }
