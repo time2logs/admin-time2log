@@ -236,6 +236,6 @@ class OrganizationDomainServiceTest {
     }
 
     private OrganizationResponse orgResponse(String name) {
-        return new OrganizationResponse(orgId, name, OffsetDateTime.now(), OffsetDateTime.now());
+        return new OrganizationResponse(orgId, name, null, OffsetDateTime.now(), OffsetDateTime.now());
     }
 }
