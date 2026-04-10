@@ -136,7 +136,7 @@
             <p class="text-gray-500 dark:text-[hsl(210,15%,55%)] text-sm">{{ 'organizationManaging.members.noMembers' | translate }}</p>
           } @else {
             <ul class="space-y-2">
-              @for (member of members(); track member.id) {
+              @for (member of members(); track member.id; let i = $index) {
                 <li
                   class="flex items-center justify-between px-4 py-3 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm hover:border-gray-300 dark:hover:border-[hsl(215,20%,25%)] hover:shadow-md transition-all group cursor-pointer"
                   role="button"
@@ -160,13 +160,15 @@
                       {{ 'organizationManaging.members.confirmRemoveIrreversible' | translate }}
                     </button>
                   } @else {
-                    <button
-                      class="px-2 py-1 text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
-                      (click)="confirmRemoveMember(member, $event)"
-                      data-testid="remove-member-button"
-                    >
-                      {{ 'organizationManaging.members.remove' | translate }}
-                    </button>
+              @if (member.id !== organization()?.createdBy) {
+                <button
+                  class="px-2 py-1 text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
+                  (click)="confirmRemoveMember(member, $event)"
+                  data-testid="remove-member-button"
+                >
+                  {{ 'organizationManaging.members.remove' | translate }}
+                </button>
+              }
                   }
                 </li>
               }

@@ -1,6 +1,7 @@
 export interface Organization {
   id: string
   name: string
+  createdBy: string
 }
 
 export interface Profession {
