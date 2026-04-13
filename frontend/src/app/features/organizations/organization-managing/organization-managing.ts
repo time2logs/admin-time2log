@@ -55,6 +55,9 @@ export class OrganizationManaging implements OnInit {
   private organizationId = '';
   protected readonly memberToConfirmRemoval = signal<string | null>(null);
   protected readonly teamToConfirmDeletion = signal<string | null>(null);
+  protected readonly newOrganizationOwner = signal<string>('');
+  protected readonly showTransferConfirm = signal(false);
+  protected readonly isTransferring = signal(false);
 
   ngOnInit(): void {
     this.organizationId = this.route.snapshot.params['id'];
@@ -275,7 +278,25 @@ protected confirmDeleteTeam(team: Team, event: Event): void {
   }
 }
 
-  @HostListener('document:click')
+  protected transferOwnership(): void {
+    const newOwnerId = this.newOrganizationOwner();
+    if (!newOwnerId) return;
+
+    this.isTransferring.set(true);
+    this.organizationService.transferOwnership(this.organizationId, newOwnerId).subscribe({
+      next: () => {
+        this.toast.success(this.translate.instant('toast.ownershipTransferred'));
+        this.showTransferConfirm.set(false);
+        this.newOrganizationOwner.set('');
+        this.isTransferring.set(false);
+        this.loadOrganization();
+      },
+      error: () => this.isTransferring.set(false),
+    });
+  }
+
+
+@HostListener('document:click')
     onDocumentClick(): void {
     this.memberToConfirmRemoval.set(null);
     this.teamToConfirmDeletion.set(null);

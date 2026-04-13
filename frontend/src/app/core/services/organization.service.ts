@@ -59,4 +59,8 @@ export class OrganizationService {
   getOnlyOrganizationMembers(id: string): Observable<Profile[]> {
     return this.http.get<Profile[]>(`${this.baseUrl}/${id}/onlyMembers`);
   }
+
+  transferOwnership(organizationId: string, newOwnerId: string): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${organizationId}/owner`, { newOwnerId });
+  }
 }

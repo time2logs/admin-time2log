@@ -5,7 +5,8 @@
     "save": "Speichern",
     "cancel": "Abbrechen",
     "delete": "Löschen",
-    "edit": "Bearbeiten"
+    "edit": "Bearbeiten",
+    "confirm": "Bestätigen"
   },
   "auth": {
     "login": {
@@ -193,7 +194,10 @@
       "dangerZone": "Gefahrenzone",
       "dangerDescription": "Unwiderrufliche Aktionen für diese Organisation.",
       "deleteOrganization": "Organisation löschen",
-      "deleteConfirm": "Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden."
+      "deleteConfirm": "Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "NewOrganizationOwner": "Neuer Eigentümer der Organisation",
+      "transferConfirm": "Wirklich übertragen? Diese Aktion ist unwiderruflich.",
+      "changeOwner": "Eigentümer wechseln"
     }
   },
   "teamManaging": {

@@ -5,7 +5,8 @@
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
-    "edit": "Edit"
+    "edit": "Edit",
+    "confirm": "Confirm"
   },
   "auth": {
     "login": {
@@ -192,7 +193,10 @@
       "dangerZone": "Danger Zone",
       "dangerDescription": "Irreversible actions for this organization.",
       "deleteOrganization": "Delete Organization",
-      "deleteConfirm": "Are you sure? This action cannot be undone."
+      "deleteConfirm": "Are you sure? This action cannot be undone.",
+      "NewOrganizationOwner": "New Organization Owner",
+      "transferConfirm": "Really transfer? This action is irreversible.",
+      "changeOwner": "Change Owner"
     }
   },
   "teamManaging": {
