@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { RouterOutlet } from '@angular/router';
+import { provideRouter, RouterOutlet } from '@angular/router';
 import { By } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { provideTranslateService } from '@ngx-translate/core';
@@ -9,7 +9,7 @@ describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideHttpClient(), provideTranslateService()],
+      providers: [provideHttpClient(), provideTranslateService(), provideRouter([])],
     }).compileComponents();
   });
 

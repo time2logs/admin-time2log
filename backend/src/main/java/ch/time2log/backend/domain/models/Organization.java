@@ -9,7 +9,7 @@ import java.util.UUID;
 public record Organization(UUID id, String name, UUID createdBy, OffsetDateTime createdAt, OffsetDateTime updatedAt) {
 
     public static Organization of(OrganizationResponse r) {
-        return new Organization(r.id(), r.name(), r. created_by(), r.created_at(), r.updated_at());
+        return new Organization(r.id(), r.name(), r.created_by(), r.created_at(), r.updated_at());
     }
 
     public static List<Organization> ofList(List<OrganizationResponse> list) {

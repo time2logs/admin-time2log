@@ -2,6 +2,7 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import Papa from 'papaparse';
 import { Profession } from '@app/core/models/organizations.models';
 import { CurriculumImport } from '@app/core/models/curriculum-import.models';
 import { CurriculumImportService } from '@services/curriculum-import.service';
@@ -60,6 +61,14 @@ export class ProfessionsManaging implements OnInit {
 
     this.selectedFileName.set(file.name);
 
+    if (file.name.endsWith('.csv')) {
+      this.parseCsvFile(file);
+    } else {
+      this.parseJsonFile(file);
+    }
+  }
+
+  private parseJsonFile(file: File): void {
     const reader = new FileReader();
     reader.onload = () => {
       try {
@@ -71,6 +80,80 @@ export class ProfessionsManaging implements OnInit {
     };
     reader.readAsText(file);
   }
+
+  private parseCsvFile(file: File): void {
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (result) => {
+        try {
+          this.selectedPayload = this.csvRowsToJson(result.data as CsvRow[]);
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : this.translate.instant('professionManaging.import.invalidCsv');
+          this.toast.error(msg);
+          this.resetFileSelection();
+        }
+      },
+      error: () => {
+        this.toast.error(this.translate.instant('professionManaging.import.invalidCsv'));
+        this.resetFileSelection();
+      },
+    });
+  }
+
+private csvRowsToJson(rows: CsvRow[]): object {
+  this.validateCsvRows(rows);
+  const nodeMap: Record<string, CsvNode> = {};
+  const competencySet = new Set<string>();
+
+  for (const row of rows) {
+    // Problem 3: Validierung
+    if (!['category', 'activity'].includes(row.type)) {
+      throw new Error(`Ungültiger type: "${row.type}" bei key "${row.key}"`);
+    }
+
+    const comps = row.competencies
+      ? row.competencies.split(',').map(c => c.trim()).filter(c => c)
+      : undefined;
+
+    comps?.forEach(c => competencySet.add(c));
+
+    nodeMap[row.key] = {
+      key: row.key,
+      type: row.type,
+      label: row.label,
+      order: Number(row.order),
+      competencies: comps,
+      children: row.type === 'category' ? [] : undefined,
+      _parent: row.parent_key || null,
+    };
+  }
+
+  const roots: Omit<CsvNode, '_parent'>[] = [];
+  for (const node of Object.values(nodeMap)) {
+    const { _parent, ...clean } = node;
+    if (_parent && nodeMap[_parent]) {
+      nodeMap[_parent].children!.push(clean as CsvNode);
+    } else {
+      roots.push(clean);
+    }
+  }
+
+  // Problem 1: Sortierung sicherstellen
+  const sortChildren = (nodes: Omit<CsvNode, '_parent'>[]) => {
+    nodes.sort((a, b) => a.order - b.order);
+    nodes.forEach(n => n.children && sortChildren(n.children));
+  };
+  sortChildren(roots);
+
+  return {
+    schema_version: 1,
+    version: '1.0',
+    // Problem 2: descriptions bleiben leer – bewusste Entscheidung dokumentieren
+    competencies: [...competencySet].map(code => ({ code, description: '' })),
+    nodes: roots,
+  };
+}
 
   protected uploadImport(): void {
     if (!this.selectedPayload) return;
@@ -125,4 +208,63 @@ export class ProfessionsManaging implements OnInit {
     // TODO: replace with real API call
     this.profession.set({ id, key: 'maurer', label: 'Maurer EFZ' });
   }
+
+  private validateCsvRows(rows: CsvRow[]): void {
+  if (rows.length === 0) {
+    throw new Error('CSV ist leer');
+  }
+
+  const seenKeys = new Set<string>();
+
+  for (const [i, row] of rows.entries()) {
+    const line = `Zeile ${i + 2}`; // +2 wegen Header
+
+    // Pflichtfelder
+    if (!row.key?.trim())   throw new Error(`${line}: "key" fehlt`);
+    if (!row.label?.trim()) throw new Error(`${line}: "label" fehlt`);
+    if (!row.type?.trim())  throw new Error(`${line}: "type" fehlt`);
+    if (!row.order?.trim()) throw new Error(`${line}: "order" fehlt`);
+
+    // Doppelte keys
+    if (seenKeys.has(row.key)) throw new Error(`${line}: key "${row.key}" ist doppelt`);
+    seenKeys.add(row.key);
+
+    // Type-Validierung
+    if (!['category', 'activity'].includes(row.type)) {
+      throw new Error(`${line}: ungültiger type "${row.type}"`);
+    }
+
+    // order muss eine Zahl sein
+    if (isNaN(Number(row.order))) {
+      throw new Error(`${line}: "order" ist keine Zahl ("${row.order}")`);
+    }
+  }
+
+  // parent_key-Referenzen prüfen
+  const allKeys = new Set(rows.map(r => r.key));
+  for (const [i, row] of rows.entries()) {
+    if (row.parent_key && !allKeys.has(row.parent_key)) {
+      throw new Error(`Zeile ${i + 2}: parent_key "${row.parent_key}" existiert nicht`);
+    }
+  }
+}
+}
+
+interface CsvRow {
+  key: string;
+  type: string;
+  label: string;
+  order: string;
+  competencies?: string;
+  parent_key?: string;
+}
+
+interface CsvNode {
+  key: string;
+  type: string;
+  label: string;
+  order: number;
+  competencies?: string[];
+  children?: CsvNode[];
+  _parent: string | null;
 }
