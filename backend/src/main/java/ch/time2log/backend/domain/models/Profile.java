@@ -11,7 +11,8 @@ public record Profile(
         String firstName,
         String lastName,
         OffsetDateTime createdAt,
-        OffsetDateTime updatedAt
+        OffsetDateTime updatedAt,
+        String role
 ) {
     public static Profile of(ProfileResponse profileResponse) {
         return new Profile(
@@ -19,8 +20,13 @@ public record Profile(
                 profileResponse.first_name(),
                 profileResponse.last_name(),
                 profileResponse.created_at(),
-                profileResponse.updated_at()
+                profileResponse.updated_at(),
+                null
         );
+    }
+
+    public Profile withRole(String role) {
+        return new Profile(id, firstName, lastName, createdAt, updatedAt, role);
     }
 
     public static List<Profile> ofList(List<ProfileResponse> profiles) {

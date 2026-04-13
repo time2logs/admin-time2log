@@ -9,10 +9,11 @@ import java.util.UUID;
 public record ProfileDto(
         UUID id,
         String firstName,
-        String lastName
+        String lastName,
+        String role
 ) {
     public static ProfileDto of(Profile profile) {
-        return new ProfileDto(profile.id(), profile.firstName(), profile.lastName());
+        return new ProfileDto(profile.id(), profile.firstName(), profile.lastName(), profile.role());
     }
 
     public static List<ProfileDto> ofList(List<Profile> profiles) {

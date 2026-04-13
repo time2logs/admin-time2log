@@ -147,7 +147,16 @@ public class OrganizationDomainService {
                 OrganizationMemberResponse.class
         );
         var ids = members.stream().map(OrganizationMemberResponse::user_id).toList();
-        return profileDomainService.getByIds(ids);
+        var profiles = profileDomainService.getByIds(ids);
+
+        return profiles.stream().map(profile -> {
+            var role = members.stream()
+                    .filter(m -> m.user_id().equals(profile.id()))
+                    .map(OrganizationMemberResponse::user_role)
+                    .findFirst()
+                    .orElse("user");
+            return profile.withRole(role);
+        }).toList();
     }
 
     public List<Profile> getOnlyOrganizationMemberProfiles(UUID organizationId) {
@@ -158,5 +167,14 @@ public class OrganizationDomainService {
         );
         var ids = members.stream().map(OrganizationMemberResponse::user_id).toList();
         return profileDomainService.getByIds(ids);
+    }
+
+    public void transferOwnership(UUID organizationId, UUID newOwnerId) {
+        supabaseService.patch(
+                "admin.organizations",
+                "id=eq." + organizationId,
+                Map.of("created_by", newOwnerId),
+                Object.class
+        );
     }
 }

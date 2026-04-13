@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RequestMapping("api/organizations")
@@ -72,5 +73,10 @@ public class OrganizationController {
     @GetMapping("/{id}/onlyMembers")
     public List<ProfileDto> getOnlyOrganizationMembers(@PathVariable UUID id){
         return ProfileDto.ofList(orgDomainService.getOnlyOrganizationMemberProfiles(id));
+    }
+
+    @PatchMapping("/{id}/owner")
+    public void transferOwnership(@PathVariable UUID id, @RequestBody Map<String, String> body) {
+        orgDomainService.transferOwnership(id, UUID.fromString(body.get("newOwnerId")));
     }
 }
