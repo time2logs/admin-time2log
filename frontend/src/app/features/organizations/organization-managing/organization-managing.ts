@@ -8,8 +8,6 @@ import { ToastService } from '@services/toast.service';
 import { Invite, Organization, Profession } from '@app/core/models/organizations.models';
 import { Profile } from '@app/core/models/profile.models';
 import { Team } from '@app/core/models/team.models';
-import {createClient} from '@supabase/supabase-js';
-import {environment} from '@env/environment';
 import {AuthService} from '@services/auth.service';
 
 type Tab = 'members' | 'curriculums' | 'teams' | 'settings';
