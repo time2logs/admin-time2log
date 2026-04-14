@@ -169,10 +169,11 @@
         <ngx-charts-pie-chart
           [results]="activityChartData()"
           [scheme]="colorScheme"
-          [legend]="true"
+          [legend]="false"
           [legendTitle]="''"
           [legendPosition]="legendPosition"
           [labels]="true"
+          [trimLabels]="trimLabels()"
           [doughnut]="false"
           [tooltipDisabled]="false"
           [view]="chartView()"

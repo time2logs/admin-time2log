@@ -178,6 +178,7 @@ export class DashboardComponent implements OnInit {
   }
 
   chartView = signal<[number, number]>(this.getChartSize());
+  trimLabels = signal(window.innerWidth < 640);
 
   private getChartSize(): [number, number] {
     const width = window.innerWidth;
@@ -189,6 +190,7 @@ export class DashboardComponent implements OnInit {
   @HostListener('window:resize')
   onResize() {
     this.chartView.set(this.getChartSize());
+    this.trimLabels.set(window.innerWidth < 640);
   }
 
 

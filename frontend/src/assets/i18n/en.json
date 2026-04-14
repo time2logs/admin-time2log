@@ -222,7 +222,7 @@
     },
     "import": {
       "title": "New Import",
-      "description": "Upload a JSON file with the curriculum data.",
+      "description": "Upload a JSON or CSV file with the curriculum data.",
       "selectFile": "Select File",
       "upload": "Upload",
       "uploading": "Uploading...",
@@ -232,6 +232,7 @@
       "applySuccess": "Curriculum imported successfully.",
       "applyFailed": "Import failed.",
       "invalidJson": "Invalid JSON file.",
+      "invalidCsv": "Invalid CSV file.",
       "version": "Version",
       "statusPending": "Pending",
       "statusApplied": "Applied",
