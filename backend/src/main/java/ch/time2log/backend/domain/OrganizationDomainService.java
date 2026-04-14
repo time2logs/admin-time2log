@@ -11,6 +11,7 @@ import ch.time2log.backend.infrastructure.supabase.SupabaseService;
 import ch.time2log.backend.infrastructure.supabase.responses.InviteResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.OrganizationMemberResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.OrganizationResponse;
+import ch.time2log.backend.infrastructure.supabase.responses.ReminderResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -158,5 +159,43 @@ public class OrganizationDomainService {
         );
         var ids = members.stream().map(OrganizationMemberResponse::user_id).toList();
         return profileDomainService.getByIds(ids);
+    }
+
+    public ReminderResponse getReminder(UUID organizationId) {
+        var list = supabaseService.getListWithQuery(
+                "admin.reminder",
+                "organization_id=eq." + organizationId,
+                ReminderResponse.class
+        );
+        return list.isEmpty() ? null : list.getFirst();
+    }
+
+    public ReminderResponse saveReminder(UUID organizationId, String channel, String sendTime, int idleDays, String sendDay) {
+        var existing = getReminder(organizationId);
+        var body = Map.of(
+                "organization_id", organizationId,
+                "channel", channel,
+                "send_time", sendTime,
+                "idle_days", idleDays,
+                "send_day", sendDay
+        );
+        if (existing != null) {
+            var updated = supabaseService.patch(
+                    "admin.reminder",
+                    "organization_id=eq." + organizationId,
+                    body,
+                    ReminderResponse[].class
+            );
+            if (updated == null || updated.length == 0) {
+                throw new EntityNotCreatedException("Could not update reminder");
+            }
+            return updated[0];
+        } else {
+            var created = supabaseService.post("admin.reminder", body, ReminderResponse[].class);
+            if (created == null || created.length == 0) {
+                throw new EntityNotCreatedException("Could not create reminder");
+            }
+            return created[0];
+        }
     }
 }

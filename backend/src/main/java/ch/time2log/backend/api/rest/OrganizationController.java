@@ -2,9 +2,11 @@ package ch.time2log.backend.api.rest;
 
 import ch.time2log.backend.api.rest.dto.inbound.CreateInviteRequest;
 import ch.time2log.backend.api.rest.dto.inbound.CreateOrganizationRequest;
+import ch.time2log.backend.api.rest.dto.inbound.SaveReminderRequest;
 import ch.time2log.backend.api.rest.dto.outbound.InviteDto;
 import ch.time2log.backend.api.rest.dto.outbound.OrganizationDto;
 import ch.time2log.backend.api.rest.dto.outbound.ProfileDto;
+import ch.time2log.backend.api.rest.dto.outbound.ReminderDto;
 import ch.time2log.backend.domain.OrganizationDomainService;
 import ch.time2log.backend.security.AuthenticatedUser;
 import org.springframework.http.HttpStatus;
@@ -72,5 +74,17 @@ public class OrganizationController {
     @GetMapping("/{id}/onlyMembers")
     public List<ProfileDto> getOnlyOrganizationMembers(@PathVariable UUID id){
         return ProfileDto.ofList(orgDomainService.getOnlyOrganizationMemberProfiles(id));
+    }
+
+    @GetMapping("/{id}/reminder")
+    public ReminderDto getReminder(@PathVariable UUID id) {
+        var reminder = orgDomainService.getReminder(id);
+        return reminder != null ? ReminderDto.of(reminder) : null;
+    }
+
+    @PutMapping("/{id}/reminder")
+    public ReminderDto saveReminder(@PathVariable UUID id, @RequestBody SaveReminderRequest request) {
+        var saved = orgDomainService.saveReminder(id, request.channel(), request.sendTime(), request.idleDays(), request.sendDay());
+        return ReminderDto.of(saved);
     }
 }

@@ -6,20 +6,23 @@ import ch.time2log.backend.infrastructure.supabase.responses.ActivityRecordRespo
 import ch.time2log.backend.infrastructure.supabase.responses.OrganizationMemberResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.OrganizationResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.ProfileResponse;
+import ch.time2log.backend.infrastructure.supabase.responses.ReminderResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 
 @Component
 public class ReminderService {
     private static final Logger log = LoggerFactory.getLogger(ReminderService.class);
-    private static final long INACTIVE_THRESHOLD_DAYS = 3;
 
     private final SupabaseAdminClient adminClient;
     private final ReminderMailService reminderMailService;
@@ -33,27 +36,60 @@ public class ReminderService {
     }
 
     /**
-     * Runs every Friday at 08:00 (server time).
-     * Sends a reminder email to all users who have not logged an activity record in the last 3 days.
+     * Runs every minute to check if any organization has a reminder due right now.
+     * Matches the current day and hour/minute against each org's reminder config.
      */
-    @Scheduled(cron = "40 46 14 * * MON")
+    @Scheduled(cron = "0 * * * * *")
     public void sendWeeklyReminders() {
-        log.info("Starting weekly reminder check...");
+        log.info("Starting reminder check...");
 
-        var organizations = adminClient.getListWithQuery(
-                "admin.organizations",
-                "select=id,name",
-                OrganizationResponse.class
+        var reminders = adminClient.getListWithQuery(
+                "admin.reminder",
+                "select=*",
+                ReminderResponse.class
         );
 
-        for (var org : organizations) {
-            processOrganization(org.id(), org.name());
+        if (reminders.isEmpty()) {
+            log.info("No reminder configurations found.");
+            return;
         }
 
-        log.info("Weekly reminder check completed.");
+        var today = LocalDate.now();
+        var currentDay = today.getDayOfWeek();
+        var currentTime = LocalTime.now();
+
+        for (var reminder : reminders) {
+            try {
+                var sendDay = DayOfWeek.valueOf(reminder.send_day());
+                if (currentDay != sendDay) continue;
+
+                var sendTime = LocalTime.parse(reminder.send_time());
+                if (currentTime.getHour() != sendTime.getHour() || currentTime.getMinute() != sendTime.getMinute()) continue;
+
+                log.info("Reminder due for org {} (channel={}, day={}, time={})",
+                        reminder.organization_id(), reminder.channel(), reminder.send_day(), reminder.send_time());
+
+                processOrganization(reminder.organization_id(), reminder.idle_days(), reminder.channel());
+            } catch (Exception e) {
+                log.error("Error processing reminder config for org {}: {}", reminder.organization_id(), e.getMessage());
+            }
+        }
+
+        log.info("Reminder check completed.");
     }
 
-    private void processOrganization(UUID orgId, String orgName) {
+    private void processOrganization(UUID orgId, int idleDays, String channel) {
+        var organizations = adminClient.getListWithQuery(
+                "admin.organizations",
+                "id=eq." + orgId + "&select=id,name",
+                OrganizationResponse.class
+        );
+        if (organizations.isEmpty()) {
+            log.warn("Organization {} not found, skipping", orgId);
+            return;
+        }
+        var orgName = organizations.getFirst().name();
+
         var members = adminClient.getListWithQuery(
                 "admin.organization_members",
                 "organization_id=eq." + orgId + "&user_role=eq.user",
@@ -62,18 +98,18 @@ public class ReminderService {
 
         if (members.isEmpty()) return;
 
-        var cutoffDate = LocalDate.now().minusDays(INACTIVE_THRESHOLD_DAYS).toString();
+        var cutoffDate = LocalDate.now().minusDays(idleDays).toString();
 
         for (var member : members) {
             try {
-                checkAndNotifyMember(member.user_id(), orgId, orgName, cutoffDate);
+                checkAndNotifyMember(member.user_id(), orgId, orgName, cutoffDate, idleDays, channel);
             } catch (Exception e) {
                 log.error("Error processing reminder for user {} in org {}: {}", member.user_id(), orgId, e.getMessage());
             }
         }
     }
 
-    private void checkAndNotifyMember(UUID userId, UUID orgId, String orgName, String cutoffDate) {
+    private void checkAndNotifyMember(UUID userId, UUID orgId, String orgName, String cutoffDate, int idleDays, String channel) {
         var recentRecords = adminClient.getListWithQuery(
                 "app.activity_records",
                 "organization_id=eq." + orgId + "&user_id=eq." + userId
@@ -83,7 +119,6 @@ public class ReminderService {
         log.info("Checking reminder for user {} in org {}", userId, orgName);
         if (!recentRecords.isEmpty()) return;
 
-        // User has no records in the last 3 days -> determine exact days inactive
         var lastRecords = adminClient.getListWithQuery(
                 "app.activity_records",
                 "organization_id=eq." + orgId + "&user_id=eq." + userId
@@ -93,13 +128,12 @@ public class ReminderService {
 
         long daysInactive;
         if (lastRecords.isEmpty()) {
-            daysInactive = INACTIVE_THRESHOLD_DAYS;
+            daysInactive = idleDays;
         } else {
             var lastDate = LocalDate.parse(lastRecords.getFirst().entry_date());
             daysInactive = ChronoUnit.DAYS.between(lastDate, LocalDate.now());
         }
 
-        // Fetch profile for first name
         var profiles = adminClient.getListWithQuery(
                 "app.profiles",
                 "id=eq." + userId,
@@ -107,15 +141,17 @@ public class ReminderService {
         );
         var firstName = profiles.isEmpty() ? "User" : profiles.getFirst().first_name();
 
-        // Fetch email from Supabase Auth
         var email = adminClient.getUserEmail(userId);
-        log.info("user email is " + email);
         if (email == null || email.isBlank()) {
             log.warn("No email found for user {}, skipping reminder", userId);
             return;
         }
 
-        reminderMailService.sendReminder(email, firstName, orgName, daysInactive, appUrl);
-        log.info("Sent reminder to {} ({}) - {} days inactive in org {}", email, firstName, daysInactive, orgName);
+        if ("EMAIL".equals(channel)) {
+            reminderMailService.sendReminder(email, firstName, orgName, daysInactive, appUrl);
+            log.info("Sent EMAIL reminder to {} ({}) - {} days inactive in org {}", email, firstName, daysInactive, orgName);
+        } else {
+            log.info("SMS reminder for {} ({}) - {} days inactive in org {} (SMS not yet implemented)", email, firstName, daysInactive, orgName);
+        }
     }
 }
