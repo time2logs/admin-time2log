@@ -193,7 +193,24 @@
       "dangerZone": "Gefahrenzone",
       "dangerDescription": "Unwiderrufliche Aktionen für diese Organisation.",
       "deleteOrganization": "Organisation löschen",
-      "deleteConfirm": "Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden."
+      "deleteConfirm": "Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "reminder": {
+        "title": "Erinnerungen",
+        "channel": "Benachrichtigungskanal",
+        "email": "E-Mail",
+        "sendDay": "Versandtag",
+        "sendTime": "Versandzeit",
+        "idleDays": "Inaktive Tage vor Erinnerung",
+        "days": {
+          "monday": "Montag",
+          "tuesday": "Dienstag",
+          "wednesday": "Mittwoch",
+          "thursday": "Donnerstag",
+          "friday": "Freitag",
+          "saturday": "Samstag",
+          "sunday": "Sonntag"
+        }
+      }
     }
   },
   "teamManaging": {
@@ -277,7 +294,8 @@
     "organizationDeleted": "Organisation gelöscht.",
     "professionCreated": "Beruf erstellt.",
     "teamCreated": "Team erstellt.",
-    "teamDeleted": "Team gelöscht."
+    "teamDeleted": "Team gelöscht.",
+    "reminderSaved": "Erinnerungseinstellungen gespeichert."
   },
   "reports": {
     "title": "Reports",

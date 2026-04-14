@@ -5,7 +5,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { OrganizationService } from '@services/organization.service';
 import { TeamService } from '@services/team.service';
 import { ToastService } from '@services/toast.service';
-import { Invite, Organization, Profession } from '@app/core/models/organizations.models';
+import { Invite, Organization, Profession, Reminder } from '@app/core/models/organizations.models';
 import { Profile } from '@app/core/models/profile.models';
 import { Team } from '@app/core/models/team.models';
 
@@ -52,6 +52,21 @@ export class OrganizationManaging implements OnInit {
   protected readonly showDeleteConfirm = signal(false);
   protected readonly isDeleting = signal(false);
 
+  protected readonly reminderChannel = signal<string>('SMS');
+  protected readonly reminderSendDay = signal<string>('FRIDAY');
+  protected readonly reminderSendTime = signal<string>('08:00');
+  protected readonly reminderIdleDays = signal<number>(3);
+  protected readonly isSavingReminder = signal(false);
+  protected readonly dayOptions = [
+    { value: 'MONDAY', labelKey: 'organizationManaging.settings.reminder.days.monday' },
+    { value: 'TUESDAY', labelKey: 'organizationManaging.settings.reminder.days.tuesday' },
+    { value: 'WEDNESDAY', labelKey: 'organizationManaging.settings.reminder.days.wednesday' },
+    { value: 'THURSDAY', labelKey: 'organizationManaging.settings.reminder.days.thursday' },
+    { value: 'FRIDAY', labelKey: 'organizationManaging.settings.reminder.days.friday' },
+    { value: 'SATURDAY', labelKey: 'organizationManaging.settings.reminder.days.saturday' },
+    { value: 'SUNDAY', labelKey: 'organizationManaging.settings.reminder.days.sunday' },
+  ] as const;
+
   private organizationId = '';
   protected readonly memberToConfirmRemoval = signal<string | null>(null);
   protected readonly teamToConfirmDeletion = signal<string | null>(null);
@@ -69,6 +84,7 @@ export class OrganizationManaging implements OnInit {
     this.loadInvites();
     this.loadProfessions();
     this.loadTeams();
+    this.loadReminder();
   }
 
   protected setTab(tab: Tab): void {
@@ -274,6 +290,37 @@ protected confirmDeleteTeam(team: Team, event: Event): void {
     this.teamToConfirmDeletion.set(team.id);
   }
 }
+
+  private loadReminder(): void {
+    this.organizationService.getReminder(this.organizationId).subscribe({
+      next: (reminder) => {
+        if (reminder) {
+          this.reminderChannel.set(reminder.channel);
+          this.reminderSendDay.set(reminder.sendDay);
+          this.reminderSendTime.set(reminder.sendTime);
+          this.reminderIdleDays.set(reminder.idleDays);
+        }
+      },
+    });
+  }
+
+  protected saveReminder(): void {
+    this.isSavingReminder.set(true);
+    this.organizationService.saveReminder(this.organizationId, {
+      channel: this.reminderChannel(),
+      sendTime: this.reminderSendTime(),
+      idleDays: this.reminderIdleDays(),
+      sendDay: this.reminderSendDay(),
+    }).subscribe({
+      next: () => {
+        this.isSavingReminder.set(false);
+        this.toast.success(this.translate.instant('toast.reminderSaved'));
+      },
+      error: () => {
+        this.isSavingReminder.set(false);
+      },
+    });
+  }
 
   @HostListener('document:click')
     onDocumentClick(): void {
