@@ -8,6 +8,9 @@ import { ToastService } from '@services/toast.service';
 import { Invite, Organization, Profession } from '@app/core/models/organizations.models';
 import { Profile } from '@app/core/models/profile.models';
 import { Team } from '@app/core/models/team.models';
+import {createClient} from '@supabase/supabase-js';
+import {environment} from '@env/environment';
+import {AuthService} from '@services/auth.service';
 
 type Tab = 'members' | 'curriculums' | 'teams' | 'settings';
 
@@ -59,6 +62,9 @@ export class OrganizationManaging implements OnInit {
   protected readonly showTransferConfirm = signal(false);
   protected readonly isTransferring = signal(false);
 
+  private readonly authService = inject(AuthService);
+  protected readonly currentUserId = signal<string | null>(null);
+
   ngOnInit(): void {
     this.organizationId = this.route.snapshot.params['id'];
 
@@ -72,6 +78,10 @@ export class OrganizationManaging implements OnInit {
     this.loadInvites();
     this.loadProfessions();
     this.loadTeams();
+
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUserId.set(user?.id ?? null);
+    });
   }
 
   protected setTab(tab: Tab): void {
@@ -301,4 +311,6 @@ protected confirmDeleteTeam(team: Team, event: Event): void {
     this.memberToConfirmRemoval.set(null);
     this.teamToConfirmDeletion.set(null);
   }
+
+
 }

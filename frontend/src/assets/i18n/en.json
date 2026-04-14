@@ -279,7 +279,8 @@
     "organizationDeleted": "Organization deleted.",
     "professionCreated": "Profession created.",
     "teamCreated": "Team created.",
-    "teamDeleted": "Team deleted."
+    "teamDeleted": "Team deleted.",
+    "ownershipTransferred": "Organization successfully transferred"
   },
   "reports": {
     "title": "Reports",
