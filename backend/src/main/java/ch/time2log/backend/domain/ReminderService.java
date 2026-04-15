@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
@@ -54,9 +55,10 @@ public class ReminderService {
             return;
         }
 
-        var today = LocalDate.now();
+        var swissZone = ZoneId.of("Europe/Zurich");
+        var today = LocalDate.now(swissZone);
         var currentDay = today.getDayOfWeek();
-        var currentTime = LocalTime.now();
+        var currentTime = LocalTime.now(swissZone);
 
         for (var reminder : reminders) {
             try {
