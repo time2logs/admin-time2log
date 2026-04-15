@@ -403,8 +403,9 @@
           <div class="p-5 space-y-4">
             <!-- Channel -->
             <div>
-              <label class="block text-sm font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] mb-1">{{ 'organizationManaging.settings.reminder.channel' | translate }}</label>
+              <label for="reminder-channel" class="block text-sm font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] mb-1">{{ 'organizationManaging.settings.reminder.channel' | translate }}</label>
               <select
+                id="reminder-channel"
                 class="w-full sm:w-auto px-4 py-2 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-[hsl(210,15%,90%)]"
                 [ngModel]="reminderChannel()"
                 (ngModelChange)="reminderChannel.set($event)"
@@ -416,8 +417,9 @@
 
             <!-- Day -->
             <div>
-              <label class="block text-sm font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] mb-1">{{ 'organizationManaging.settings.reminder.sendDay' | translate }}</label>
+              <label for="reminder-send-day" class="block text-sm font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] mb-1">{{ 'organizationManaging.settings.reminder.sendDay' | translate }}</label>
               <select
+                id="reminder-send-day"
                 class="w-full sm:w-auto px-4 py-2 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-[hsl(210,15%,90%)]"
                 [ngModel]="reminderSendDay()"
                 (ngModelChange)="reminderSendDay.set($event)"
@@ -430,8 +432,9 @@
 
             <!-- Time -->
             <div>
-              <label class="block text-sm font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] mb-1">{{ 'organizationManaging.settings.reminder.sendTime' | translate }}</label>
+              <label for="reminder-send-time" class="block text-sm font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] mb-1">{{ 'organizationManaging.settings.reminder.sendTime' | translate }}</label>
               <input
+                id="reminder-send-time"
                 type="time"
                 class="w-full sm:w-auto px-4 py-2 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-[hsl(210,15%,90%)]"
                 [ngModel]="reminderSendTime()"
@@ -441,8 +444,9 @@
 
             <!-- Idle Days -->
             <div>
-              <label class="block text-sm font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] mb-1">{{ 'organizationManaging.settings.reminder.idleDays' | translate }}</label>
+              <label for="reminder-idle-days" class="block text-sm font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] mb-1">{{ 'organizationManaging.settings.reminder.idleDays' | translate }}</label>
               <input
+                id="reminder-idle-days"
                 type="number"
                 min="1"
                 class="w-full sm:w-24 px-4 py-2 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-[hsl(210,15%,90%)]"

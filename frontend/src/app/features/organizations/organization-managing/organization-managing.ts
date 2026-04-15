@@ -5,7 +5,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { OrganizationService } from '@services/organization.service';
 import { TeamService } from '@services/team.service';
 import { ToastService } from '@services/toast.service';
-import { Invite, Organization, Profession, Reminder } from '@app/core/models/organizations.models';
+import { Invite, Organization, Profession } from '@app/core/models/organizations.models';
 import { Profile } from '@app/core/models/profile.models';
 import { Team } from '@app/core/models/team.models';
 import {AuthService} from '@services/auth.service';
