@@ -14,6 +14,7 @@ import ch.time2log.backend.infrastructure.supabase.responses.InviteResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.OrganizationMemberResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.OrganizationResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.ProfileResponse;
+import ch.time2log.backend.infrastructure.supabase.responses.ReminderResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -263,7 +265,11 @@ class OrganizationDomainServiceTest {
         private final UUID userId1 = UUID.randomUUID();
         private final UUID userId2 = UUID.randomUUID();
         private final String remOrgName = "Acme Corp";
-        private final String remAppUrl = "https://dev.app.aeristo.cc/";
+        private final String remAppUrl = "https://app.time2log.ch";
+
+        // Current day/time used to build matching reminder configs
+        private final String currentDayName = LocalDate.now().getDayOfWeek().name();
+        private final String currentTime = LocalTime.now().withSecond(0).withNano(0).toString();
 
         @BeforeEach
         void setUpReminder() {
@@ -271,36 +277,65 @@ class OrganizationDomainServiceTest {
             ReflectionTestUtils.setField(reminderService, "appUrl", remAppUrl);
         }
 
-        @Test
-        void sendWeeklyReminders_inactiveUser_sendsReminderEmail() {
-            var cutoffDate = LocalDate.now().minusDays(3).toString();
+        // --- Reminder config matching ---
 
-            when(supabaseAdminClient.getListWithQuery(eq("admin.organizations"), anyString(), eq(OrganizationResponse.class)))
-                    .thenReturn(List.of(reminderOrgResponse(remOrgId, remOrgName)));
-            when(supabaseAdminClient.getListWithQuery(eq("admin.organization_members"), contains("organization_id=eq." + remOrgId), eq(OrganizationMemberResponse.class)))
-                    .thenReturn(List.of(memberResponse(userId1, remOrgId)));
-            when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("entry_date=gte." + cutoffDate), eq(ActivityRecordResponse.class)))
+        @Test
+        void sendWeeklyReminders_noReminderConfigs_doesNothing() {
+            when(supabaseAdminClient.getListWithQuery(eq("admin.reminder"), anyString(), eq(ReminderResponse.class)))
                     .thenReturn(List.of());
-            var lastRecord = activityRecordResponse(userId1, remOrgId, LocalDate.now().minusDays(5).toString());
-            when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("order=entry_date.desc"), eq(ActivityRecordResponse.class)))
-                    .thenReturn(List.of(lastRecord));
-            when(supabaseAdminClient.getListWithQuery(eq("app.profiles"), contains("id=eq." + userId1), eq(ProfileResponse.class)))
-                    .thenReturn(List.of(profileResponse(userId1, "Max")));
+
+            reminderService.sendWeeklyReminders();
+
+            verifyNoInteractions(reminderMailService);
+        }
+
+        @Test
+        void sendWeeklyReminders_reminderOnDifferentDay_doesNothing() {
+            var otherDay = LocalDate.now().getDayOfWeek() == java.time.DayOfWeek.MONDAY ? "TUESDAY" : "MONDAY";
+            var reminder = reminderConfig(remOrgId, "EMAIL", currentTime, 3, otherDay);
+
+            when(supabaseAdminClient.getListWithQuery(eq("admin.reminder"), anyString(), eq(ReminderResponse.class)))
+                    .thenReturn(List.of(reminder));
+
+            reminderService.sendWeeklyReminders();
+
+            verifyNoInteractions(reminderMailService);
+        }
+
+        @Test
+        void sendWeeklyReminders_reminderOnDifferentTime_doesNothing() {
+            var otherTime = LocalTime.now().plusHours(2).withSecond(0).withNano(0).toString();
+            var reminder = reminderConfig(remOrgId, "EMAIL", otherTime, 3, currentDayName);
+
+            when(supabaseAdminClient.getListWithQuery(eq("admin.reminder"), anyString(), eq(ReminderResponse.class)))
+                    .thenReturn(List.of(reminder));
+
+            reminderService.sendWeeklyReminders();
+
+            verifyNoInteractions(reminderMailService);
+        }
+
+        // --- EMAIL channel: full flow ---
+
+        @Test
+        void sendWeeklyReminders_inactiveUser_sendsEmailReminder() {
+            var idleDays = 5;
+            stubReminderWithOrg("EMAIL", idleDays);
+            stubMember(userId1);
+            stubInactiveUser(userId1, 7);
+            stubProfile(userId1, "Max");
             when(supabaseAdminClient.getUserEmail(userId1)).thenReturn("max@example.com");
 
             reminderService.sendWeeklyReminders();
 
-            verify(reminderMailService).sendReminder("max@example.com", "Max", remOrgName, 5, remAppUrl);
+            verify(reminderMailService).sendReminder("max@example.com", "Max", remOrgName, 7, remAppUrl);
         }
 
         @Test
         void sendWeeklyReminders_activeUser_doesNotSendReminder() {
+            stubReminderWithOrg("EMAIL", 3);
+            stubMember(userId1);
             var recentRecord = activityRecordResponse(userId1, remOrgId, LocalDate.now().toString());
-
-            when(supabaseAdminClient.getListWithQuery(eq("admin.organizations"), anyString(), eq(OrganizationResponse.class)))
-                    .thenReturn(List.of(reminderOrgResponse(remOrgId, remOrgName)));
-            when(supabaseAdminClient.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
-                    .thenReturn(List.of(memberResponse(userId1, remOrgId)));
             when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("entry_date=gte."), eq(ActivityRecordResponse.class)))
                     .thenReturn(List.of(recentRecord));
 
@@ -310,34 +345,28 @@ class OrganizationDomainServiceTest {
         }
 
         @Test
-        void sendWeeklyReminders_userWithNoRecordsAtAll_usesDefaultDaysInactive() {
-            when(supabaseAdminClient.getListWithQuery(eq("admin.organizations"), anyString(), eq(OrganizationResponse.class)))
-                    .thenReturn(List.of(reminderOrgResponse(remOrgId, remOrgName)));
-            when(supabaseAdminClient.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
-                    .thenReturn(List.of(memberResponse(userId1, remOrgId)));
+        void sendWeeklyReminders_userWithNoRecordsAtAll_usesConfiguredIdleDays() {
+            var idleDays = 7;
+            stubReminderWithOrg("EMAIL", idleDays);
+            stubMember(userId1);
+            // No recent records and no records at all
             when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("entry_date=gte."), eq(ActivityRecordResponse.class)))
                     .thenReturn(List.of());
             when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("order=entry_date.desc"), eq(ActivityRecordResponse.class)))
                     .thenReturn(List.of());
-            when(supabaseAdminClient.getListWithQuery(eq("app.profiles"), contains("id=eq." + userId1), eq(ProfileResponse.class)))
-                    .thenReturn(List.of(profileResponse(userId1, "Anna")));
+            stubProfile(userId1, "Anna");
             when(supabaseAdminClient.getUserEmail(userId1)).thenReturn("anna@example.com");
 
             reminderService.sendWeeklyReminders();
 
-            verify(reminderMailService).sendReminder("anna@example.com", "Anna", remOrgName, 3, remAppUrl);
+            verify(reminderMailService).sendReminder("anna@example.com", "Anna", remOrgName, 7, remAppUrl);
         }
 
         @Test
         void sendWeeklyReminders_profileNotFound_usesFallbackName() {
-            when(supabaseAdminClient.getListWithQuery(eq("admin.organizations"), anyString(), eq(OrganizationResponse.class)))
-                    .thenReturn(List.of(reminderOrgResponse(remOrgId, remOrgName)));
-            when(supabaseAdminClient.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
-                    .thenReturn(List.of(memberResponse(userId1, remOrgId)));
-            when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("entry_date=gte."), eq(ActivityRecordResponse.class)))
-                    .thenReturn(List.of());
-            when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("order=entry_date.desc"), eq(ActivityRecordResponse.class)))
-                    .thenReturn(List.of());
+            stubReminderWithOrg("EMAIL", 3);
+            stubMember(userId1);
+            stubInactiveUserNoRecords(userId1);
             when(supabaseAdminClient.getListWithQuery(eq("app.profiles"), anyString(), eq(ProfileResponse.class)))
                     .thenReturn(List.of());
             when(supabaseAdminClient.getUserEmail(userId1)).thenReturn("unknown@example.com");
@@ -349,16 +378,10 @@ class OrganizationDomainServiceTest {
 
         @Test
         void sendWeeklyReminders_emailIsNull_doesNotSendReminder() {
-            when(supabaseAdminClient.getListWithQuery(eq("admin.organizations"), anyString(), eq(OrganizationResponse.class)))
-                    .thenReturn(List.of(reminderOrgResponse(remOrgId, remOrgName)));
-            when(supabaseAdminClient.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
-                    .thenReturn(List.of(memberResponse(userId1, remOrgId)));
-            when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("entry_date=gte."), eq(ActivityRecordResponse.class)))
-                    .thenReturn(List.of());
-            when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("order=entry_date.desc"), eq(ActivityRecordResponse.class)))
-                    .thenReturn(List.of());
-            when(supabaseAdminClient.getListWithQuery(eq("app.profiles"), anyString(), eq(ProfileResponse.class)))
-                    .thenReturn(List.of(profileResponse(userId1, "Ghost")));
+            stubReminderWithOrg("EMAIL", 3);
+            stubMember(userId1);
+            stubInactiveUserNoRecords(userId1);
+            stubProfile(userId1, "Ghost");
             when(supabaseAdminClient.getUserEmail(userId1)).thenReturn(null);
 
             reminderService.sendWeeklyReminders();
@@ -368,16 +391,10 @@ class OrganizationDomainServiceTest {
 
         @Test
         void sendWeeklyReminders_emailIsBlank_doesNotSendReminder() {
-            when(supabaseAdminClient.getListWithQuery(eq("admin.organizations"), anyString(), eq(OrganizationResponse.class)))
-                    .thenReturn(List.of(reminderOrgResponse(remOrgId, remOrgName)));
-            when(supabaseAdminClient.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
-                    .thenReturn(List.of(memberResponse(userId1, remOrgId)));
-            when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("entry_date=gte."), eq(ActivityRecordResponse.class)))
-                    .thenReturn(List.of());
-            when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("order=entry_date.desc"), eq(ActivityRecordResponse.class)))
-                    .thenReturn(List.of());
-            when(supabaseAdminClient.getListWithQuery(eq("app.profiles"), anyString(), eq(ProfileResponse.class)))
-                    .thenReturn(List.of(profileResponse(userId1, "Ghost")));
+            stubReminderWithOrg("EMAIL", 3);
+            stubMember(userId1);
+            stubInactiveUserNoRecords(userId1);
+            stubProfile(userId1, "Ghost");
             when(supabaseAdminClient.getUserEmail(userId1)).thenReturn("   ");
 
             reminderService.sendWeeklyReminders();
@@ -386,19 +403,8 @@ class OrganizationDomainServiceTest {
         }
 
         @Test
-        void sendWeeklyReminders_noOrganizations_doesNothing() {
-            when(supabaseAdminClient.getListWithQuery(eq("admin.organizations"), anyString(), eq(OrganizationResponse.class)))
-                    .thenReturn(List.of());
-
-            reminderService.sendWeeklyReminders();
-
-            verifyNoInteractions(reminderMailService);
-        }
-
-        @Test
         void sendWeeklyReminders_noMembers_doesNotSendReminder() {
-            when(supabaseAdminClient.getListWithQuery(eq("admin.organizations"), anyString(), eq(OrganizationResponse.class)))
-                    .thenReturn(List.of(reminderOrgResponse(remOrgId, remOrgName)));
+            stubReminderWithOrg("EMAIL", 3);
             when(supabaseAdminClient.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
                     .thenReturn(List.of());
 
@@ -408,37 +414,64 @@ class OrganizationDomainServiceTest {
         }
 
         @Test
-        void sendWeeklyReminders_multipleOrgsAndUsers_sendsCorrectReminders() {
-            var orgId2 = UUID.randomUUID();
-
-            when(supabaseAdminClient.getListWithQuery(eq("admin.organizations"), anyString(), eq(OrganizationResponse.class)))
-                    .thenReturn(List.of(reminderOrgResponse(remOrgId, "Org A"), reminderOrgResponse(orgId2, "Org B")));
-            when(supabaseAdminClient.getListWithQuery(eq("admin.organization_members"), contains("organization_id=eq." + remOrgId), eq(OrganizationMemberResponse.class)))
-                    .thenReturn(List.of(memberResponse(userId1, remOrgId)));
-            when(supabaseAdminClient.getListWithQuery(eq("admin.organization_members"), contains("organization_id=eq." + orgId2), eq(OrganizationMemberResponse.class)))
-                    .thenReturn(List.of(memberResponse(userId2, orgId2)));
-            when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("entry_date=gte."), eq(ActivityRecordResponse.class)))
+        void sendWeeklyReminders_orgNotFound_doesNotSendReminder() {
+            var reminder = reminderConfig(remOrgId, "EMAIL", currentTime, 3, currentDayName);
+            when(supabaseAdminClient.getListWithQuery(eq("admin.reminder"), anyString(), eq(ReminderResponse.class)))
+                    .thenReturn(List.of(reminder));
+            when(supabaseAdminClient.getListWithQuery(eq("admin.organizations"), contains("id=eq." + remOrgId), eq(OrganizationResponse.class)))
                     .thenReturn(List.of());
-            when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("order=entry_date.desc"), eq(ActivityRecordResponse.class)))
-                    .thenReturn(List.of());
-            when(supabaseAdminClient.getListWithQuery(eq("app.profiles"), contains("id=eq." + userId1), eq(ProfileResponse.class)))
-                    .thenReturn(List.of(profileResponse(userId1, "Max")));
-            when(supabaseAdminClient.getListWithQuery(eq("app.profiles"), contains("id=eq." + userId2), eq(ProfileResponse.class)))
-                    .thenReturn(List.of(profileResponse(userId2, "Lea")));
-            when(supabaseAdminClient.getUserEmail(userId1)).thenReturn("max@example.com");
-            when(supabaseAdminClient.getUserEmail(userId2)).thenReturn("lea@example.com");
 
             reminderService.sendWeeklyReminders();
 
-            verify(reminderMailService).sendReminder("max@example.com", "Max", "Org A", 3, remAppUrl);
-            verify(reminderMailService).sendReminder("lea@example.com", "Lea", "Org B", 3, remAppUrl);
+            verifyNoInteractions(reminderMailService);
+        }
+
+        // --- SMS channel ---
+
+        @Test
+        void sendWeeklyReminders_smsChannel_doesNotSendEmail() {
+            stubReminderWithOrg("SMS", 3);
+            stubMember(userId1);
+            stubInactiveUserNoRecords(userId1);
+            stubProfile(userId1, "Max");
+            when(supabaseAdminClient.getUserEmail(userId1)).thenReturn("max@example.com");
+
+            reminderService.sendWeeklyReminders();
+
+            verifyNoInteractions(reminderMailService);
+        }
+
+        // --- Multiple orgs ---
+
+        @Test
+        void sendWeeklyReminders_multipleReminders_sendsToMatchingOrgsOnly() {
+            var orgId2 = UUID.randomUUID();
+            var otherDay = LocalDate.now().getDayOfWeek() == java.time.DayOfWeek.MONDAY ? "TUESDAY" : "MONDAY";
+
+            // One reminder matches today, one does not
+            var matchingReminder = reminderConfig(remOrgId, "EMAIL", currentTime, 3, currentDayName);
+            var nonMatchingReminder = reminderConfig(orgId2, "EMAIL", currentTime, 3, otherDay);
+
+            when(supabaseAdminClient.getListWithQuery(eq("admin.reminder"), anyString(), eq(ReminderResponse.class)))
+                    .thenReturn(List.of(matchingReminder, nonMatchingReminder));
+            when(supabaseAdminClient.getListWithQuery(eq("admin.organizations"), contains("id=eq." + remOrgId), eq(OrganizationResponse.class)))
+                    .thenReturn(List.of(reminderOrgResponse(remOrgId, remOrgName)));
+            stubMember(userId1);
+            stubInactiveUserNoRecords(userId1);
+            stubProfile(userId1, "Max");
+            when(supabaseAdminClient.getUserEmail(userId1)).thenReturn("max@example.com");
+
+            reminderService.sendWeeklyReminders();
+
+            verify(reminderMailService).sendReminder("max@example.com", "Max", remOrgName, 3, remAppUrl);
             verifyNoMoreInteractions(reminderMailService);
         }
 
+        // --- Error handling ---
+
         @Test
         void sendWeeklyReminders_errorForOneUser_continuesWithNext() {
-            when(supabaseAdminClient.getListWithQuery(eq("admin.organizations"), anyString(), eq(OrganizationResponse.class)))
-                    .thenReturn(List.of(reminderOrgResponse(remOrgId, remOrgName)));
+            stubReminderWithOrg("EMAIL", 3);
             when(supabaseAdminClient.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
                     .thenReturn(List.of(memberResponse(userId1, remOrgId), memberResponse(userId2, remOrgId)));
             when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("entry_date=gte."), eq(ActivityRecordResponse.class)))
@@ -460,17 +493,10 @@ class OrganizationDomainServiceTest {
 
         @Test
         void sendWeeklyReminders_correctDaysInactiveCalculation() {
-            when(supabaseAdminClient.getListWithQuery(eq("admin.organizations"), anyString(), eq(OrganizationResponse.class)))
-                    .thenReturn(List.of(reminderOrgResponse(remOrgId, remOrgName)));
-            when(supabaseAdminClient.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
-                    .thenReturn(List.of(memberResponse(userId1, remOrgId)));
-            when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("entry_date=gte."), eq(ActivityRecordResponse.class)))
-                    .thenReturn(List.of());
-            var lastRecord = activityRecordResponse(userId1, remOrgId, LocalDate.now().minusDays(10).toString());
-            when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("order=entry_date.desc"), eq(ActivityRecordResponse.class)))
-                    .thenReturn(List.of(lastRecord));
-            when(supabaseAdminClient.getListWithQuery(eq("app.profiles"), anyString(), eq(ProfileResponse.class)))
-                    .thenReturn(List.of(profileResponse(userId1, "Test")));
+            stubReminderWithOrg("EMAIL", 3);
+            stubMember(userId1);
+            stubInactiveUser(userId1, 10);
+            stubProfile(userId1, "Test");
             when(supabaseAdminClient.getUserEmail(userId1)).thenReturn("test@example.com");
 
             reminderService.sendWeeklyReminders();
@@ -478,7 +504,127 @@ class OrganizationDomainServiceTest {
             verify(reminderMailService).sendReminder(eq("test@example.com"), eq("Test"), eq(remOrgName), eq(10L), eq(remAppUrl));
         }
 
-        // --- Reminder helpers ---
+        // --- OrganizationDomainService: getReminder / saveReminder ---
+
+        @Test
+        void getReminder_returnsExistingReminder() {
+            var response = reminderConfig(orgId, "EMAIL", "08:00:00", 3, "FRIDAY");
+            when(supabaseService.getListWithQuery(eq("admin.reminder"), contains("organization_id=eq." + orgId), eq(ReminderResponse.class)))
+                    .thenReturn(List.of(response));
+
+            var result = organizationDomainService.getReminder(orgId);
+
+            assertThat(result).isNotNull();
+            assertThat(result.channel()).isEqualTo("EMAIL");
+            assertThat(result.idle_days()).isEqualTo(3);
+            assertThat(result.send_day()).isEqualTo("FRIDAY");
+        }
+
+        @Test
+        void getReminder_returnsNullWhenNoneExists() {
+            when(supabaseService.getListWithQuery(eq("admin.reminder"), contains("organization_id=eq." + orgId), eq(ReminderResponse.class)))
+                    .thenReturn(List.of());
+
+            var result = organizationDomainService.getReminder(orgId);
+
+            assertThat(result).isNull();
+        }
+
+        @Test
+        void saveReminder_createsNewWhenNoneExists() {
+            when(supabaseService.getListWithQuery(eq("admin.reminder"), anyString(), eq(ReminderResponse.class)))
+                    .thenReturn(List.of());
+            var created = reminderConfig(orgId, "SMS", "09:00:00", 5, "MONDAY");
+            when(supabaseService.post(eq("admin.reminder"), any(), eq(ReminderResponse[].class)))
+                    .thenReturn(new ReminderResponse[]{created});
+
+            var result = organizationDomainService.saveReminder(orgId, "SMS", "09:00:00", 5, "MONDAY");
+
+            assertThat(result.channel()).isEqualTo("SMS");
+            assertThat(result.idle_days()).isEqualTo(5);
+            verify(supabaseService).post(eq("admin.reminder"), any(), eq(ReminderResponse[].class));
+        }
+
+        @Test
+        void saveReminder_updatesExistingReminder() {
+            var existing = reminderConfig(orgId, "EMAIL", "08:00:00", 3, "FRIDAY");
+            when(supabaseService.getListWithQuery(eq("admin.reminder"), anyString(), eq(ReminderResponse.class)))
+                    .thenReturn(List.of(existing));
+            var updated = reminderConfig(orgId, "SMS", "10:00:00", 7, "WEDNESDAY");
+            when(supabaseService.patch(eq("admin.reminder"), contains("organization_id=eq." + orgId), any(), eq(ReminderResponse[].class)))
+                    .thenReturn(new ReminderResponse[]{updated});
+
+            var result = organizationDomainService.saveReminder(orgId, "SMS", "10:00:00", 7, "WEDNESDAY");
+
+            assertThat(result.channel()).isEqualTo("SMS");
+            assertThat(result.idle_days()).isEqualTo(7);
+            assertThat(result.send_day()).isEqualTo("WEDNESDAY");
+            verify(supabaseService).patch(eq("admin.reminder"), anyString(), any(), eq(ReminderResponse[].class));
+        }
+
+        @Test
+        void saveReminder_throwsWhenCreateFails() {
+            when(supabaseService.getListWithQuery(eq("admin.reminder"), anyString(), eq(ReminderResponse.class)))
+                    .thenReturn(List.of());
+            when(supabaseService.post(eq("admin.reminder"), any(), eq(ReminderResponse[].class)))
+                    .thenReturn(new ReminderResponse[]{});
+
+            assertThatThrownBy(() -> organizationDomainService.saveReminder(orgId, "EMAIL", "08:00:00", 3, "FRIDAY"))
+                    .isInstanceOf(EntityNotCreatedException.class);
+        }
+
+        @Test
+        void saveReminder_throwsWhenUpdateFails() {
+            var existing = reminderConfig(orgId, "EMAIL", "08:00:00", 3, "FRIDAY");
+            when(supabaseService.getListWithQuery(eq("admin.reminder"), anyString(), eq(ReminderResponse.class)))
+                    .thenReturn(List.of(existing));
+            when(supabaseService.patch(eq("admin.reminder"), anyString(), any(), eq(ReminderResponse[].class)))
+                    .thenReturn(new ReminderResponse[]{});
+
+            assertThatThrownBy(() -> organizationDomainService.saveReminder(orgId, "SMS", "10:00:00", 7, "MONDAY"))
+                    .isInstanceOf(EntityNotCreatedException.class);
+        }
+
+        // --- Shared stubs ---
+
+        private void stubReminderWithOrg(String channel, int idleDays) {
+            var reminder = reminderConfig(remOrgId, channel, currentTime, idleDays, currentDayName);
+            when(supabaseAdminClient.getListWithQuery(eq("admin.reminder"), anyString(), eq(ReminderResponse.class)))
+                    .thenReturn(List.of(reminder));
+            when(supabaseAdminClient.getListWithQuery(eq("admin.organizations"), contains("id=eq." + remOrgId), eq(OrganizationResponse.class)))
+                    .thenReturn(List.of(reminderOrgResponse(remOrgId, remOrgName)));
+        }
+
+        private void stubMember(UUID userId) {
+            when(supabaseAdminClient.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
+                    .thenReturn(List.of(memberResponse(userId, remOrgId)));
+        }
+
+        private void stubInactiveUserNoRecords(UUID userId) {
+            when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("entry_date=gte."), eq(ActivityRecordResponse.class)))
+                    .thenReturn(List.of());
+            when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("order=entry_date.desc"), eq(ActivityRecordResponse.class)))
+                    .thenReturn(List.of());
+        }
+
+        private void stubInactiveUser(UUID userId, int daysAgo) {
+            when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("entry_date=gte."), eq(ActivityRecordResponse.class)))
+                    .thenReturn(List.of());
+            var lastRecord = activityRecordResponse(userId, remOrgId, LocalDate.now().minusDays(daysAgo).toString());
+            when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("order=entry_date.desc"), eq(ActivityRecordResponse.class)))
+                    .thenReturn(List.of(lastRecord));
+        }
+
+        private void stubProfile(UUID userId, String firstName) {
+            when(supabaseAdminClient.getListWithQuery(eq("app.profiles"), contains("id=eq." + userId), eq(ProfileResponse.class)))
+                    .thenReturn(List.of(profileResponse(userId, firstName)));
+        }
+
+        // --- Helpers ---
+
+        private ReminderResponse reminderConfig(UUID orgId, String channel, String sendTime, int idleDays, String sendDay) {
+            return new ReminderResponse(UUID.randomUUID(), orgId, channel, sendTime, idleDays, sendDay);
+        }
 
         private OrganizationResponse reminderOrgResponse(UUID id, String name) {
             return new OrganizationResponse(id, name, OffsetDateTime.now(), OffsetDateTime.now());
