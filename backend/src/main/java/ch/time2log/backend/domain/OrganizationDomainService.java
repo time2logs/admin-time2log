@@ -206,6 +206,8 @@ public class OrganizationDomainService {
             }
             return created[0];
         }
+    }
+
     public void transferOwnership(UUID organizationId, UUID newOwnerId) {
         supabaseService.patch(
                 "admin.organizations",

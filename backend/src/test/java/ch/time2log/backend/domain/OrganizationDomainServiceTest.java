@@ -627,7 +627,7 @@ class OrganizationDomainServiceTest {
         }
 
         private OrganizationResponse reminderOrgResponse(UUID id, String name) {
-            return new OrganizationResponse(id, name, OffsetDateTime.now(), OffsetDateTime.now());
+            return new OrganizationResponse(id, name, UUID.randomUUID(), OffsetDateTime.now(), OffsetDateTime.now());
         }
 
         private OrganizationMemberResponse memberResponse(UUID userId, UUID orgId) {

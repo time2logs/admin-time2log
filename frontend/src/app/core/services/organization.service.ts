@@ -66,6 +66,8 @@ export class OrganizationService {
 
   saveReminder(organizationId: string, reminder: { channel: string; sendTime: string; idleDays: number; sendDay: string }): Observable<Reminder> {
     return this.http.put<Reminder>(`${this.baseUrl}/${organizationId}/reminder`, reminder);
+  }
+
   transferOwnership(organizationId: string, newOwnerId: string): Observable<void> {
     return this.http.patch<void>(`${this.baseUrl}/${organizationId}/owner`, { newOwnerId });
   }

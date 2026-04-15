@@ -211,7 +211,7 @@
           "saturday": "Samstag",
           "sunday": "Sonntag"
         }
-      }
+      },
       "NewOrganizationOwner": "Neuer Eigentümer der Organisation",
       "transferConfirm": "Wirklich übertragen? Diese Aktion ist unwiderruflich.",
       "changeOwner": "Eigentümer wechseln"
@@ -299,7 +299,7 @@
     "professionCreated": "Beruf erstellt.",
     "teamCreated": "Team erstellt.",
     "teamDeleted": "Team gelöscht.",
-    "reminderSaved": "Erinnerungseinstellungen gespeichert."
+    "reminderSaved": "Erinnerungseinstellungen gespeichert.",
     "ownershipTransferred": "Organisation erfolgreich übertragen"
   },
   "reports": {
