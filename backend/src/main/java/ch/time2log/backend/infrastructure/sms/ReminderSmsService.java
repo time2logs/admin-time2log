@@ -35,7 +35,7 @@ public class ReminderSmsService {
         }
 
         var messageText = String.format(
-                "Hallo %s, du hast seit %d Tagen keine Aktivitaeten in %s erfasst. Bitte logge deine Stunden auf time2log.",
+                "Hallo %s, du hast seit %d Tagen keine Aktivitäten in %s erfasst. Bitte logge deine Aktivitäten auf time2log.",
                 firstName, daysInactive, organizationName
         );
 
