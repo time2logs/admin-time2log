@@ -428,24 +428,26 @@
                 {{ 'organizationManaging.settings.NewOrganizationOwner' | translate }}
               </button>
             } @else {
-              <div class="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900/50 rounded-lg">
-                <p class="text-green-700 dark:text-green-400 text-sm">
+              <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900/50 rounded-lg w-full">
+                <p class="text-green-700 dark:text-green-400 text-sm flex-1">
                   {{ 'organizationManaging.settings.transferConfirm' | translate }}
                 </p>
-                <button
-                  class="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
-                  [disabled]="isTransferring()"
-                  (click)="transferOwnership()"
-                  data-testid="confirm-transfer-owner-button"
-                >
-                  {{ isTransferring() ? ('common.loading' | translate) : ('common.confirm' | translate) }}
-                </button>
-                <button
-                  class="px-4 py-2 bg-gray-200 dark:bg-[hsl(215,25%,16%)] text-gray-700 dark:text-[hsl(210,15%,70%)] rounded-lg hover:bg-gray-300 transition-colors"
-                  (click)="showTransferConfirm.set(false)"
-                >
-                  {{ 'common.cancel' | translate }}
-                </button>
+                <div class="flex gap-3">
+                  <button
+                    class="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
+                    [disabled]="isTransferring()"
+                    (click)="transferOwnership()"
+                    data-testid="confirm-transfer-owner-button"
+                  >
+                    {{ isTransferring() ? ('common.loading' | translate) : ('common.confirm' | translate) }}
+                  </button>
+                  <button
+                    class="px-4 py-2 bg-gray-200 dark:bg-[hsl(215,25%,16%)] text-gray-700 dark:text-[hsl(210,15%,70%)] rounded-lg hover:bg-gray-300 transition-colors"
+                    (click)="showTransferConfirm.set(false)"
+                  >
+                    {{ 'common.cancel' | translate }}
+                  </button>
+                </div>
               </div>
             }
           </div>
