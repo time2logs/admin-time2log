@@ -267,9 +267,10 @@ class OrganizationDomainServiceTest {
         private final String remOrgName = "Acme Corp";
         private final String remAppUrl = "https://app.time2log.ch";
 
-        // Current day/time used to build matching reminder configs
-        private final String currentDayName = LocalDate.now().getDayOfWeek().name();
-        private final String currentTime = LocalTime.now().withSecond(0).withNano(0).toString();
+        // Use the same timezone as ReminderService so tests pass on UTC CI servers
+        private static final java.time.ZoneId SWISS_ZONE = java.time.ZoneId.of("Europe/Zurich");
+        private final String currentDayName = LocalDate.now(SWISS_ZONE).getDayOfWeek().name();
+        private final String currentTime = LocalTime.now(SWISS_ZONE).withSecond(0).withNano(0).toString();
 
         @BeforeEach
         void setUpReminder() {
@@ -291,7 +292,7 @@ class OrganizationDomainServiceTest {
 
         @Test
         void sendWeeklyReminders_reminderOnDifferentDay_doesNothing() {
-            var otherDay = LocalDate.now().getDayOfWeek() == java.time.DayOfWeek.MONDAY ? "TUESDAY" : "MONDAY";
+            var otherDay = LocalDate.now(SWISS_ZONE).getDayOfWeek() == java.time.DayOfWeek.MONDAY ? "TUESDAY" : "MONDAY";
             var reminder = reminderConfig(remOrgId, "EMAIL", currentTime, 3, otherDay);
 
             when(supabaseAdminClient.getListWithQuery(eq("admin.reminder"), anyString(), eq(ReminderResponse.class)))
@@ -304,7 +305,7 @@ class OrganizationDomainServiceTest {
 
         @Test
         void sendWeeklyReminders_reminderOnDifferentTime_doesNothing() {
-            var otherTime = LocalTime.now().plusHours(2).withSecond(0).withNano(0).toString();
+            var otherTime = LocalTime.now(SWISS_ZONE).plusHours(2).withSecond(0).withNano(0).toString();
             var reminder = reminderConfig(remOrgId, "EMAIL", otherTime, 3, currentDayName);
 
             when(supabaseAdminClient.getListWithQuery(eq("admin.reminder"), anyString(), eq(ReminderResponse.class)))
@@ -335,7 +336,7 @@ class OrganizationDomainServiceTest {
         void sendWeeklyReminders_activeUser_doesNotSendReminder() {
             stubReminderWithOrg("EMAIL", 3);
             stubMember(userId1);
-            var recentRecord = activityRecordResponse(userId1, remOrgId, LocalDate.now().toString());
+            var recentRecord = activityRecordResponse(userId1, remOrgId, LocalDate.now(SWISS_ZONE).toString());
             when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("entry_date=gte."), eq(ActivityRecordResponse.class)))
                     .thenReturn(List.of(recentRecord));
 
@@ -446,7 +447,7 @@ class OrganizationDomainServiceTest {
         @Test
         void sendWeeklyReminders_multipleReminders_sendsToMatchingOrgsOnly() {
             var orgId2 = UUID.randomUUID();
-            var otherDay = LocalDate.now().getDayOfWeek() == java.time.DayOfWeek.MONDAY ? "TUESDAY" : "MONDAY";
+            var otherDay = LocalDate.now(SWISS_ZONE).getDayOfWeek() == java.time.DayOfWeek.MONDAY ? "TUESDAY" : "MONDAY";
 
             // One reminder matches today, one does not
             var matchingReminder = reminderConfig(remOrgId, "EMAIL", currentTime, 3, currentDayName);
@@ -610,7 +611,7 @@ class OrganizationDomainServiceTest {
         private void stubInactiveUser(UUID userId, int daysAgo) {
             when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("entry_date=gte."), eq(ActivityRecordResponse.class)))
                     .thenReturn(List.of());
-            var lastRecord = activityRecordResponse(userId, remOrgId, LocalDate.now().minusDays(daysAgo).toString());
+            var lastRecord = activityRecordResponse(userId, remOrgId, LocalDate.now(SWISS_ZONE).minusDays(daysAgo).toString());
             when(supabaseAdminClient.getListWithQuery(eq("app.activity_records"), contains("order=entry_date.desc"), eq(ActivityRecordResponse.class)))
                     .thenReturn(List.of(lastRecord));
         }
