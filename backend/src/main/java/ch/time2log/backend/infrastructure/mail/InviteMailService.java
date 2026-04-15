@@ -35,7 +35,7 @@ public class InviteMailService {
             var helper = new MimeMessageHelper(message, false, "UTF-8");
             helper.setFrom(from);
             helper.setTo(toEmail);
-            helper.setSubject("You've been invited to " + organizationName);
+            helper.setSubject("Einladung zu " + organizationName);
             helper.setText(html, true);
 
             mailSender.send(message);
@@ -52,7 +52,7 @@ public class InviteMailService {
 
         var isAdmin = "admin".equalsIgnoreCase(role);
         return template
-                .replace("{{SUBJECT}}", "You've been invited!")
+                .replace("{{SUBJECT}}", "Du wurdest eingeladen!")
                 .replace("{{ORGANIZATION_NAME}}", organizationName)
                 .replace("{{ROLE_CLASS}}", isAdmin ? "role-badge role-admin" : "role-badge role-member")
                 .replace("{{ROLE_LABEL}}", isAdmin ? "Admin" : "Member")
