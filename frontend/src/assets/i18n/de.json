@@ -195,6 +195,23 @@
       "dangerDescription": "Unwiderrufliche Aktionen für diese Organisation.",
       "deleteOrganization": "Organisation löschen",
       "deleteConfirm": "Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "reminder": {
+        "title": "Erinnerungen",
+        "channel": "Benachrichtigungskanal",
+        "email": "E-Mail",
+        "sendDay": "Versandtag",
+        "sendTime": "Versandzeit",
+        "idleDays": "Inaktive Tage vor Erinnerung",
+        "days": {
+          "monday": "Montag",
+          "tuesday": "Dienstag",
+          "wednesday": "Mittwoch",
+          "thursday": "Donnerstag",
+          "friday": "Freitag",
+          "saturday": "Samstag",
+          "sunday": "Sonntag"
+        }
+      },
       "NewOrganizationOwner": "Neuer Eigentümer der Organisation",
       "transferConfirm": "Wirklich übertragen? Diese Aktion ist unwiderruflich.",
       "changeOwner": "Eigentümer wechseln"
@@ -282,6 +299,7 @@
     "professionCreated": "Beruf erstellt.",
     "teamCreated": "Team erstellt.",
     "teamDeleted": "Team gelöscht.",
+    "reminderSaved": "Erinnerungseinstellungen gespeichert.",
     "ownershipTransferred": "Organisation erfolgreich übertragen"
   },
   "reports": {

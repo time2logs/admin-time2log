@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -17,13 +18,20 @@ import java.util.UUID;
 public class SupabaseAdminClient {
     private static final Logger log = LoggerFactory.getLogger(SupabaseAdminClient.class);
     private final WebClient webClient;
+    private final WebClient restClient;
+    private final String serviceRoleKey;
 
     public SupabaseAdminClient(@Value("${supabase.url}") String supabaseUrl,
                                @Value("${supabase.service-role-key}") String serviceRoleKey) {
+        this.serviceRoleKey = serviceRoleKey;
         this.webClient = WebClient.builder()
                 .baseUrl(supabaseUrl)
                 .defaultHeader("apikey", serviceRoleKey)
                 .defaultHeader("Authorization", "Bearer " + serviceRoleKey)
+                .build();
+        this.restClient = WebClient.builder()
+                .baseUrl(supabaseUrl + "/rest/v1")
+                .defaultHeader("Accept", "application/json")
                 .build();
     }
 
@@ -69,5 +77,52 @@ public class SupabaseAdminClient {
                 .bodyToMono(Void.class);
     }
 
+    /**
+     * Fetches the email address of a Supabase Auth user by their ID.
+     */
+    public String getUserEmail(UUID userId) {
+        return webClient.get()
+                .uri("/auth/v1/admin/users/{id}", userId)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, response ->
+                        response.bodyToMono(String.class)
+                                .defaultIfEmpty("")
+                                .flatMap(body -> {
+                                    log.error("Supabase admin get user error: {} - {}", response.statusCode().value(), body);
+                                    return Mono.error(new SupabaseApiException(response.statusCode().value(), body));
+                                }))
+                .bodyToMono(UserResponse.class)
+                .map(UserResponse::email)
+                .block();
+    }
+
+    /**
+     * Queries a Supabase table using the service-role key (bypasses RLS).
+     * Used for scheduled tasks that run without a user context.
+     */
+    public <T> List<T> getListWithQuery(String schemaTable, String query, Class<T> elementType) {
+        var st = SchemaTable.parse(schemaTable);
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/{table}")
+                        .query(query)
+                        .build(st.table()))
+                .header("apikey", serviceRoleKey)
+                .header("Authorization", "Bearer " + serviceRoleKey)
+                .header("Accept-Profile", st.schema())
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, response ->
+                        response.bodyToMono(String.class)
+                                .defaultIfEmpty("")
+                                .flatMap(body -> {
+                                    log.error("Supabase admin query error: {} - {}", response.statusCode().value(), body);
+                                    return Mono.error(new SupabaseApiException(response.statusCode().value(), body));
+                                }))
+                .bodyToFlux(elementType)
+                .collectList()
+                .block();
+    }
+
     private record GenerateLinkResponse(@JsonProperty("action_link") String actionLink) {}
+    private record UserResponse(String email) {}
 }
