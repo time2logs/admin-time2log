@@ -8,6 +8,7 @@ import { ToastService } from '@services/toast.service';
 import { Invite, Organization, Profession, Reminder } from '@app/core/models/organizations.models';
 import { Profile } from '@app/core/models/profile.models';
 import { Team } from '@app/core/models/team.models';
+import {AuthService} from '@services/auth.service';
 
 type Tab = 'members' | 'curriculums' | 'teams' | 'settings';
 
@@ -70,6 +71,12 @@ export class OrganizationManaging implements OnInit {
   private organizationId = '';
   protected readonly memberToConfirmRemoval = signal<string | null>(null);
   protected readonly teamToConfirmDeletion = signal<string | null>(null);
+  protected readonly newOrganizationOwner = signal<string>('');
+  protected readonly showTransferConfirm = signal(false);
+  protected readonly isTransferring = signal(false);
+
+  private readonly authService = inject(AuthService);
+  protected readonly currentUserId = signal<string | null>(null);
 
   ngOnInit(): void {
     this.organizationId = this.route.snapshot.params['id'];
@@ -85,6 +92,10 @@ export class OrganizationManaging implements OnInit {
     this.loadProfessions();
     this.loadTeams();
     this.loadReminder();
+
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUserId.set(user?.id ?? null);
+    });
   }
 
   protected setTab(tab: Tab): void {
@@ -323,8 +334,29 @@ protected confirmDeleteTeam(team: Team, event: Event): void {
   }
 
   @HostListener('document:click')
+  protected transferOwnership(): void {
+    const newOwnerId = this.newOrganizationOwner();
+    if (!newOwnerId) return;
+
+    this.isTransferring.set(true);
+    this.organizationService.transferOwnership(this.organizationId, newOwnerId).subscribe({
+      next: () => {
+        this.toast.success(this.translate.instant('toast.ownershipTransferred'));
+        this.showTransferConfirm.set(false);
+        this.newOrganizationOwner.set('');
+        this.isTransferring.set(false);
+        this.loadOrganization();
+      },
+      error: () => this.isTransferring.set(false),
+    });
+  }
+
+
+@HostListener('document:click')
     onDocumentClick(): void {
     this.memberToConfirmRemoval.set(null);
     this.teamToConfirmDeletion.set(null);
   }
+
+
 }

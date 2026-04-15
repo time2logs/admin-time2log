@@ -6,11 +6,12 @@ import java.util.List;
 import java.util.UUID;
 
 public record OrganizationDto(
-   UUID id,
-   String name
+        UUID id,
+        String name,
+        UUID createdBy
 ) {
     public static OrganizationDto of(Organization org) {
-        return new OrganizationDto(org.id(), org.name());
+        return new OrganizationDto(org.id(), org.name(), org.createdBy());
     }
 
     public static List<OrganizationDto> ofList(List<Organization> list) {

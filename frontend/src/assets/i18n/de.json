@@ -5,7 +5,8 @@
     "save": "Speichern",
     "cancel": "Abbrechen",
     "delete": "Löschen",
-    "edit": "Bearbeiten"
+    "edit": "Bearbeiten",
+    "confirm": "Bestätigen"
   },
   "auth": {
     "login": {
@@ -211,6 +212,9 @@
           "sunday": "Sonntag"
         }
       }
+      "NewOrganizationOwner": "Neuer Eigentümer der Organisation",
+      "transferConfirm": "Wirklich übertragen? Diese Aktion ist unwiderruflich.",
+      "changeOwner": "Eigentümer wechseln"
     }
   },
   "teamManaging": {
@@ -296,6 +300,7 @@
     "teamCreated": "Team erstellt.",
     "teamDeleted": "Team gelöscht.",
     "reminderSaved": "Erinnerungseinstellungen gespeichert."
+    "ownershipTransferred": "Organisation erfolgreich übertragen"
   },
   "reports": {
     "title": "Reports",

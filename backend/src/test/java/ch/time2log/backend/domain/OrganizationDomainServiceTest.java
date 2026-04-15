@@ -55,6 +55,7 @@ class OrganizationDomainServiceTest {
     private final UUID orgId = UUID.randomUUID();
     private final UUID inviteId = UUID.randomUUID();
     private final UUID invitedBy = UUID.randomUUID();
+    private final UUID memberId = UUID.randomUUID();
     private final UUID token = UUID.randomUUID();
     private final String email = "user@example.com";
     private final String userRole = "user";
@@ -243,7 +244,7 @@ class OrganizationDomainServiceTest {
     }
 
     private OrganizationResponse orgResponse(String name) {
-        return new OrganizationResponse(orgId, name, OffsetDateTime.now(), OffsetDateTime.now());
+        return new OrganizationResponse(orgId, name, memberId,OffsetDateTime.now(), OffsetDateTime.now());
     }
 
     // =====================================================================

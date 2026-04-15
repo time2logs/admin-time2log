@@ -38,7 +38,7 @@ class ReportsDomainServiceTest {
 
     @BeforeEach
     void setUp() {
-        Profile profile = new Profile(userId, "John", "Doe", OffsetDateTime.now(), OffsetDateTime.now());
+        Profile profile = new Profile(userId, "John", "Doe", OffsetDateTime.now(), OffsetDateTime.now(), "admin");
         when(organizationDomainService.getOrganizationMemberProfiles(orgId))
                 .thenReturn(List.of(profile));
     }

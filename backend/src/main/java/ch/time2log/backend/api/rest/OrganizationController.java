@@ -14,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RequestMapping("api/organizations")
@@ -86,5 +87,8 @@ public class OrganizationController {
     public ReminderDto saveReminder(@PathVariable UUID id, @RequestBody SaveReminderRequest request) {
         var saved = orgDomainService.saveReminder(id, request.channel(), request.sendTime(), request.idleDays(), request.sendDay());
         return ReminderDto.of(saved);
+    @PatchMapping("/{id}/owner")
+    public void transferOwnership(@PathVariable UUID id, @RequestBody Map<String, String> body) {
+        orgDomainService.transferOwnership(id, UUID.fromString(body.get("newOwnerId")));
     }
 }
