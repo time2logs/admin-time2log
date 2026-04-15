@@ -20,3 +20,11 @@ export interface Invite {
   createdAt: string
   expiresAt: string
 }
+
+export interface Reminder {
+  id: number
+  channel: 'EMAIL' | 'SMS'
+  sendTime: string
+  idleDays: number
+  sendDay: string
+}

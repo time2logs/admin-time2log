@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@env/environment';
-import { Invite, Organization, Profession } from '@app/core/models/organizations.models';
+import { Invite, Organization, Profession, Reminder } from '@app/core/models/organizations.models';
 import { Profile } from '@app/core/models/profile.models';
 
 @Injectable({ providedIn: 'root' })
@@ -58,6 +58,14 @@ export class OrganizationService {
 
   getOnlyOrganizationMembers(id: string): Observable<Profile[]> {
     return this.http.get<Profile[]>(`${this.baseUrl}/${id}/onlyMembers`);
+  }
+
+  getReminder(organizationId: string): Observable<Reminder | null> {
+    return this.http.get<Reminder | null>(`${this.baseUrl}/${organizationId}/reminder`);
+  }
+
+  saveReminder(organizationId: string, reminder: { channel: string; sendTime: string; idleDays: number; sendDay: string }): Observable<Reminder> {
+    return this.http.put<Reminder>(`${this.baseUrl}/${organizationId}/reminder`, reminder);
   }
 
   transferOwnership(organizationId: string, newOwnerId: string): Observable<void> {

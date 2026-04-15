@@ -395,6 +395,79 @@
           </div>
         </div>
 
+        <!-- Reminder / Notification Settings -->
+        <div class="bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm overflow-hidden">
+          <div class="px-5 py-3 bg-gray-50 dark:bg-[hsl(215,25%,16%)] border-b border-gray-200 dark:border-[hsl(215,20%,22%)]">
+            <h2 class="text-lg font-medium text-gray-800 dark:text-[hsl(210,15%,90%)]">{{ 'organizationManaging.settings.reminder.title' | translate }}</h2>
+          </div>
+          <div class="p-5 space-y-4">
+            <!-- Channel -->
+            <div>
+              <label for="reminder-channel" class="block text-sm font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] mb-1">{{ 'organizationManaging.settings.reminder.channel' | translate }}</label>
+              <select
+                id="reminder-channel"
+                class="w-full sm:w-auto px-4 py-2 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-[hsl(210,15%,90%)]"
+                [ngModel]="reminderChannel()"
+                (ngModelChange)="reminderChannel.set($event)"
+              >
+                <option value="SMS">SMS</option>
+                <option value="EMAIL">{{ 'organizationManaging.settings.reminder.email' | translate }}</option>
+              </select>
+            </div>
+
+            <!-- Day -->
+            <div>
+              <label for="reminder-send-day" class="block text-sm font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] mb-1">{{ 'organizationManaging.settings.reminder.sendDay' | translate }}</label>
+              <select
+                id="reminder-send-day"
+                class="w-full sm:w-auto px-4 py-2 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-[hsl(210,15%,90%)]"
+                [ngModel]="reminderSendDay()"
+                (ngModelChange)="reminderSendDay.set($event)"
+              >
+                @for (day of dayOptions; track day.value) {
+                  <option [value]="day.value">{{ day.labelKey | translate }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Time -->
+            <div>
+              <label for="reminder-send-time" class="block text-sm font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] mb-1">{{ 'organizationManaging.settings.reminder.sendTime' | translate }}</label>
+              <input
+                id="reminder-send-time"
+                type="time"
+                class="w-full sm:w-auto px-4 py-2 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-[hsl(210,15%,90%)]"
+                [ngModel]="reminderSendTime()"
+                (ngModelChange)="reminderSendTime.set($event)"
+              />
+            </div>
+
+            <!-- Idle Days -->
+            <div>
+              <label for="reminder-idle-days" class="block text-sm font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] mb-1">{{ 'organizationManaging.settings.reminder.idleDays' | translate }}</label>
+              <input
+                id="reminder-idle-days"
+                type="number"
+                min="1"
+                class="w-full sm:w-24 px-4 py-2 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-[hsl(210,15%,90%)]"
+                [ngModel]="reminderIdleDays()"
+                (ngModelChange)="reminderIdleDays.set($event)"
+              />
+            </div>
+
+            <!-- Save Button -->
+            <div>
+              <button
+                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+                [disabled]="isSavingReminder()"
+                (click)="saveReminder()"
+              >
+                {{ isSavingReminder() ? ('common.loading' | translate) : ('common.save' | translate) }}
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Change Organization Owner -->
         @if (currentUserId() === organization()?.createdBy) {
         <div class="bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm overflow-hidden">

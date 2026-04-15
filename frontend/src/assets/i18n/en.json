@@ -194,6 +194,23 @@
       "dangerDescription": "Irreversible actions for this organization.",
       "deleteOrganization": "Delete Organization",
       "deleteConfirm": "Are you sure? This action cannot be undone.",
+      "reminder": {
+        "title": "Reminders",
+        "channel": "Notification Channel",
+        "email": "Email",
+        "sendDay": "Send Day",
+        "sendTime": "Send Time",
+        "idleDays": "Inactive Days Before Reminder",
+        "days": {
+          "monday": "Monday",
+          "tuesday": "Tuesday",
+          "wednesday": "Wednesday",
+          "thursday": "Thursday",
+          "friday": "Friday",
+          "saturday": "Saturday",
+          "sunday": "Sunday"
+        }
+      },
       "NewOrganizationOwner": "New Organization Owner",
       "transferConfirm": "Really transfer? This action is irreversible.",
       "changeOwner": "Change Owner"
@@ -281,6 +298,7 @@
     "professionCreated": "Profession created.",
     "teamCreated": "Team created.",
     "teamDeleted": "Team deleted.",
+    "reminderSaved": "Reminder settings saved.",
     "ownershipTransferred": "Organization successfully transferred"
   },
   "reports": {
