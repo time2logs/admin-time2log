@@ -6,6 +6,7 @@ import ch.time2log.backend.domain.models.Invite;
 import ch.time2log.backend.domain.models.Organization;
 import ch.time2log.backend.infrastructure.mail.InviteMailService;
 import ch.time2log.backend.infrastructure.mail.ReminderMailService;
+import ch.time2log.backend.infrastructure.sms.ReminderSmsService;
 import ch.time2log.backend.infrastructure.supabase.SupabaseAdminClient;
 import ch.time2log.backend.infrastructure.supabase.SupabaseApiException;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
@@ -259,6 +260,9 @@ class OrganizationDomainServiceTest {
         @Mock
         private ReminderMailService reminderMailService;
 
+        @Mock
+        private ReminderSmsService reminderSmsService;
+
         private ReminderService reminderService;
 
         private final UUID remOrgId = UUID.randomUUID();
@@ -274,7 +278,7 @@ class OrganizationDomainServiceTest {
 
         @BeforeEach
         void setUpReminder() {
-            reminderService = new ReminderService(supabaseAdminClient, reminderMailService);
+            reminderService = new ReminderService(supabaseAdminClient, reminderMailService, reminderSmsService);
             ReflectionTestUtils.setField(reminderService, "appUrl", remAppUrl);
         }
 
@@ -430,15 +434,43 @@ class OrganizationDomainServiceTest {
         // --- SMS channel ---
 
         @Test
-        void sendWeeklyReminders_smsChannel_doesNotSendEmail() {
+        void sendWeeklyReminders_smsChannel_sendsSmsReminder() {
             stubReminderWithOrg("SMS", 3);
             stubMember(userId1);
             stubInactiveUserNoRecords(userId1);
             stubProfile(userId1, "Max");
-            when(supabaseAdminClient.getUserEmail(userId1)).thenReturn("max@example.com");
 
             reminderService.sendWeeklyReminders();
 
+            verify(reminderSmsService).sendReminder("+41791234567", "Max", remOrgName, 3);
+            verifyNoInteractions(reminderMailService);
+        }
+
+        @Test
+        void sendWeeklyReminders_smsChannel_noPhoneNumber_skips() {
+            stubReminderWithOrg("SMS", 3);
+            stubMember(userId1);
+            stubInactiveUserNoRecords(userId1);
+            when(supabaseAdminClient.getListWithQuery(eq("app.profiles"), contains("id=eq." + userId1), eq(ProfileResponse.class)))
+                    .thenReturn(List.of(profileResponseNoPhone(userId1, "Max")));
+
+            reminderService.sendWeeklyReminders();
+
+            verifyNoInteractions(reminderSmsService);
+            verifyNoInteractions(reminderMailService);
+        }
+
+        @Test
+        void sendWeeklyReminders_smsChannel_noProfile_skips() {
+            stubReminderWithOrg("SMS", 3);
+            stubMember(userId1);
+            stubInactiveUserNoRecords(userId1);
+            when(supabaseAdminClient.getListWithQuery(eq("app.profiles"), contains("id=eq." + userId1), eq(ProfileResponse.class)))
+                    .thenReturn(List.of());
+
+            reminderService.sendWeeklyReminders();
+
+            verifyNoInteractions(reminderSmsService);
             verifyNoInteractions(reminderMailService);
         }
 
@@ -636,7 +668,11 @@ class OrganizationDomainServiceTest {
         }
 
         private ProfileResponse profileResponse(UUID id, String firstName) {
-            return new ProfileResponse(id, firstName, "Lastname", OffsetDateTime.now(), OffsetDateTime.now());
+            return new ProfileResponse(id, firstName, "Lastname", "+41791234567", OffsetDateTime.now(), OffsetDateTime.now());
+        }
+
+        private ProfileResponse profileResponseNoPhone(UUID id, String firstName) {
+            return new ProfileResponse(id, firstName, "Lastname", null, OffsetDateTime.now(), OffsetDateTime.now());
         }
 
         private ActivityRecordResponse activityRecordResponse(UUID userId, UUID orgId, String entryDate) {

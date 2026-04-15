@@ -7,6 +7,7 @@ public record ProfileResponse(
         UUID id,
         String first_name,
         String last_name,
+        String phone_number,
         OffsetDateTime created_at,
         OffsetDateTime updated_at
 ) {}

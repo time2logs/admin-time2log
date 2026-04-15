@@ -27,6 +27,10 @@ app:
   url: ${APP_URL:http://localhost:4300}
   mail:
     from: ${MAIL_FROM:noreply@time2log.app}
+  sms:
+    swisscom:
+      client-id: ${SWISSCOM_CLIENT_ID:}
+      from: ${SWISSCOM_SMS_FROM:}
 
 
 cors:
