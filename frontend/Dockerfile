@@ -1,6 +1,6 @@
 FROM node:25.9.0-alpine AS build
 
-ARG BUILD_CONFIGURATION=development
+ARG BUILD_CONFIGURATION=production
 ARG API_BASE_URL
 
 WORKDIR /app
