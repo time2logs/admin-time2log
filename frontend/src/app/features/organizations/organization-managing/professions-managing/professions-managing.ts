@@ -116,7 +116,7 @@ export class ProfessionsManaging implements OnInit {
 
   private splitCsvSections(text: string): { nodesCsv: string; competencyMap: Map<string, string> } {
     const lines = text.split(/\r?\n/);
-    const competencyMap = new Map<string, string>();
+    const competencyMap: Map<string, string> = new Map();
 
     const compHeaderIndex = lines.findIndex(line => {
       const parts = line.split(';').map(p => p.trim().toLowerCase());
