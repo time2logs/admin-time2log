@@ -261,6 +261,25 @@
     },
     "history": {
       "title": "Verlauf"
+    },
+    "manual": {
+      "tab": "Manuell erfassen",
+      "fileTab": "Datei hochladen",
+      "addCategory": "Kategorie erstellen",
+      "addActivity": "Aktivität erstellen",
+      "submit": "Als Import erstellen",
+      "emptyHint": "Füge Kategorien und Aktivitäten hinzu, um den Bildungsplan manuell zu erfassen.",
+      "noParent": "— keine Kategorie —",
+      "competenciesTitle": "Kompetenzen",
+      "competencyDescPlaceholder": "Beschreibung",
+      "colKey": "Key",
+      "colType": "Typ",
+      "colLabel": "Bezeichnung",
+      "colOrder": "Reihenfolge",
+      "colCompetencies": "Kompetenzen",
+      "colParent": "Übergeordnet",
+      "typeCategory": "Kategorie",
+      "typeActivity": "Aktivität"
     }
   },
   "errors": {
