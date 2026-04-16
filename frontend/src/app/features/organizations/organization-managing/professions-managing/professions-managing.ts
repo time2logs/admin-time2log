@@ -116,7 +116,7 @@ export class ProfessionsManaging implements OnInit {
 
   private splitCsvSections(text: string): { nodesCsv: string; competencyMap: Map<string, string> } {
     const lines = text.split(/\r?\n/);
-    const competencyMap: Map<string, string> = new Map();
+    const competencyMap = new Map<string, string>();
 
     const compHeaderIndex = lines.findIndex(line => {
       const parts = line.split(';').map(p => p.trim().toLowerCase());
@@ -142,7 +142,7 @@ export class ProfessionsManaging implements OnInit {
     return { nodesCsv, competencyMap };
   }
 
-private csvRowsToJson(rows: CsvRow[], competencyMap: Map<string, string> = new Map()): object {
+private csvRowsToJson(rows: CsvRow[], competencyMap = new Map<string, string>()): object {
   this.validateCsvRows(rows);
   const nodeMap: Record<string, CsvNode> = {};
   const competencySet = new Set<string>();
