@@ -26,6 +26,23 @@ export class ProfessionsManaging implements OnInit {
   protected readonly selectedFileName = signal<string>('');
   protected readonly isUploading = signal(false);
   protected readonly isApplying = signal(false);
+  protected readonly importMode = signal<'file' | 'manual'>('file');
+  protected readonly manualRows = signal<ManualRow[]>([]);
+  protected readonly competencyDescriptions = signal<Record<string, string>>({});
+
+  protected readonly availableCategories = computed(() =>
+    this.manualRows().filter(r => r.type === 'category')
+  );
+
+  protected readonly usedCompetencyCodes = computed(() => {
+    const codes = new Set<string>();
+    for (const row of this.manualRows()) {
+      if (row.type === 'activity' && row.competencies) {
+        row.competencies.split(',').map(c => c.trim()).filter(c => c).forEach(c => codes.add(c));
+      }
+    }
+    return [...codes].sort();
+  });
 
   protected readonly activeImport = computed(() =>
     this.imports().find(i => i.status === 'applied') ?? null
@@ -48,6 +65,57 @@ export class ProfessionsManaging implements OnInit {
     this.professionId = this.route.snapshot.params['professionId'];
     this.loadProfession(this.professionId);
     this.loadImports();
+  }
+
+  protected setImportMode(mode: 'file' | 'manual'): void {
+    this.importMode.set(mode);
+  }
+
+  protected addCategory(): void {
+    this.manualRows.update(rows => [
+      ...rows,
+      { key: '', type: 'category', label: '', order: '1', competencies: '', parent_key: '' },
+    ]);
+  }
+
+  protected addActivity(): void {
+    this.manualRows.update(rows => [
+      ...rows,
+      { key: '', type: 'activity', label: '', order: '1', competencies: '', parent_key: '' },
+    ]);
+  }
+
+  protected removeManualRow(index: number): void {
+    this.manualRows.update(rows => rows.filter((_, i) => i !== index));
+  }
+
+  protected updateManualRow(index: number, field: keyof ManualRow, event: Event): void {
+    const value = (event.target as HTMLInputElement | HTMLSelectElement).value;
+    this.manualRows.update(rows => {
+      const updated = [...rows];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  }
+
+  protected updateCompetencyDescription(code: string, event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.competencyDescriptions.update(desc => ({ ...desc, [code]: value }));
+  }
+
+  protected submitManualImport(): void {
+    try {
+      const payload = this.csvRowsToJson(this.manualRows() as CsvRow[]) as Record<string, unknown>;
+      const descs = this.competencyDescriptions();
+      (payload['competencies'] as { code: string; description: string }[]).forEach(c => {
+        c.description = descs[c.code] ?? '';
+      });
+      this.selectedPayload = payload;
+      this.uploadImport();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : this.translate.instant('professionManaging.import.invalidCsv');
+      this.toast.error(msg);
+    }
   }
 
   protected goBack(): void {
@@ -248,6 +316,15 @@ private csvRowsToJson(rows: CsvRow[]): object {
     }
   }
 }
+}
+
+interface ManualRow {
+  key: string;
+  type: string;
+  label: string;
+  order: string;
+  competencies: string;
+  parent_key: string;
 }
 
 interface CsvRow {

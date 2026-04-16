@@ -260,6 +260,23 @@
     },
     "history": {
       "title": "History"
+    },
+    "manual": {
+      "tab": "Manual entry",
+      "fileTab": "Upload file",
+      "addCategory": "Create category",
+      "addActivity": "Create activity",
+      "submit": "Create as import",
+      "emptyHint": "Add categories and activities to manually define the curriculum.",
+      "noParent": "— no category —",
+      "colKey": "Key",
+      "colType": "Type",
+      "colLabel": "Label",
+      "colOrder": "Order",
+      "colCompetencies": "Competencies",
+      "colParent": "Parent",
+      "typeCategory": "Category",
+      "typeActivity": "Activity"
     }
   },
   "errors": {
