@@ -35,7 +35,7 @@ public class ReminderMailService {
             var helper = new MimeMessageHelper(message, false, "UTF-8");
             helper.setFrom(from);
             helper.setTo(toEmail);
-            helper.setSubject("Reminder: Log your activities in " + organizationName);
+            helper.setSubject("Erinnerung: Erfasse deine Aktivitäten in " + organizationName);
             helper.setText(html, true);
 
             mailSender.send(message);

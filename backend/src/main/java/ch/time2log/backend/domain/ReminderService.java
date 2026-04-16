@@ -1,6 +1,7 @@
 package ch.time2log.backend.domain;
 
 import ch.time2log.backend.infrastructure.mail.ReminderMailService;
+import ch.time2log.backend.infrastructure.sms.ReminderSmsService;
 import ch.time2log.backend.infrastructure.supabase.SupabaseAdminClient;
 import ch.time2log.backend.infrastructure.supabase.responses.ActivityRecordResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.OrganizationMemberResponse;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
@@ -26,13 +28,15 @@ public class ReminderService {
 
     private final SupabaseAdminClient adminClient;
     private final ReminderMailService reminderMailService;
+    private final ReminderSmsService reminderSmsService;
 
     @Value("${app.url}")
     private String appUrl;
 
-    public ReminderService(SupabaseAdminClient adminClient, ReminderMailService reminderMailService) {
+    public ReminderService(SupabaseAdminClient adminClient, ReminderMailService reminderMailService, ReminderSmsService reminderSmsService) {
         this.adminClient = adminClient;
         this.reminderMailService = reminderMailService;
+        this.reminderSmsService = reminderSmsService;
     }
 
     /**
@@ -54,9 +58,10 @@ public class ReminderService {
             return;
         }
 
-        var today = LocalDate.now();
+        var swissZone = ZoneId.of("Europe/Zurich");
+        var today = LocalDate.now(swissZone);
         var currentDay = today.getDayOfWeek();
-        var currentTime = LocalTime.now();
+        var currentTime = LocalTime.now(swissZone);
 
         for (var reminder : reminders) {
             try {
@@ -141,17 +146,22 @@ public class ReminderService {
         );
         var firstName = profiles.isEmpty() ? "User" : profiles.getFirst().first_name();
 
-        var email = adminClient.getUserEmail(userId);
-        if (email == null || email.isBlank()) {
-            log.warn("No email found for user {}, skipping reminder", userId);
-            return;
-        }
-
-        if ("EMAIL".equals(channel)) {
+        if ("SMS".equals(channel)) {
+            var phoneNumber = profiles.isEmpty() ? null : profiles.getFirst().phone_number();
+            if (phoneNumber == null || phoneNumber.isBlank()) {
+                log.warn("No phone number found for user {}, skipping SMS reminder", userId);
+                return;
+            }
+            reminderSmsService.sendReminder(phoneNumber, firstName, orgName, daysInactive);
+            log.info("Sent SMS reminder to {} ({}) - {} days inactive in org {}", phoneNumber, firstName, daysInactive, orgName);
+        } else {
+            var email = adminClient.getUserEmail(userId);
+            if (email == null || email.isBlank()) {
+                log.warn("No email found for user {}, skipping reminder", userId);
+                return;
+            }
             reminderMailService.sendReminder(email, firstName, orgName, daysInactive, appUrl);
             log.info("Sent EMAIL reminder to {} ({}) - {} days inactive in org {}", email, firstName, daysInactive, orgName);
-        } else {
-            log.info("SMS reminder for {} ({}) - {} days inactive in org {} (SMS not yet implemented)", email, firstName, daysInactive, orgName);
         }
     }
 }

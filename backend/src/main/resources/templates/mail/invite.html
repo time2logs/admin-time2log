@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>You've been invited</title>
+  <title>Du wurdest eingeladen</title>
   <style>
     body { margin: 0; padding: 0; background: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
     .wrapper { padding: 40px 16px; }
@@ -35,33 +35,33 @@
     <div class="header">
       <div class="logo">Time<span>2</span>Log</div>
       <h1>{{SUBJECT}}</h1>
-      <p>Set up your account and join the organization.</p>
+      <p>Richte dein Konto ein und tritt der Organisation bei.</p>
     </div>
 
     <div class="body">
       <div class="org-card">
         <div>
-          <div class="org-label">Invited to</div>
+          <div class="org-label">Eingeladen zu</div>
           <div class="org-name">{{ORGANIZATION_NAME}}</div>
         </div>
         <span class="role-badge {{ROLE_CLASS}}">{{ROLE_LABEL}}</span>
       </div>
 
       <p class="message">
-        You've been invited to join <strong>{{ORGANIZATION_NAME}}</strong> on Time2Log.
-        Click the button below to accept your invitation and set up your account.
-        This link expires after <strong>24 hours</strong>.
+        Du wurdest eingeladen, <strong>{{ORGANIZATION_NAME}}</strong> auf Time2Log beizutreten.
+        Klicke auf den Button unten, um die Einladung anzunehmen und dein Konto einzurichten.
+        Dieser Link ist <strong>24 Stunden</strong> gültig.
       </p>
 
-      <a href="{{ACTION_LINK}}" class="btn">Accept Invitation</a>
+      <a href="{{ACTION_LINK}}" class="btn">Einladung annehmen</a>
     </div>
 
     <div class="divider"></div>
 
     <div class="footer">
       <p>
-        If you weren't expecting this invitation, you can ignore this email.<br/>
-        If the button doesn't work, copy this link into your browser:<br/>
+        Falls du diese Einladung nicht erwartet hast, kannst du diese E-Mail ignorieren.<br/>
+        Wenn der Button nicht funktioniert, kopiere diesen Link in deinen Browser:<br/>
         <span style="color:#60a5fa; word-break:break-all;">{{ACTION_LINK}}</span>
       </p>
     </div>
