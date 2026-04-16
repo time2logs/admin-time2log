@@ -132,10 +132,11 @@ export class ProfessionsManaging implements OnInit {
     for (let i = compHeaderIndex + 1; i < lines.length; i++) {
       const line = lines[i].trim();
       if (!line || line === ';;;;;' || line === ';;;;') continue;
-      const [code, ...descParts] = line.split(';');
-      const trimmedCode = code.trim();
+      const parts = line.split(';');
+      const trimmedCode = parts[0].trim();
+      const description = (parts[1] ?? '').trim();
       if (trimmedCode) {
-        competencyMap.set(trimmedCode, descParts.join(';').trim());
+        competencyMap.set(trimmedCode, description);
       }
     }
 
