@@ -26,6 +26,23 @@ export class ProfessionsManaging implements OnInit {
   protected readonly selectedFileName = signal<string>('');
   protected readonly isUploading = signal(false);
   protected readonly isApplying = signal(false);
+  protected readonly importMode = signal<'file' | 'manual'>('file');
+  protected readonly manualRows = signal<ManualRow[]>([]);
+  protected readonly competencyDescriptions = signal<Record<string, string>>({});
+
+  protected readonly availableCategories = computed(() =>
+    this.manualRows().filter(r => r.type === 'category')
+  );
+
+  protected readonly usedCompetencyCodes = computed(() => {
+    const codes = new Set<string>();
+    for (const row of this.manualRows()) {
+      if (row.type === 'activity' && row.competencies) {
+        row.competencies.split(',').map(c => c.trim()).filter(c => c).forEach(c => codes.add(c));
+      }
+    }
+    return [...codes].sort();
+  });
 
   protected readonly activeImport = computed(() =>
     this.imports().find(i => i.status === 'applied') ?? null
@@ -48,6 +65,57 @@ export class ProfessionsManaging implements OnInit {
     this.professionId = this.route.snapshot.params['professionId'];
     this.loadProfession(this.professionId);
     this.loadImports();
+  }
+
+  protected setImportMode(mode: 'file' | 'manual'): void {
+    this.importMode.set(mode);
+  }
+
+  protected addCategory(): void {
+    this.manualRows.update(rows => [
+      ...rows,
+      { key: '', type: 'category', label: '', order: '1', competencies: '', parent_key: '' },
+    ]);
+  }
+
+  protected addActivity(): void {
+    this.manualRows.update(rows => [
+      ...rows,
+      { key: '', type: 'activity', label: '', order: '1', competencies: '', parent_key: '' },
+    ]);
+  }
+
+  protected removeManualRow(index: number): void {
+    this.manualRows.update(rows => rows.filter((_, i) => i !== index));
+  }
+
+  protected updateManualRow(index: number, field: keyof ManualRow, event: Event): void {
+    const value = (event.target as HTMLInputElement | HTMLSelectElement).value;
+    this.manualRows.update(rows => {
+      const updated = [...rows];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  }
+
+  protected updateCompetencyDescription(code: string, event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.competencyDescriptions.update(desc => ({ ...desc, [code]: value }));
+  }
+
+  protected submitManualImport(): void {
+    try {
+      const payload = this.csvRowsToJson(this.manualRows() as CsvRow[]) as Record<string, unknown>;
+      const descs = this.competencyDescriptions();
+      (payload['competencies'] as { code: string; description: string }[]).forEach(c => {
+        c.description = descs[c.code] ?? '';
+      });
+      this.selectedPayload = payload;
+      this.uploadImport();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : this.translate.instant('professionManaging.import.invalidCsv');
+      this.toast.error(msg);
+    }
   }
 
   protected goBack(): void {
@@ -82,32 +150,73 @@ export class ProfessionsManaging implements OnInit {
   }
 
   private parseCsvFile(file: File): void {
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (result) => {
-        try {
-          this.selectedPayload = this.csvRowsToJson(result.data as CsvRow[]);
-        } catch (e) {
-          const msg = e instanceof Error ? e.message : this.translate.instant('professionManaging.import.invalidCsv');
-          this.toast.error(msg);
-          this.resetFileSelection();
-        }
-      },
-      error: () => {
-        this.toast.error(this.translate.instant('professionManaging.import.invalidCsv'));
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const text = reader.result as string;
+        const { nodesCsv, competencyMap } = this.splitCsvSections(text);
+
+        Papa.parse(nodesCsv, {
+          header: true,
+          skipEmptyLines: 'greedy',
+          complete: (result) => {
+            try {
+              this.selectedPayload = this.csvRowsToJson(result.data as CsvRow[], competencyMap);
+            } catch (e) {
+              const msg = e instanceof Error ? e.message : this.translate.instant('professionManaging.import.invalidCsv');
+              this.toast.error(msg);
+              this.resetFileSelection();
+            }
+          },
+          error: () => {
+            this.toast.error(this.translate.instant('professionManaging.import.invalidCsv'));
+            this.resetFileSelection();
+          },
+        });
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : this.translate.instant('professionManaging.import.invalidCsv');
+        this.toast.error(msg);
         this.resetFileSelection();
-      },
-    });
+      }
+    };
+    reader.readAsText(file);
   }
 
-private csvRowsToJson(rows: CsvRow[]): object {
+  private splitCsvSections(text: string): { nodesCsv: string; competencyMap: Map<string, string> } {
+    const lines = text.split(/\r?\n/);
+    const competencyMap = new Map<string, string>();
+
+    const compHeaderIndex = lines.findIndex(line => {
+      const parts = line.split(';').map(p => p.trim().toLowerCase());
+      return parts[0] === 'competencies' && parts[1] === 'description';
+    });
+
+    if (compHeaderIndex === -1) {
+      return { nodesCsv: text, competencyMap };
+    }
+
+    const nodesCsv = lines.slice(0, compHeaderIndex).join('\n');
+
+    for (let i = compHeaderIndex + 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line || line === ';;;;;' || line === ';;;;') continue;
+      const parts = line.split(';');
+      const trimmedCode = parts[0].trim();
+      const description = (parts[1] ?? '').trim();
+      if (trimmedCode) {
+        competencyMap.set(trimmedCode, description);
+      }
+    }
+
+    return { nodesCsv, competencyMap };
+  }
+
+private csvRowsToJson(rows: CsvRow[], competencyMap = new Map<string, string>()): object {
   this.validateCsvRows(rows);
   const nodeMap: Record<string, CsvNode> = {};
   const competencySet = new Set<string>();
 
   for (const row of rows) {
-    // Problem 3: Validierung
     if (!['category', 'activity'].includes(row.type)) {
       throw new Error(`Ungültiger type: "${row.type}" bei key "${row.key}"`);
     }
@@ -139,7 +248,6 @@ private csvRowsToJson(rows: CsvRow[]): object {
     }
   }
 
-  // Problem 1: Sortierung sicherstellen
   const sortChildren = (nodes: Omit<CsvNode, '_parent'>[]) => {
     nodes.sort((a, b) => a.order - b.order);
     nodes.forEach(n => n.children && sortChildren(n.children));
@@ -149,8 +257,10 @@ private csvRowsToJson(rows: CsvRow[]): object {
   return {
     schema_version: 1,
     version: '1.0',
-    // Problem 2: descriptions bleiben leer – bewusste Entscheidung dokumentieren
-    competencies: [...competencySet].map(code => ({ code, description: '' })),
+    competencies: [...competencySet].map(code => ({
+      code,
+      description: competencyMap.get(code) ?? '',
+    })),
     nodes: roots,
   };
 }
@@ -248,6 +358,15 @@ private csvRowsToJson(rows: CsvRow[]): object {
     }
   }
 }
+}
+
+interface ManualRow {
+  key: string;
+  type: string;
+  label: string;
+  order: string;
+  competencies: string;
+  parent_key: string;
 }
 
 interface CsvRow {

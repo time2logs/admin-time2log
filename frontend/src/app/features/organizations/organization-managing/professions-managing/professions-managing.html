@@ -84,42 +84,232 @@
               </div>
             </div>
           } @else {
-            <!-- File upload -->
-            <p class="text-sm text-gray-600 dark:text-[hsl(210,15%,70%)] mb-4">{{ 'professionManaging.import.description' | translate }}</p>
-            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-              <label
-                class="px-4 py-2 bg-white dark:bg-[hsl(215,25%,16%)] border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-[hsl(215,25%,20%)] transition-colors text-sm text-gray-700 dark:text-[hsl(210,15%,70%)] inline-flex items-center gap-2"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                </svg>
-                {{ 'professionManaging.import.selectFile' | translate }}
-                <input
-                  type="file"
-                  accept=".json, .csv"
-                  class="hidden"
-                  (change)="onFileSelected($event)"
-                />
-              </label>
-              @if (selectedFileName()) {
-                <span class="text-sm text-gray-600 dark:text-[hsl(210,15%,70%)] font-mono">{{ selectedFileName() }}</span>
-                <button
-                  class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors disabled:opacity-50 text-sm inline-flex items-center gap-2"
-                  [disabled]="isUploading()"
-                  (click)="uploadImport()"
-                >
-                  @if (isUploading()) {
-                    <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                    </svg>
-                    {{ 'professionManaging.import.uploading' | translate }}
-                  } @else {
-                    {{ 'professionManaging.import.upload' | translate }}
-                  }
-                </button>
-              }
+            <!-- Tab toggle -->
+            <div class="flex gap-1 mb-5 border-b border-gray-200 dark:border-[hsl(215,20%,22%)]">
+              <button
+                class="px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px"
+                [class]="importMode() === 'file'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 dark:text-[hsl(210,15%,55%)] hover:text-gray-700 dark:hover:text-[hsl(210,15%,70%)]'"
+                (click)="setImportMode('file')"
+              >{{ 'professionManaging.manual.fileTab' | translate }}</button>
+              <button
+                class="px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px"
+                [class]="importMode() === 'manual'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 dark:text-[hsl(210,15%,55%)] hover:text-gray-700 dark:hover:text-[hsl(210,15%,70%)]'"
+                (click)="setImportMode('manual')"
+              >{{ 'professionManaging.manual.tab' | translate }}</button>
             </div>
+
+            <!-- File upload tab -->
+            @if (importMode() === 'file') {
+              <p class="text-sm text-gray-600 dark:text-[hsl(210,15%,70%)] mb-4">{{ 'professionManaging.import.description' | translate }}</p>
+              <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <label
+                  class="px-4 py-2 bg-white dark:bg-[hsl(215,25%,16%)] border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-[hsl(215,25%,20%)] transition-colors text-sm text-gray-700 dark:text-[hsl(210,15%,70%)] inline-flex items-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  {{ 'professionManaging.import.selectFile' | translate }}
+                  <input
+                    type="file"
+                    accept=".json, .csv"
+                    class="hidden"
+                    (change)="onFileSelected($event)"
+                  />
+                </label>
+                @if (selectedFileName()) {
+                  <span class="text-sm text-gray-600 dark:text-[hsl(210,15%,70%)] font-mono">{{ selectedFileName() }}</span>
+                  <button
+                    class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors disabled:opacity-50 text-sm inline-flex items-center gap-2"
+                    [disabled]="isUploading()"
+                    (click)="uploadImport()"
+                  >
+                    @if (isUploading()) {
+                      <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                      </svg>
+                      {{ 'professionManaging.import.uploading' | translate }}
+                    } @else {
+                      {{ 'professionManaging.import.upload' | translate }}
+                    }
+                  </button>
+                }
+              </div>
+            }
+
+            <!-- Manual entry tab -->
+            @if (importMode() === 'manual') {
+              <div class="space-y-4">
+                @if (manualRows().length === 0) {
+                  <p class="text-sm text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ 'professionManaging.manual.emptyHint' | translate }}</p>
+                } @else {
+                  <div class="overflow-x-auto">
+                    <table class="w-full text-sm border-collapse">
+                      <thead>
+                        <tr class="border-b border-gray-200 dark:border-[hsl(215,20%,22%)]">
+                          <th class="text-left px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] w-24">{{ 'professionManaging.manual.colKey' | translate }}</th>
+                          <th class="text-left px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] w-28">{{ 'professionManaging.manual.colType' | translate }}</th>
+                          <th class="text-left px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ 'professionManaging.manual.colLabel' | translate }}</th>
+                          <th class="text-left px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] w-20">{{ 'professionManaging.manual.colOrder' | translate }}</th>
+                          <th class="text-left px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] w-36">{{ 'professionManaging.manual.colCompetencies' | translate }}</th>
+                          <th class="text-left px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] w-40">{{ 'professionManaging.manual.colParent' | translate }}</th>
+                          <th class="w-8"></th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-100 dark:divide-[hsl(215,20%,20%)]">
+                        @for (row of manualRows(); track $index; let i = $index) {
+                          <tr>
+                            <td class="px-2 py-1">
+                              <input
+                                type="text"
+                                [value]="row.key"
+                                (input)="updateManualRow(i, 'key', $event)"
+                                placeholder="1.10"
+                                class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded bg-white dark:bg-[hsl(215,25%,11%)] text-gray-800 dark:text-[hsl(210,15%,85%)] focus:outline-none focus:border-blue-400"
+                              />
+                            </td>
+                            <td class="px-2 py-1">
+                              @if (row.type === 'category') {
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+                                  {{ 'professionManaging.manual.typeCategory' | translate }}
+                                </span>
+                              } @else {
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                                  {{ 'professionManaging.manual.typeActivity' | translate }}
+                                </span>
+                              }
+                            </td>
+                            <td class="px-2 py-1">
+                              <input
+                                type="text"
+                                [value]="row.label"
+                                (input)="updateManualRow(i, 'label', $event)"
+                                placeholder="Mauerwerk"
+                                class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded bg-white dark:bg-[hsl(215,25%,11%)] text-gray-800 dark:text-[hsl(210,15%,85%)] focus:outline-none focus:border-blue-400"
+                              />
+                            </td>
+                            <td class="px-2 py-1">
+                              <input
+                                type="number"
+                                min="1"
+                                [value]="row.order"
+                                (input)="updateManualRow(i, 'order', $event)"
+                                class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded bg-white dark:bg-[hsl(215,25%,11%)] text-gray-800 dark:text-[hsl(210,15%,85%)] focus:outline-none focus:border-blue-400"
+                              />
+                            </td>
+                            <td class="px-2 py-1">
+                              @if (row.type === 'activity') {
+                                <input
+                                  type="text"
+                                  [value]="row.competencies"
+                                  (input)="updateManualRow(i, 'competencies', $event)"
+                                  placeholder="a1,b3"
+                                  class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded bg-white dark:bg-[hsl(215,25%,11%)] text-gray-800 dark:text-[hsl(210,15%,85%)] focus:outline-none focus:border-blue-400"
+                                />
+                              } @else {
+                                <span class="text-xs text-gray-400 dark:text-[hsl(210,15%,40%)] px-2">—</span>
+                              }
+                            </td>
+                            <td class="px-2 py-1">
+                              @if (row.type === 'activity') {
+                                <select
+                                  [value]="row.parent_key"
+                                  (change)="updateManualRow(i, 'parent_key', $event)"
+                                  class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded bg-white dark:bg-[hsl(215,25%,11%)] text-gray-800 dark:text-[hsl(210,15%,85%)] focus:outline-none focus:border-blue-400"
+                                >
+                                  <option value="">{{ 'professionManaging.manual.noParent' | translate }}</option>
+                                  @for (cat of availableCategories(); track cat.key) {
+                                    <option [value]="cat.key">{{ cat.label || cat.key }}</option>
+                                  }
+                                </select>
+                              } @else {
+                                <span class="text-xs text-gray-400 dark:text-[hsl(210,15%,40%)] px-2">—</span>
+                              }
+                            </td>
+                            <td class="px-2 py-1 text-center">
+                              <button
+                                (click)="removeManualRow(i)"
+                                class="text-gray-400 hover:text-red-500 dark:text-[hsl(210,15%,45%)] dark:hover:text-red-400 transition-colors"
+                                title="{{ 'common.delete' | translate }}"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+
+                <!-- Competency descriptions -->
+                @if (usedCompetencyCodes().length > 0) {
+                  <div class="border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg overflow-hidden">
+                    <div class="px-3 py-2 bg-gray-50 dark:bg-[hsl(215,25%,16%)] border-b border-gray-200 dark:border-[hsl(215,20%,22%)]">
+                      <h3 class="text-xs font-medium text-gray-600 dark:text-[hsl(210,15%,60%)] uppercase tracking-wide">{{ 'professionManaging.manual.competenciesTitle' | translate }}</h3>
+                    </div>
+                    <div class="divide-y divide-gray-100 dark:divide-[hsl(215,20%,20%)]">
+                      @for (code of usedCompetencyCodes(); track code) {
+                        <div class="flex items-center gap-3 px-3 py-2">
+                          <span class="text-sm font-mono font-medium text-gray-700 dark:text-[hsl(210,15%,75%)] w-12 flex-shrink-0">{{ code }}</span>
+                          <input
+                            type="text"
+                            [value]="competencyDescriptions()[code] ?? ''"
+                            (input)="updateCompetencyDescription(code, $event)"
+                            [placeholder]="'professionManaging.manual.competencyDescPlaceholder' | translate"
+                            class="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded bg-white dark:bg-[hsl(215,25%,11%)] text-gray-800 dark:text-[hsl(210,15%,85%)] focus:outline-none focus:border-blue-400"
+                          />
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+
+                <div class="flex flex-wrap items-center gap-2 pt-1">
+                  <button
+                    (click)="addCategory()"
+                    class="px-3 py-1.5 text-sm border border-purple-300 dark:border-purple-700 rounded hover:bg-purple-50 dark:hover:bg-purple-900/20 text-purple-700 dark:text-purple-300 inline-flex items-center gap-1.5 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    {{ 'professionManaging.manual.addCategory' | translate }}
+                  </button>
+                  <button
+                    (click)="addActivity()"
+                    class="px-3 py-1.5 text-sm border border-blue-300 dark:border-blue-700 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-700 dark:text-blue-300 inline-flex items-center gap-1.5 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    {{ 'professionManaging.manual.addActivity' | translate }}
+                  </button>
+                  @if (manualRows().length > 0) {
+                    <button
+                      (click)="submitManualImport()"
+                      [disabled]="isUploading()"
+                      class="ml-auto px-4 py-1.5 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors disabled:opacity-50 text-sm inline-flex items-center gap-2"
+                    >
+                      @if (isUploading()) {
+                        <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        {{ 'professionManaging.import.uploading' | translate }}
+                      } @else {
+                        {{ 'professionManaging.manual.submit' | translate }}
+                      }
+                    </button>
+                  }
+                </div>
+              </div>
+            }
           }
         </div>
       </div>
