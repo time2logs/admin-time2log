@@ -12,4 +12,4 @@ spring:
       mail.smtp.starttls.required: true
 
 cors:
-  allowed-origins: https://admin.time2log.app
+  allowed-origins: ${CORS_ALLOWED_ORIGINS}
