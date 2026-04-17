@@ -74,15 +74,18 @@
   </div>
 
   <!-- Progress section -->
-  @if (activityProgress().length > 0) {
+  @for (group of teamGroups(); track group.teamId) {
     <div class="space-y-4">
-      <!-- Activity progress (derived from records, no curriculum lookup) -->
+      <!-- Activity progress per team -->
       <div class="bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm overflow-hidden">
         <div class="px-5 py-3 bg-gray-50 dark:bg-[hsl(215,25%,16%)] border-b border-gray-200 dark:border-[hsl(215,20%,22%)]">
-          <h2 class="text-lg font-medium text-gray-800 dark:text-[hsl(210,15%,90%)]">{{ 'reports.memberDetail.progress' | translate }}</h2>
+          <h2 class="text-lg font-medium text-gray-800 dark:text-[hsl(210,15%,90%)]">
+            {{ 'reports.memberDetail.progress' | translate }}
+            <span class="text-gray-500 dark:text-[hsl(210,15%,55%)]">– {{ group.teamName }}</span>
+          </h2>
         </div>
         <div class="p-4 space-y-3">
-          @for (activity of activityProgress(); track activity.id) {
+          @for (activity of group.activityProgress; track activity.id) {
             <div>
               <div class="flex items-center justify-between mb-1">
                 <span class="text-sm text-gray-700 dark:text-[hsl(210,15%,70%)] truncate">{{ activity.label }}</span>
@@ -91,7 +94,7 @@
               <div class="h-1.5 bg-gray-100 dark:bg-[hsl(215,20%,22%)] rounded-full overflow-hidden">
                 <div
                   class="h-full bg-green-500 rounded-full transition-all"
-                  [style.width.%]="(activity.hours / maxActivityHours()) * 100"
+                  [style.width.%]="(activity.hours / group.maxActivityHours) * 100"
                 ></div>
               </div>
             </div>
@@ -99,30 +102,33 @@
         </div>
       </div>
 
-      <!-- Competency progress -->
-      @if (curriculum() && curriculum()!.competencies.length > 0) {
+      <!-- Competency progress per team -->
+      @if (group.curriculum && group.curriculum.competencies.length > 0) {
         <div class="bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm overflow-hidden">
           <div class="px-5 py-3 bg-gray-50 dark:bg-[hsl(215,25%,16%)] border-b border-gray-200 dark:border-[hsl(215,20%,22%)]">
-            <h2 class="text-lg font-medium text-gray-800 dark:text-[hsl(210,15%,90%)]">{{ 'reports.memberDetail.competencies' | translate }}</h2>
+            <h2 class="text-lg font-medium text-gray-800 dark:text-[hsl(210,15%,90%)]">
+              {{ 'reports.memberDetail.competencies' | translate }}
+              <span class="text-gray-500 dark:text-[hsl(210,15%,55%)]">– {{ group.teamName }}</span>
+            </h2>
           </div>
           <div class="p-4 space-y-3">
-            @for (comp of curriculum()!.competencies; track comp.id) {
+            @for (comp of group.curriculum.competencies; track comp.id) {
               <div>
                 <div class="flex items-center justify-between mb-1">
                   <span class="text-sm text-gray-700 dark:text-[hsl(210,15%,70%)]">
                     <span class="font-mono text-xs text-gray-400 dark:text-[hsl(210,15%,45%)] mr-1">{{ comp.code }}</span>
                     {{ comp.description }}
                   </span>
-                  <span class="text-sm font-medium text-gray-800 dark:text-[hsl(210,15%,90%)] ml-2 flex-shrink-0">{{ competencyHours().get(comp.id) ?? 0 }}h</span>
+                  <span class="text-sm font-medium text-gray-800 dark:text-[hsl(210,15%,90%)] ml-2 flex-shrink-0">{{ group.competencyHours.get(comp.id) ?? 0 }}h</span>
                 </div>
                 <div class="h-1.5 bg-gray-100 dark:bg-[hsl(215,20%,22%)] rounded-full overflow-hidden">
                   <div
                     class="h-full rounded-full transition-all"
-                    [class.bg-blue-500]="(competencyHours().get(comp.id) ?? 0) > 0"
-                    [class.bg-gray-200]="(competencyHours().get(comp.id) ?? 0) === 0"
-                    [class.dark:bg-blue-600]="(competencyHours().get(comp.id) ?? 0) > 0"
-                    [class.dark:bg-gray-600]="(competencyHours().get(comp.id) ?? 0) === 0"
-                    [style.width.%]="((competencyHours().get(comp.id) ?? 0) / maxCompetencyHours()) * 100"
+                    [class.bg-blue-500]="(group.competencyHours.get(comp.id) ?? 0) > 0"
+                    [class.bg-gray-200]="(group.competencyHours.get(comp.id) ?? 0) === 0"
+                    [class.dark:bg-blue-600]="(group.competencyHours.get(comp.id) ?? 0) > 0"
+                    [class.dark:bg-gray-600]="(group.competencyHours.get(comp.id) ?? 0) === 0"
+                    [style.width.%]="((group.competencyHours.get(comp.id) ?? 0) / group.maxCompetencyHours) * 100"
                   ></div>
                 </div>
               </div>
