@@ -44,9 +44,9 @@
     "zone.js": "0.16.1"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "21.2.7",
-    "@angular/build": "21.2.7",
-    "@angular/cli": "21.2.7",
+    "@angular-devkit/build-angular": "21.2.8",
+    "@angular/build": "21.2.8",
+    "@angular/cli": "21.2.8",
     "@angular/compiler-cli": "21.2.9",
     "@tailwindcss/postcss": "4.2.4",
     "@types/jasmine": "6.0.0",
