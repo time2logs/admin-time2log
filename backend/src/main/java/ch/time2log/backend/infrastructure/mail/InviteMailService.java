@@ -1,12 +1,9 @@
 package ch.time2log.backend.infrastructure.mail;
 
-import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -16,29 +13,21 @@ import java.nio.charset.StandardCharsets;
 public class InviteMailService {
     private static final Logger log = LoggerFactory.getLogger(InviteMailService.class);
 
-    private final JavaMailSender mailSender;
+    private final EmailSender emailSender;
     private final ResourceLoader resourceLoader;
 
     @Value("${app.mail.from:noreply@time2log.app}")
     private String from;
 
-    public InviteMailService(JavaMailSender mailSender, ResourceLoader resourceLoader) {
-        this.mailSender = mailSender;
+    public InviteMailService(EmailSender emailSender, ResourceLoader resourceLoader) {
+        this.emailSender = emailSender;
         this.resourceLoader = resourceLoader;
     }
 
     public void sendInvite(String toEmail, String organizationName, String role, String actionLink) {
         try {
             var html = loadTemplate(organizationName, role, actionLink);
-
-            MimeMessage message = mailSender.createMimeMessage();
-            var helper = new MimeMessageHelper(message, false, "UTF-8");
-            helper.setFrom(from);
-            helper.setTo(toEmail);
-            helper.setSubject("Einladung zu " + organizationName);
-            helper.setText(html, true);
-
-            mailSender.send(message);
+            emailSender.send(from, toEmail, "Einladung zu " + organizationName, html);
             log.info("Invite email sent to {}", toEmail);
         } catch (Exception e) {
             log.error("Failed to send invite email to {}: {}", toEmail, e.getMessage());
