@@ -18,6 +18,7 @@ export interface MemberActivityRecord {
   hours: number;
   notes: string;
   rating: number | null;
+  teamId: string | null;
 }
 
 export interface CurriculumNodeDto {

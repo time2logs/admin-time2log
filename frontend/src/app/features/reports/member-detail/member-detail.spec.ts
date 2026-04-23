@@ -9,7 +9,9 @@ import { of } from 'rxjs';
 import { MemberDetail } from './member-detail';
 import { OrganizationService } from '@services/organization.service';
 import { ReportService } from '@services/report.service';
+import { TeamService } from '@services/team.service';
 import { MemberActivityRecord, CurriculumOverview } from '@app/core/models/report.models';
+import { Team } from '@app/core/models/team.models';
 
 function makeRecord(overrides: Partial<MemberActivityRecord> = {}): MemberActivityRecord {
   return {
@@ -20,6 +22,7 @@ function makeRecord(overrides: Partial<MemberActivityRecord> = {}): MemberActivi
     hours: 1,
     notes: '',
     rating: null,
+    teamId: null,
     ...overrides,
   };
 }
@@ -29,9 +32,10 @@ describe('MemberDetail computed signals', () => {
   let component: MemberDetail;
 
   beforeEach(async () => {
-    const orgServiceSpy = jasmine.createSpyObj('OrganizationService', ['getOrganizationMembers', 'getProfessions']);
+    const orgServiceSpy = jasmine.createSpyObj('OrganizationService', ['getOrganizationMembers', 'getProfessions', 'getOnlyOrganizationMembers']);
     orgServiceSpy.getOrganizationMembers.and.returnValue(of([]));
     orgServiceSpy.getProfessions.and.returnValue(of([]));
+    orgServiceSpy.getOnlyOrganizationMembers.and.returnValue(of([]));
 
     const reportServiceSpy = jasmine.createSpyObj('ReportService', [
       'getMemberRecordsByDate',
@@ -42,16 +46,18 @@ describe('MemberDetail computed signals', () => {
     reportServiceSpy.getMemberRecordsByRange.and.returnValue(of([]));
     reportServiceSpy.getCurriculum.and.returnValue(of(null));
 
+    const teamServiceSpy = jasmine.createSpyObj('TeamService', ['getTeams']);
+    teamServiceSpy.getTeams.and.returnValue(of([]));
+
     await TestBed.configureTestingModule({
       imports: [MemberDetail],
       providers: [
-        // Intercept all HTTP requests so AuthService cannot reach Supabase
-        // even if a real session is present in the test browser's localStorage.
         provideHttpClientTesting(),
         provideTranslateService(),
         provideRouter([]),
         { provide: OrganizationService, useValue: orgServiceSpy },
         { provide: ReportService, useValue: reportServiceSpy },
+        { provide: TeamService, useValue: teamServiceSpy },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -64,11 +70,6 @@ describe('MemberDetail computed signals', () => {
 
     fixture = TestBed.createComponent(MemberDetail);
     component = fixture.componentInstance;
-
-    // Do NOT call detectChanges() here. We only test the computed signal logic,
-    // not the data-loading side effects of ngOnInit. Skipping detectChanges()
-    // prevents ngOnInit from running, which means no real or mocked HTTP calls
-    // are triggered and the signals stay in their clean initial state ([]/null).
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -102,7 +103,6 @@ describe('MemberDetail computed signals', () => {
     });
 
     it('produces one entry per distinct date', () => {
-      // Use a future month so the "missing weekday" loop adds nothing.
       c().currentYear.set(2099);
       c().currentMonth.set(0);
       c().monthRecords.set([
@@ -113,39 +113,11 @@ describe('MemberDetail computed signals', () => {
     });
   });
 
-  describe('activityProgress', () => {
-    it('aggregates hours per activity, sorted descending', () => {
-      const actId1 = 'act-1';
-      const actId2 = 'act-2';
-      c().allRecords.set([
-        makeRecord({ curriculumActivityId: actId1, activityLabel: 'First Aid', hours: 3 }),
-        makeRecord({ curriculumActivityId: actId1, hours: 2 }),
-        makeRecord({ curriculumActivityId: actId2, activityLabel: 'CPR', hours: 6 }),
-      ]);
-      const progress = c().activityProgress();
-      expect(progress).toHaveSize(2);
-      expect(progress[0].id).toBe(actId2);
-      expect(progress[0].hours).toBe(6);
-      expect(progress[1].id).toBe(actId1);
-      expect(progress[1].hours).toBe(5);
-    });
+  describe('teamGroups', () => {
+    const team1: Team = { id: 'team-1', professionId: 'prof-1', name: 'Team A' };
+    const team2: Team = { id: 'team-2', professionId: 'prof-2', name: 'Team B' };
 
-    it('skips records without an activity id', () => {
-      c().allRecords.set([
-        makeRecord({ curriculumActivityId: null, hours: 8 }),
-        makeRecord({ curriculumActivityId: 'act-1', hours: 2 }),
-      ]);
-      expect(c().activityProgress()).toHaveSize(1);
-    });
-
-    it('returns empty array when no records exist', () => {
-      c().allRecords.set([]);
-      expect(c().activityProgress()).toHaveSize(0);
-    });
-  });
-
-  describe('competencyHours', () => {
-    const curriculum: CurriculumOverview = {
+    const curriculum1: CurriculumOverview = {
       nodes: [
         { id: 'act-1', parentId: null, nodeType: 'activity', key: 'a1', label: 'Act 1', sortOrder: 0, competencyIds: ['comp-A', 'comp-B'] },
         { id: 'act-2', parentId: null, nodeType: 'activity', key: 'a2', label: 'Act 2', sortOrder: 1, competencyIds: ['comp-A'] },
@@ -157,31 +129,85 @@ describe('MemberDetail computed signals', () => {
       ],
     };
 
-    beforeEach(() => {
-      c().curriculum.set(curriculum);
+    const curriculum2: CurriculumOverview = {
+      nodes: [
+        { id: 'act-3', parentId: null, nodeType: 'activity', key: 'a3', label: 'Act 3', sortOrder: 0, competencyIds: ['comp-C'] },
+      ],
+      competencies: [{ id: 'comp-C', code: 'C', description: 'Competency C' }],
+    };
+
+    it('creates one group per team with records', () => {
+      c().teams.set([team1, team2]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculum1], ['prof-2', curriculum2]]));
       c().allRecords.set([
-        makeRecord({ curriculumActivityId: 'act-1', hours: 4 }),
-        makeRecord({ curriculumActivityId: 'act-2', hours: 2 }),
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-1', hours: 4 }),
+        makeRecord({ teamId: 'team-2', curriculumActivityId: 'act-3', hours: 2 }),
       ]);
+      const groups = c().teamGroups();
+      expect(groups).toHaveSize(2);
+      expect(groups.map((g: { teamName: string }) => g.teamName).sort()).toEqual(['Team A', 'Team B']);
     });
 
-    it('sums hours from all activities contributing to each competency', () => {
-      const map: Map<string, number> = c().competencyHours();
-      // comp-A gets hours from act-1 (4h) + act-2 (2h) = 6h
+    it('aggregates activity hours per team, sorted descending', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculum1]]));
+      c().allRecords.set([
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-1', hours: 3 }),
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-1', hours: 2 }),
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-2', hours: 6 }),
+      ]);
+      const progress = c().teamGroups()[0].activityProgress;
+      expect(progress).toHaveSize(2);
+      expect(progress[0].id).toBe('act-2');
+      expect(progress[0].hours).toBe(6);
+      expect(progress[1].id).toBe('act-1');
+      expect(progress[1].hours).toBe(5);
+    });
+
+    it('sums competency hours across activities within a team', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculum1]]));
+      c().allRecords.set([
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-1', hours: 4 }),
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-2', hours: 2 }),
+      ]);
+      const map: Map<string, number> = c().teamGroups()[0].competencyHours;
       expect(map.get('comp-A')).toBe(6);
-      // comp-B only from act-1 = 4h
       expect(map.get('comp-B')).toBe(4);
     });
 
-    it('ignores category nodes', () => {
-      c().allRecords.set([makeRecord({ curriculumActivityId: 'cat-1', hours: 10 })]);
-      const map: Map<string, number> = c().competencyHours();
-      expect(map.size).toBe(0);
+    it('skips records without activity id', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculum1]]));
+      c().allRecords.set([
+        makeRecord({ teamId: 'team-1', curriculumActivityId: null, hours: 8 }),
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-1', hours: 2 }),
+      ]);
+      expect(c().teamGroups()[0].activityProgress).toHaveSize(1);
     });
 
-    it('returns empty map when curriculum is null', () => {
-      c().curriculum.set(null);
-      expect(c().competencyHours().size).toBe(0);
+    it('ignores category nodes in competency mapping', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculum1]]));
+      c().allRecords.set([makeRecord({ teamId: 'team-1', curriculumActivityId: 'cat-1', hours: 10 })]);
+      const group = c().teamGroups()[0];
+      expect(group.competencyHours.size).toBe(0);
+    });
+
+    it('returns empty array when no records exist', () => {
+      c().allRecords.set([]);
+      expect(c().teamGroups()).toHaveSize(0);
+    });
+
+    it('uses fallback profession curriculum for records without team id', () => {
+      c().teams.set([]);
+      c().fallbackProfessionId.set('prof-1');
+      c().curriculaByProfession.set(new Map([['prof-1', curriculum1]]));
+      c().allRecords.set([makeRecord({ teamId: null, curriculumActivityId: 'act-1', hours: 4 })]);
+      const groups = c().teamGroups();
+      expect(groups).toHaveSize(1);
+      expect(groups[0].teamName).toBe('Ohne Team');
+      expect(groups[0].competencyHours.get('comp-A')).toBe(4);
     });
   });
 });

@@ -101,7 +101,8 @@ public class ReportsDomainService {
                 r.curriculum_activity_id() != null ? finalLabelMap.getOrDefault(r.curriculum_activity_id(), "") : "",
                 r.hours(),
                 r.notes(),
-                r.rating()
+                r.rating(),
+                r.team_id()
         )).toList();
     }
     public List<ActivitySummary> getActivitySummary(UUID organizationId, UUID userId, String from, String to, List<String> semesters) {
