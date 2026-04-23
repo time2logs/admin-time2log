@@ -8,8 +8,7 @@ spring:
     password: ${SMTP_PASSWORD}
     properties:
       mail.smtp.auth: true
-      mail.smtp.starttls.enable: true
-      mail.smtp.starttls.required: true
+      mail.smtp.ssl.enable: true
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS}
