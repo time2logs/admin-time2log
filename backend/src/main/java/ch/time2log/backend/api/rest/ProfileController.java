@@ -6,6 +6,8 @@ import ch.time2log.backend.infrastructure.supabase.SupabaseAdminClient;
 import ch.time2log.backend.security.AuthenticatedUser;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import ch.time2log.backend.api.rest.dto.inbound.UpdateColorblindTypeRequest;
+
 
 import java.util.UUID;
 
@@ -34,5 +36,12 @@ public class ProfileController {
     @DeleteMapping
     public void deleteProfile(@AuthenticationPrincipal AuthenticatedUser user) {
         supabaseAdmin.deleteUser(user.id()).block();
+    }
+    @PutMapping("/colorblind-type")
+    public void updateColorblindType(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @RequestBody UpdateColorblindTypeRequest request
+    ) {
+        profileDomainService.updateColorblindType(user.id(), request.colorblindType());
     }
 }

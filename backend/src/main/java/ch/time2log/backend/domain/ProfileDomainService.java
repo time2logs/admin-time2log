@@ -37,4 +37,12 @@ public class ProfileDomainService {
         );
         return Profile.ofList(profiles);
     }
+    public void updateColorblindType(UUID userId, String colorblindType) {
+        supabaseService.patch(
+                "app.profiles",
+                "id=eq." + userId,
+                Map.of("colorblind_type", colorblindType),
+                ProfileResponse.class
+        );
+    }
 }

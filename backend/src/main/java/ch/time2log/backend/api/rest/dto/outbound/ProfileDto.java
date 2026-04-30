@@ -10,10 +10,15 @@ public record ProfileDto(
         UUID id,
         String firstName,
         String lastName,
-        String role
+        String role,
+        String colorblindType
 ) {
     public static ProfileDto of(Profile profile) {
-        return new ProfileDto(profile.id(), profile.firstName(), profile.lastName(), profile.role());
+        return new ProfileDto(profile.id(),
+                profile.firstName(),
+                profile.lastName(),
+                profile.role(),
+                profile.colorblindType);
     }
 
     public static List<ProfileDto> ofList(List<Profile> profiles) {

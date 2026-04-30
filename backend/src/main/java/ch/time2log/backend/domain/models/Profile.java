@@ -12,7 +12,8 @@ public record Profile(
         String lastName,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt,
-        String role
+        String role,
+        String colorblindType
 ) {
     public static Profile of(ProfileResponse profileResponse) {
         return new Profile(
@@ -21,12 +22,13 @@ public record Profile(
                 profileResponse.last_name(),
                 profileResponse.created_at(),
                 profileResponse.updated_at(),
-                null
+                null,
+                profileResponse.colorblind_type()
         );
     }
 
     public Profile withRole(String role) {
-        return new Profile(id, firstName, lastName, createdAt, updatedAt, role);
+        return new Profile(id, firstName, lastName, createdAt, updatedAt, role, colorblind);
     }
 
     public static List<Profile> ofList(List<ProfileResponse> profiles) {
