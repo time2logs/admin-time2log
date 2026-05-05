@@ -123,6 +123,33 @@
       </div>
     </div>
 
+    <!-- Farbschemen Section -->
+    <div class="bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm overflow-hidden">
+      <div class="px-5 py-3 bg-gray-50 dark:bg-[hsl(215,25%,16%)] border-b border-gray-200 dark:border-[hsl(215,20%,22%)]">
+        <h2 class="text-lg font-medium text-gray-800 dark:text-[hsl(210,15%,90%)]">Farbschema</h2>
+      </div>
+      <div class="p-5">
+        <div class="flex gap-2 flex-wrap">
+          @for (p of palettes; track p.value) {
+            <button
+              class="px-4 py-2 text-sm border rounded transition-all dark:border-[hsl(215,20%,25%)] dark:text-[hsl(210,15%,70%)]"
+              [class.border-blue-500]="paletteService.current() === p.value"
+              [class.bg-blue-50]="paletteService.current() === p.value"
+              [class.text-blue-700]="paletteService.current() === p.value"
+              [class.dark:bg-blue-900]="paletteService.current() === p.value"
+              [class.dark:text-blue-200]="paletteService.current() === p.value"
+              [class.dark:border-blue-500]="paletteService.current() === p.value"
+              [class.border-gray-200]="paletteService.current() !== p.value"
+              [class.text-gray-700]="paletteService.current() !== p.value"
+              (click)="paletteService.set(p.value)"
+            >
+              {{ p.label }}
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+
     <!-- Email Change Section -->
     <div class="bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm overflow-hidden">
       <div class="px-5 py-3 bg-gray-50 dark:bg-[hsl(215,25%,16%)] border-b border-gray-200 dark:border-[hsl(215,20%,22%)]">
