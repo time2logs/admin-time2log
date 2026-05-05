@@ -6,6 +6,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from '@services/auth.service';
 import { LanguageService } from '@services/language.service';
 import { ThemeService } from '@services/theme.service';
+import { PaletteService, type Palette } from '@services/palette.service';
 
 @Component({
   selector: 'app-settings',
@@ -64,4 +65,11 @@ export class Settings {
       error: () => this.isDeleting.set(false),
     });
   }
+  protected readonly paletteService = inject(PaletteService);
+  protected readonly palettes: { value: Palette; label: string }[] = [
+    { value: 'default',      label: 'Standard' },
+    { value: 'deuteranopia', label: 'Deuteranopie' },
+    { value: 'protanopia',   label: 'Protanopie' },
+    { value: 'monochrome',   label: 'Monochrom' },
+  ];
 }

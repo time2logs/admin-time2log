@@ -26,11 +26,9 @@ public record Profile(
                 profileResponse.colorblind_type()
         );
     }
-
     public Profile withRole(String role) {
-        return new Profile(id, firstName, lastName, createdAt, updatedAt, role, colorblind);
+        return new Profile(id, firstName, lastName, createdAt, updatedAt, role, colorblindType());
     }
-
     public static List<Profile> ofList(List<ProfileResponse> profiles) {
         return profiles.stream().map(Profile::of).toList();
     }

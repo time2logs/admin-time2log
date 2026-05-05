@@ -18,7 +18,7 @@ public record ProfileDto(
                 profile.firstName(),
                 profile.lastName(),
                 profile.role(),
-                profile.colorblindType);
+                profile.colorblindType());
     }
 
     public static List<ProfileDto> ofList(List<Profile> profiles) {

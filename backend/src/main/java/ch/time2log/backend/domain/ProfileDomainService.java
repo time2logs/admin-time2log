@@ -7,6 +7,7 @@ import ch.time2log.backend.infrastructure.supabase.responses.ProfileResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
