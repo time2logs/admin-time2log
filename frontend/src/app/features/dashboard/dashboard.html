@@ -168,7 +168,7 @@
       <div class="flex justify-center">
         <ngx-charts-pie-chart
           [results]="activityChartData()"
-          [scheme]="colorScheme"
+          [scheme]="colorScheme()"
           [legend]="false"
           [legendTitle]="''"
           [legendPosition]="legendPosition"
@@ -197,7 +197,7 @@
       <div class="flex justify-center">
         <ngx-charts-bar-vertical
           [results]="locationChartData()"
-          [scheme]="colorScheme"
+          [scheme]="colorScheme()"
           [xAxis]="true"
           [yAxis]="true"
           [showXAxisLabel]="false"
