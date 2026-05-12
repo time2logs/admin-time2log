@@ -25,7 +25,9 @@ server:
   port: 0
 
 app:
-  url: http://localhost:4300
+  url:
+    user: http://localhost:4300
+    admin: http://localhost:4200
 
 logging:
   level:
