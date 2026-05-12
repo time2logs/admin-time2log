@@ -117,7 +117,7 @@
                   (ngModelChange)="inviteSemester.set($event)"
                 >
                   @for (s of semesterOptions; track s) {
-                    <option [value]="s">{{ 'organizationManaging.members.semesterOption' | translate: { semester: s } }}</option>
+                    <option [value]="s">{{ s === '-' ? '-' : ('organizationManaging.members.semesterOption' | translate: { semester: s }) }}</option>
                   }
                 </select>
                 <button

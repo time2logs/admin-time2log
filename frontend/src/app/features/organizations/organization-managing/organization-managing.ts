@@ -35,7 +35,7 @@ export class OrganizationManaging implements OnInit {
   protected readonly inviteEmail = signal('');
   protected readonly inviteRole = signal('member');
   protected readonly inviteSemester = signal('1');
-  protected readonly semesterOptions = ['1', '2', '3', '4', '5', '6', '7', '8'] as const;
+  protected readonly semesterOptions = ['-', '1', '2', '3', '4', '5', '6', '7', '8'] as const;
   protected readonly isInviting = signal(false);
 
   protected readonly professions = signal<Profession[]>([]);
@@ -119,6 +119,17 @@ export class OrganizationManaging implements OnInit {
   protected invite(): void {
     const email = this.inviteEmail().trim();
     if (!email) return;
+
+    const role = this.inviteRole();
+    const semester = this.inviteSemester();
+    if (role === 'member' && semester === '-') {
+      this.toast.error(this.translate.instant('toast.inviteMemberNeedsSemester'));
+      return;
+    }
+    if (role === 'admin' && semester !== '-') {
+      this.toast.error(this.translate.instant('toast.inviteAdminNoSemester'));
+      return;
+    }
 
     this.isInviting.set(true);
 

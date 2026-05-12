@@ -319,7 +319,9 @@
     "teamCreated": "Team erstellt.",
     "teamDeleted": "Team gelöscht.",
     "reminderSaved": "Erinnerungseinstellungen gespeichert.",
-    "ownershipTransferred": "Organisation erfolgreich übertragen"
+    "ownershipTransferred": "Organisation erfolgreich übertragen",
+    "inviteMemberNeedsSemester": "Für Mitglieder muss ein Semester (1-8) ausgewählt werden.",
+    "inviteAdminNoSemester": "Für Admins muss als Semester \"-\" ausgewählt werden."
   },
   "reports": {
     "title": "Reports",
