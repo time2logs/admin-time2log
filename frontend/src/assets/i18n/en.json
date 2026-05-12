@@ -356,6 +356,13 @@
       "light": "Light",
       "dark": "Dark"
     },
+    "colorScheme": {
+      "title": "Color Scheme",
+      "default": "Default",
+      "deuteranopia": "Deuteranopia",
+      "protanopia": "Protanopia",
+      "monochrome": "Monochrome"
+    },
     "account": "Account",
     "profile": {
       "title": "Profile",

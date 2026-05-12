@@ -67,9 +67,9 @@ export class Settings {
   }
   protected readonly paletteService = inject(PaletteService);
   protected readonly palettes: { value: Palette; label: string }[] = [
-    { value: 'default',      label: 'Standard' },
-    { value: 'deuteranopia', label: 'Deuteranopie' },
-    { value: 'protanopia',   label: 'Protanopie' },
-    { value: 'monochrome',   label: 'Monochrom' },
+    { value: 'default',      label: 'settings.colorScheme.default' },
+    { value: 'deuteranopia', label: 'settings.colorScheme.deuteranopia' },
+    { value: 'protanopia',   label: 'settings.colorScheme.protanopia' },
+    { value: 'monochrome',   label: 'settings.colorScheme.monochrome' },
   ];
 }
