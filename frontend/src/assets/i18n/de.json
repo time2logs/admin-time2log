@@ -359,6 +359,13 @@
       "light": "Hell",
       "dark": "Dunkel"
     },
+    "colorScheme": {
+      "title": "Farbschema",
+      "default": "Standard",
+      "deuteranopia": "Deuteranopie",
+      "protanopia": "Protanopie",
+      "monochrome": "Monochrom"
+    },
     "account": "Konto",
     "profile": {
       "title": "Profil",
