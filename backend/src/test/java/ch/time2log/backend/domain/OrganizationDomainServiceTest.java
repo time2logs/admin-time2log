@@ -66,7 +66,8 @@ class OrganizationDomainServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(organizationDomainService, "appUrl", "http://localhost:4300");
+        ReflectionTestUtils.setField(organizationDomainService, "userAppUrl", "http://localhost:4300");
+        ReflectionTestUtils.setField(organizationDomainService, "adminAppUrl", "http://localhost:4200");
     }
 
     // --- createInvite ---

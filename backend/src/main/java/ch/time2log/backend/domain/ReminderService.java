@@ -30,7 +30,7 @@ public class ReminderService {
     private final ReminderMailService reminderMailService;
     private final ReminderSmsService reminderSmsService;
 
-    @Value("${app.url}")
+    @Value("${app.url.user}")
     private String appUrl;
 
     public ReminderService(SupabaseAdminClient adminClient, ReminderMailService reminderMailService, ReminderSmsService reminderSmsService) {
