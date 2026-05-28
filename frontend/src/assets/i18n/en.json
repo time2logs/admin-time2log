@@ -42,6 +42,16 @@
       },
       "emailExists": "This email address is already registered."
     },
+    "onboarding": {
+      "title": "Set up your account",
+      "subtitle": "You've been invited to {{organization}}. Complete your account to get started.",
+      "submit": "Set up account",
+      "error": "Your account could not be set up. Please try again.",
+      "invalidTitle": "Invalid invite",
+      "invalidMessage": "This invite is invalid or has expired. Please request a new invite.",
+      "successTitle": "Account set up",
+      "successMessage": "Your account has been set up. Please sign in now."
+    },
     "validation": {
       "emailInvalid": "Please enter a valid email address.",
       "emailRequired": "Email is required.",
