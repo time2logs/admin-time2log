@@ -42,6 +42,16 @@
       },
       "emailExists": "Diese E-Mail-Adresse ist bereits registriert."
     },
+    "onboarding": {
+      "title": "Konto einrichten",
+      "subtitle": "Du wurdest zu {{organization}} eingeladen. Vervollständige dein Konto, um loszulegen.",
+      "submit": "Konto einrichten",
+      "error": "Das Konto konnte nicht eingerichtet werden. Bitte versuche es erneut.",
+      "invalidTitle": "Einladung ungültig",
+      "invalidMessage": "Diese Einladung ist ungültig oder abgelaufen. Bitte fordere eine neue Einladung an.",
+      "successTitle": "Konto eingerichtet",
+      "successMessage": "Dein Konto wurde eingerichtet. Bitte melde dich jetzt an."
+    },
     "validation": {
       "emailInvalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
       "emailRequired": "E-Mail ist erforderlich.",

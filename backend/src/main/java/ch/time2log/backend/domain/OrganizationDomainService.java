@@ -95,7 +95,8 @@ public class OrganizationDomainService {
                 OrganizationResponse.class
         );
         var orgName = organizations.isEmpty() ? "the organization" : organizations.get(0).name();
-        var redirectTo = targetUrl + "/onboarding?invite_token=" + invite.token();
+        var onboardingPath = "admin".equals(userRole) ? "/auth/onboarding" : "/onboarding";
+        var redirectTo = targetUrl + onboardingPath + "?invite_token=" + invite.token();
         var metadata = Map.<String, Object>of(
                 "invite_token", invite.token().toString(),
                 "organization_id", organizationId.toString(),

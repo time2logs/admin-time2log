@@ -9,7 +9,7 @@
     <span class="text-xs text-gray-500">Admin</span>
   </a>
 
-    @if (authService.isAuthenticated()) {
+    @if (showNav()) {
       <div class="relative">
         @if (isSettingsMenuOpen()) {
           <div class="fixed inset-0 z-40" (click)="toggleSettingsMenu()" tabindex="0" role="button" aria-label="Close menu"></div>
@@ -83,7 +83,7 @@
 <nav
   class="flex flex-row md:flex-col flex-1 justify-around md:justify-start items-center md:items-stretch md:px-4 md:space-y-2"
 >
-  @if (authService.isAuthenticated()) {
+  @if (showNav()) {
 
     <!-- ==================== DASHBOARD ==================== -->
     <a
@@ -281,7 +281,7 @@
       }
     </div>
 
-    @if (authService.isAuthenticated()) {
+    @if (showNav()) {
       <a
         routerLink="/settings"
         #settingsLink="routerLinkActive"
