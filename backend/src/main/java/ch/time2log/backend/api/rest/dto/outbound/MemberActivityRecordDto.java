@@ -14,10 +14,11 @@ public record MemberActivityRecordDto(
         int hours,
         String notes,
         Integer rating,
-        UUID teamId
+        UUID teamId,
+        String location
 ) {
     public static MemberActivityRecordDto of(MemberActivityRecord r) {
-        return new MemberActivityRecordDto(r.id(), r.entryDate(), r.curriculumActivityId(), r.activityLabel(), r.hours(), r.notes(), r.rating(), r.teamId());
+        return new MemberActivityRecordDto(r.id(), r.entryDate(), r.curriculumActivityId(), r.activityLabel(), r.hours(), r.notes(), r.rating(), r.teamId(), r.location());
     }
 
     public static List<MemberActivityRecordDto> ofList(List<MemberActivityRecord> list) {

@@ -348,7 +348,10 @@
     "memberDetail": {
       "noRecordsForDay": "No entries for this day.",
       "progress": "Activity Progress",
-      "competencies": "Competencies"
+      "competencies": "Competencies",
+      "locationFilter": "Location",
+      "allLocations": "All locations",
+      "noLocations": "No locations available"
     },
     "calendar": {
       "mon": "Mo",
