@@ -57,7 +57,7 @@ export class DashboardComponent implements OnInit {
 
   protected readonly legendPosition = LegendPosition.Below;
 
-  protected readonly colorScheme: Color = {
+  protected colorScheme: Color = {
     name: 'time2log',
     selectable: true,
     group: ScaleType.Ordinal,
