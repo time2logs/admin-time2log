@@ -58,21 +58,7 @@ export class DashboardComponent implements OnInit {
 
   protected readonly legendPosition = LegendPosition.Below;
 
-  protected readonly colorScheme = signal<Color>({
-    name: 'time2log',
-    selectable: true,
-    group: ScaleType.Ordinal,
-    domain: [
-      '#29b6d6',
-      '#1a8fa8',
-      '#5ecde0',
-      '#4a7fc1',
-      '#2ea89e',
-      '#6090d8',
-      '#3db8ad',
-      '#5580c8',
-    ],
-  });
+
 
   protected readonly totalMemberCount = computed(() => this.membersWithActivity().length);
 
