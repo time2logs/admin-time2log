@@ -22,7 +22,7 @@ export class OrganizationDetailComponent implements OnInit {
   protected readonly inviteUserId = signal('');
   protected readonly inviteRole = signal('member');
   protected readonly inviteSemester = signal('1');
-  protected readonly semesterOptions = ['1', '2', '3', '4', '5', '6', '7', '8'] as const;
+  protected readonly semesterOptions = ['-', '1', '2', '3', '4', '5', '6', '7', '8'] as const;
   protected readonly isInviting = signal(false);
   protected readonly inviteError = signal(false);
   protected readonly inviteSuccess = signal(false);

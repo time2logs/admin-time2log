@@ -43,6 +43,10 @@ export class HeaderComponent {
     return this.languages.find((l) => l.code === this.languageService.currentLang) ?? this.languages[0];
   }
 
+  protected showNav(): boolean {
+    return this.authService.isAuthenticated() && !this.router.url.startsWith('/auth');
+  }
+
   toggleLangMenu(): void {
     this.isLangMenuOpen.update((v) => !v);
   }

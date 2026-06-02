@@ -42,6 +42,16 @@
       },
       "emailExists": "This email address is already registered."
     },
+    "onboarding": {
+      "title": "Set up your account",
+      "subtitle": "You've been invited to {{organization}}. Complete your account to get started.",
+      "submit": "Set up account",
+      "error": "Your account could not be set up. Please try again.",
+      "invalidTitle": "Invalid invite",
+      "invalidMessage": "This invite is invalid or has expired. Please request a new invite.",
+      "successTitle": "Account set up",
+      "successMessage": "Your account has been set up. Please sign in now."
+    },
     "validation": {
       "emailInvalid": "Please enter a valid email address.",
       "emailRequired": "Email is required.",
@@ -321,7 +331,9 @@
     "teamCreated": "Team created.",
     "teamDeleted": "Team deleted.",
     "reminderSaved": "Reminder settings saved.",
-    "ownershipTransferred": "Organization successfully transferred"
+    "ownershipTransferred": "Organization successfully transferred",
+    "inviteMemberNeedsSemester": "Members must have a semester (1-8) selected.",
+    "inviteAdminNoSemester": "Admins must have \"-\" selected as semester."
   },
   "reports": {
     "title": "Reports",
@@ -360,6 +372,13 @@
       "title": "Design",
       "light": "Light",
       "dark": "Dark"
+    },
+    "colorScheme": {
+      "title": "Color Scheme",
+      "default": "Default",
+      "deuteranopia": "Deuteranopia",
+      "protanopia": "Protanopia",
+      "monochrome": "Monochrome"
     },
     "account": "Account",
     "profile": {

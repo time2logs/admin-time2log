@@ -7,6 +7,7 @@ import ch.time2log.backend.infrastructure.supabase.responses.ProfileResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -36,5 +37,13 @@ public class ProfileDomainService {
                 ProfileResponse.class
         );
         return Profile.ofList(profiles);
+    }
+    public void updateColorblindType(UUID userId, String colorblindType) {
+        supabaseService.patch(
+                "app.profiles",
+                "id=eq." + userId,
+                Map.of("colorblind_type", colorblindType),
+                ProfileResponse.class
+        );
     }
 }

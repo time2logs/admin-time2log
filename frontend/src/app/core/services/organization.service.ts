@@ -33,7 +33,8 @@ export class OrganizationService {
 
   createInvite(organizationId: string, email: string, userRole: string, semester: string): Observable<Invite> {
     const backendRole = OrganizationService.ROLE_MAPPING[userRole] ?? userRole;
-    return this.http.post<Invite>(`${this.baseUrl}/${organizationId}/invites`, { email, userRole: backendRole, semester });
+    const semesterValue = semester === '-' ? null : semester;
+    return this.http.post<Invite>(`${this.baseUrl}/${organizationId}/invites`, { email, userRole: backendRole, semester: semesterValue });
   }
 
   listInvites(organizationId: string): Observable<Invite[]> {
