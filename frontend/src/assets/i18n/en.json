@@ -358,7 +358,8 @@
   "nav": {
     "dashboard": "Dashboard",
     "organizations": "Organization",
-    "reports": "Reports"
+    "reports": "Reports",
+    "systemAdmin": "System Admin"
   },
   "settings": {
     "title": "Settings",
@@ -397,5 +398,10 @@
       "deleteAccount": "Delete Account",
       "deleteConfirm": "Are you sure? This will permanently delete your account."
     }
+  },
+  "systemAdmin": {
+    "title": "System Admin",
+    "admins": "Admins",
+    "noAdmins": "No admins yet"
   }
 }

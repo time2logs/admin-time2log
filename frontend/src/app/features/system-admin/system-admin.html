@@ -1,0 +1,67 @@
+<div class="max-w-4xl mx-auto">
+  <h1 class="text-3xl font-semibold mt-10 mb-6 dark:text-[hsl(210,15%,90%)]">{{ 'systemAdmin.title' | translate }}</h1>
+  @if (true) {
+    <section>
+      <h2 class="text-xl font-medium mb-4 dark:text-[hsl(210,15%,90%)]">{{ 'organizationDetail.invite' | translate }}</h2>
+
+      <div class="flex flex-col gap-3 sm:flex-row">
+        <input
+          type="email"
+          autocomplete="email"
+          placeholder="admin@example.com"
+          class="flex-1 px-4 py-2 border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[hsl(215,25%,13%)] text-gray-900 dark:text-[hsl(210,15%,90%)] placeholder-gray-400 dark:placeholder-[hsl(210,15%,55%)]"
+          [ngModel]="inviteEmail()"
+          (ngModelChange)="inviteEmail.set($event)"
+          (keyup.enter)="invite()"
+        />
+        <button
+          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors disabled:opacity-50"
+          [disabled]="isInviting() || !isEmailValid()"
+          (click)="invite()"
+        >
+          {{ 'organizationDetail.inviteButton' | translate }}
+        </button>
+      </div>
+
+      @if (inviteError()) {
+        <p class="mt-2 text-red-600 dark:text-red-400 text-sm">{{ 'organizationDetail.inviteError' | translate }}</p>
+      }
+      @if (inviteSuccess()) {
+        <p class="mt-2 text-green-600 dark:text-green-400 text-sm">{{ 'organizationDetail.inviteSuccess' | translate }}</p>
+      }
+    </section>
+
+    <section class="mb-8 mt-8">
+      <h2 class="text-xl font-medium mb-4 dark:text-[hsl(210,15%,90%)]">{{ 'systemAdmin.admins' | translate }}</h2>
+      @if (isLoadingAdmins()) {
+        <p class="text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ 'common.loading' | translate }}</p>
+      } @else if (admins().length === 0) {
+        <p class="text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ 'systemAdmin.noAdmins' | translate }}</p>
+      } @else {
+        <ul class="space-y-2">
+          @for (member of admins(); track member.id) {
+            <li class="flex items-center justify-between px-4 py-3 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded shadow-sm">
+              <span class="text-gray-800 dark:text-[hsl(210,15%,90%)]">{{ member.firstName }} {{ member.lastName }}</span>
+              <span
+                class="text-xs px-2 py-0.5 rounded-full"
+                [class.bg-purple-100]="member.role === 'system_admin'"
+                [class.text-purple-700]="member.role === 'system_admin'"
+                [class.dark:bg-purple-900/40]="member.role === 'system_admin'"
+                [class.dark:text-purple-300]="member.role === 'system_admin'"
+                [class.bg-blue-100]="member.role === 'admin'"
+                [class.text-blue-700]="member.role === 'admin'"
+                [class.dark:bg-blue-900/40]="member.role === 'admin'"
+                [class.dark:text-blue-300]="member.role === 'admin'"
+              >
+                {{ member.role }}
+              </span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+  } @else {
+    <p class="text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ 'common.loading' | translate }}</p>
+  }
+</div>
