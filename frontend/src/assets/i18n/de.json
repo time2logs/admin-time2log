@@ -346,7 +346,10 @@
     "memberDetail": {
       "noRecordsForDay": "Keine Einträge für diesen Tag.",
       "progress": "Aktivitätsfortschritt",
-      "competencies": "Kompetenzen"
+      "competencies": "Kompetenzen",
+      "locationFilter": "Standort",
+      "allLocations": "Alle Standorte",
+      "noLocations": "Keine Standorte verfügbar"
     },
     "calendar": {
       "mon": "Mo",

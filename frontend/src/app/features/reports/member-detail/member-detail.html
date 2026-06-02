@@ -74,6 +74,27 @@
   </div>
 
   <!-- Progress section -->
+  <div class="flex justify-end">
+    <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-[hsl(210,15%,70%)]">
+      <span>{{ 'reports.memberDetail.locationFilter' | translate }}</span>
+      <select
+        class="border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-[hsl(215,25%,16%)] dark:text-[hsl(210,15%,90%)] focus:outline-none focus:ring-2 focus:ring-[hsl(199,80%,52%)] disabled:opacity-60"
+        [value]="selectedLocation()"
+        [disabled]="!hasLocationOptions()"
+        (change)="onLocationSelected($any($event.target).value)"
+      >
+        @if (hasLocationOptions()) {
+          <option value="">{{ 'reports.memberDetail.allLocations' | translate }}</option>
+        } @else {
+          <option value="" disabled>{{ 'reports.memberDetail.noLocations' | translate }}</option>
+        }
+        @for (location of availableLocations(); track location) {
+          <option [value]="location">{{ location }}</option>
+        }
+      </select>
+    </label>
+  </div>
+
   @for (group of teamGroups(); track group.teamId) {
     <div class="space-y-4">
       <!-- Activity progress per team -->

@@ -10,5 +10,6 @@ public record MemberActivityRecord(
         int hours,
         String notes,
         Integer rating,
-        UUID teamId
+        UUID teamId,
+        String location
 ) {}
