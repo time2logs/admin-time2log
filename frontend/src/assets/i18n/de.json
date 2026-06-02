@@ -110,6 +110,11 @@
       "locations": {
         "title": "Stunden pro Standort",
         "desc": "Wo wurden die Stunden geleistet"
+      },
+      "rating": {
+        "title": "Bewertung der Arbeit",
+        "desc": "Durchschnitt der bewerteten Arbeit",
+        "yAxis": "Bewertung durch Lernenden"
       }
     },
     "noData": "Keine Daten für diesen Zeitraum.",

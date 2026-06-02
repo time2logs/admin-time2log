@@ -7,7 +7,7 @@ import { OrganizationService } from '@services/organization.service';
 import { Profile } from '@app/core/models/profile.models';
 import { Organization } from '@app/core/models/organizations.models';
 import { ReportService } from '@services/report.service';
-import { NgxChartEntry, LocationSummary } from '@app/core/models/report.models';
+import { NgxChartEntry, LocationSummary, RatingSummary } from '@app/core/models/report.models';
 import { forkJoin } from 'rxjs';
 import { PaletteService } from '@services/palette.service';
 import { HostListener } from '@angular/core';
@@ -47,6 +47,7 @@ export class DashboardComponent implements OnInit {
   protected readonly selectedSemesters = signal<string[]>([]);
   protected readonly activityChartData = signal<NgxChartEntry[]>([]);
   protected readonly locationChartData = signal<NgxChartEntry[]>([]);
+  protected readonly ratingChartData = signal<NgxChartEntry[]>([]);
   protected readonly chartLoading = signal(false);
 
   protected readonly orgMembers = computed(() => {
@@ -56,6 +57,8 @@ export class DashboardComponent implements OnInit {
   });
 
   protected readonly legendPosition = LegendPosition.Below;
+
+
 
   protected readonly totalMemberCount = computed(() => this.membersWithActivity().length);
 
@@ -81,8 +84,8 @@ export class DashboardComponent implements OnInit {
       if (!orgId || !userId) return;
       this.loadActivityChart(orgId, userId, range, mode, semesters);
       this.loadLocationChart(orgId, userId, range, mode, semesters);
+      this.loadRatingChart(orgId, userId, range, mode, semesters);
     });
-
   }
 
   ngOnInit(): void {
@@ -157,6 +160,21 @@ export class DashboardComponent implements OnInit {
       next: (data) => {
         this.locationChartData.set(
           data.map((l: LocationSummary) => ({ name: l.location, value: l.totalHours }))
+        );
+      },
+    });
+  }
+
+  private loadRatingChart(orgId: string, userId: string, range: DateRange, mode: FilterMode, semesters: string[]): void {
+    const useSemesters = mode === 'semester' && semesters.length > 0;
+    const { from, to } = useSemesters ? {} as { from?: string; to?: string } : this.getDateParams(range);
+    this.reportService.getRatingSummary(orgId, userId, from, to, useSemesters ? semesters : undefined).subscribe({
+      next: (data) => {
+        this.ratingChartData.set(
+          data.map((r: RatingSummary) => ({
+            name: r.activityName,
+            value: Math.round(r.averageRating * 10) / 10,
+          }))
         );
       },
     });

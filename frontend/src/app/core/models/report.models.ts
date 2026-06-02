@@ -53,6 +53,12 @@ export interface LocationSummary {
   totalHours: number;
 }
 
+export interface RatingSummary {
+  activityId: string;
+  activityName: string;
+  averageRating: number;
+}
+
 export interface NgxChartEntry {
   name: string;
   value: number;

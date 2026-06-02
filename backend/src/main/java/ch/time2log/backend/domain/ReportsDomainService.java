@@ -3,6 +3,7 @@ package ch.time2log.backend.domain;
 import ch.time2log.backend.domain.models.ActivitySummary;
 import ch.time2log.backend.domain.models.DailyMemberReport;
 import ch.time2log.backend.domain.models.MemberActivityRecord;
+import ch.time2log.backend.domain.models.RatingSummary;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
 import ch.time2log.backend.infrastructure.supabase.responses.ActivityRecordResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.CurriculumNodeResponse;
@@ -197,5 +198,52 @@ public class ReportsDomainService {
         if (records.isEmpty()) return null;
 
         return records.getFirst().created_at();
+    }
+
+    public List<RatingSummary> getRatingSummary(UUID organizationId, UUID userId, String from, String to, List<String> semesters) {
+        if (userId == null) return List.of();
+
+        String query = "organization_id=eq." + organizationId + "&user_id=eq." + userId;
+        if (semesters != null && !semesters.isEmpty()) {
+            query += "&current_semester=in.(" + semesters.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")) + ")";
+        } else {
+            if (from != null && !from.isBlank()) query += "&entry_date=gte." + from;
+            if (to != null && !to.isBlank()) query += "&entry_date=lte." + to;
+        }
+
+        var records = supabaseService.getListWithQuery("app.activity_records", query, ActivityRecordResponse.class);
+        if (records.isEmpty()) return List.of();
+
+        // Gruppiere ratings pro Aktivität und berechne Durchschnitt
+        Map<UUID, List<Integer>> ratingsByActivity = records.stream()
+                .filter(r -> r.curriculum_activity_id() != null && r.rating() != null)
+                .collect(Collectors.groupingBy(
+                        ActivityRecordResponse::curriculum_activity_id,
+                        Collectors.mapping(ActivityRecordResponse::rating, Collectors.toList())
+                ));
+
+        if (ratingsByActivity.isEmpty()) return List.of();
+
+        var activityIds = ratingsByActivity.keySet().stream()
+                .map(UUID::toString)
+                .collect(Collectors.joining(","));
+
+        var nodes = supabaseService.getListWithQuery(
+                "admin.curriculum_nodes",
+                "id=in.(" + activityIds + ")",
+                CurriculumNodeResponse.class
+        );
+
+        var labelMap = nodes.stream()
+                .collect(Collectors.toMap(CurriculumNodeResponse::id, CurriculumNodeResponse::label));
+
+        return ratingsByActivity.entrySet().stream()
+                .map(e -> new RatingSummary(
+                        e.getKey(),
+                        labelMap.getOrDefault(e.getKey(), "Unbekannt"),
+                        e.getValue().stream().mapToInt(Integer::intValue).average().orElse(0)
+                ))
+                .sorted(Comparator.comparingDouble(RatingSummary::averageRating).reversed())
+                .toList();
     }
 }
