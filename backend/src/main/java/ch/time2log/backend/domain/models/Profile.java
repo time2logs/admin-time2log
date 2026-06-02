@@ -22,7 +22,7 @@ public record Profile(
                 profileResponse.last_name(),
                 profileResponse.created_at(),
                 profileResponse.updated_at(),
-                null,
+                profileResponse.user_role(),
                 profileResponse.colorblind_type()
         );
     }

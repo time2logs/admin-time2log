@@ -669,11 +669,11 @@ class OrganizationDomainServiceTest {
         }
 
         private ProfileResponse profileResponse(UUID id, String firstName) {
-            return new ProfileResponse(id, firstName, "Lastname", "+41791234567", OffsetDateTime.now(), OffsetDateTime.now(), "normal");
+            return new ProfileResponse(id, firstName, "Lastname", "+41791234567", OffsetDateTime.now(), OffsetDateTime.now(), "normal", "user");
         }
 
         private ProfileResponse profileResponseNoPhone(UUID id, String firstName) {
-            return new ProfileResponse(id, firstName, "Lastname", null, OffsetDateTime.now(), OffsetDateTime.now(), "normal");
+            return new ProfileResponse(id, firstName, "Lastname", null, OffsetDateTime.now(), OffsetDateTime.now(), "normal", "user");
         }
 
         private ActivityRecordResponse activityRecordResponse(UUID userId, UUID orgId, String entryDate) {

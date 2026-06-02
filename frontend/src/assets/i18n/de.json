@@ -369,7 +369,8 @@
   "nav": {
     "dashboard": "Dashboard",
     "organizations": "Organisation",
-    "reports": "Reports"
+    "reports": "Reports",
+    "systemAdmin": "System-Admin"
   },
   "settings": {
     "title": "Einstellungen",
@@ -408,5 +409,10 @@
       "deleteAccount": "Konto löschen",
       "deleteConfirm": "Bist du sicher? Dein Konto wird unwiderruflich gelöscht."
     }
+  },
+  "systemAdmin": {
+    "title": "System-Admin",
+    "admins": "Admins",
+    "noAdmins": "Noch keine Admins"
   }
 }
