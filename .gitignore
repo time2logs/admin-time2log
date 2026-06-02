@@ -91,3 +91,9 @@ nginx-proxy-manager/letsencrypt/
 */blob-report/
 */playwright/.cache/
 */playwright/.auth/
+
+
+# Vibecoding
+.claude/
+.cursor/
+

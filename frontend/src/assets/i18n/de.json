@@ -42,6 +42,16 @@
       },
       "emailExists": "Diese E-Mail-Adresse ist bereits registriert."
     },
+    "onboarding": {
+      "title": "Konto einrichten",
+      "subtitle": "Du wurdest zu {{organization}} eingeladen. Vervollständige dein Konto, um loszulegen.",
+      "submit": "Konto einrichten",
+      "error": "Das Konto konnte nicht eingerichtet werden. Bitte versuche es erneut.",
+      "invalidTitle": "Einladung ungültig",
+      "invalidMessage": "Diese Einladung ist ungültig oder abgelaufen. Bitte fordere eine neue Einladung an.",
+      "successTitle": "Konto eingerichtet",
+      "successMessage": "Dein Konto wurde eingerichtet. Bitte melde dich jetzt an."
+    },
     "validation": {
       "emailInvalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
       "emailRequired": "E-Mail ist erforderlich.",
@@ -324,7 +334,9 @@
     "teamCreated": "Team erstellt.",
     "teamDeleted": "Team gelöscht.",
     "reminderSaved": "Erinnerungseinstellungen gespeichert.",
-    "ownershipTransferred": "Organisation erfolgreich übertragen"
+    "ownershipTransferred": "Organisation erfolgreich übertragen",
+    "inviteMemberNeedsSemester": "Für Mitglieder muss ein Semester (1-8) ausgewählt werden.",
+    "inviteAdminNoSemester": "Für Admins muss als Semester \"-\" ausgewählt werden."
   },
   "reports": {
     "title": "Reports",
@@ -363,6 +375,13 @@
       "title": "Design",
       "light": "Hell",
       "dark": "Dunkel"
+    },
+    "colorScheme": {
+      "title": "Farbschema",
+      "default": "Standard",
+      "deuteranopia": "Deuteranopie",
+      "protanopia": "Protanopie",
+      "monochrome": "Monochrom"
     },
     "account": "Konto",
     "profile": {

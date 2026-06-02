@@ -66,7 +66,8 @@ class OrganizationDomainServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(organizationDomainService, "appUrl", "http://localhost:4300");
+        ReflectionTestUtils.setField(organizationDomainService, "userAppUrl", "http://localhost:4300");
+        ReflectionTestUtils.setField(organizationDomainService, "adminAppUrl", "http://localhost:4200");
     }
 
     // --- createInvite ---
@@ -668,11 +669,11 @@ class OrganizationDomainServiceTest {
         }
 
         private ProfileResponse profileResponse(UUID id, String firstName) {
-            return new ProfileResponse(id, firstName, "Lastname", "+41791234567", OffsetDateTime.now(), OffsetDateTime.now());
+            return new ProfileResponse(id, firstName, "Lastname", "+41791234567", OffsetDateTime.now(), OffsetDateTime.now(), "normal");
         }
 
         private ProfileResponse profileResponseNoPhone(UUID id, String firstName) {
-            return new ProfileResponse(id, firstName, "Lastname", null, OffsetDateTime.now(), OffsetDateTime.now());
+            return new ProfileResponse(id, firstName, "Lastname", null, OffsetDateTime.now(), OffsetDateTime.now(), "normal");
         }
 
         private ActivityRecordResponse activityRecordResponse(UUID userId, UUID orgId, String entryDate) {

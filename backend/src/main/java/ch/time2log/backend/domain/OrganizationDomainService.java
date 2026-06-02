@@ -31,8 +31,11 @@ public class OrganizationDomainService {
     private final ProfileDomainService profileDomainService;
     private final InviteMailService inviteMailService;
 
-    @Value("${app.url}")
-    private String appUrl;
+    @Value("${app.url.user}")
+    private String userAppUrl;
+
+    @Value("${app.url.admin}")
+    private String adminAppUrl;
 
     public OrganizationDomainService(SupabaseService supabaseService,
                                      SupabaseAdminClient supabaseAdminClient,
@@ -70,6 +73,8 @@ public class OrganizationDomainService {
     }
 
     public Invite createInvite(UUID organizationId, String email, String userRole, String semester, UUID invitedBy) {
+        var targetUrl = "admin".equals(userRole) ? adminAppUrl : userAppUrl;
+
         var body = new HashMap<String, Object>();
         body.put("organization_id", organizationId);
         body.put("email", email);
@@ -90,7 +95,8 @@ public class OrganizationDomainService {
                 OrganizationResponse.class
         );
         var orgName = organizations.isEmpty() ? "the organization" : organizations.get(0).name();
-        var redirectTo = appUrl + "/onboarding?invite_token=" + invite.token();
+        var onboardingPath = "admin".equals(userRole) ? "/auth/onboarding" : "/onboarding";
+        var redirectTo = targetUrl + onboardingPath + "?invite_token=" + invite.token();
         var metadata = Map.<String, Object>of(
                 "invite_token", invite.token().toString(),
                 "organization_id", organizationId.toString(),

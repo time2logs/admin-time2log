@@ -13,6 +13,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/reset-password/reset-password').then((m) => m.ResetPassword),
   },
   {
+    path: 'auth/onboarding',
+    loadComponent: () => import('./features/auth/onboarding/onboarding').then((m) => m.OnboardingComponent),
+  },
+  {
     path: 'auth',
     canActivate: [guestGuard],
     loadChildren: () => import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
