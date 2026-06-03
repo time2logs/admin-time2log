@@ -410,6 +410,9 @@
   "systemAdmin": {
     "title": "System Admin",
     "admins": "Admins",
-    "noAdmins": "No admins yet"
+    "noAdmins": "No admins yet",
+    "pendingInvites": "Pending Invites",
+    "noPendingInvites": "No pending invites",
+    "invite": "Invite Admin"
   }
 }

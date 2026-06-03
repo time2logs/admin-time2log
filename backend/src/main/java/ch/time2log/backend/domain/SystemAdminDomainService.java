@@ -1,6 +1,7 @@
 package ch.time2log.backend.domain;
 
 import ch.time2log.backend.domain.exception.EntityNotCreatedException;
+import ch.time2log.backend.domain.exception.NoRowsAffectedException;
 import ch.time2log.backend.domain.models.Invite;
 import ch.time2log.backend.domain.models.Profile;
 import ch.time2log.backend.infrastructure.mail.InviteMailService;
@@ -11,6 +12,7 @@ import ch.time2log.backend.infrastructure.supabase.responses.ProfileResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -73,5 +75,29 @@ public class SystemAdminDomainService {
                 ProfileResponse.class
         );
         return Profile.ofList(profiles);
+    }
+
+    public List<Invite> listInvites(String userRole) {
+        var responses = supabaseService.getListWithQuery(
+                "admin.invites",
+                "user_role=eq." + userRole + "&status=eq.pending&order=created_at.desc",
+                InviteResponse.class
+        );
+        return Invite.ofList(responses);
+    }
+
+    public void deleteInvite(UUID inviteId) {
+        int deleted = supabaseService.deleteReturningCount(
+                "admin.invites",
+                "id=eq." + inviteId
+        );
+        if (deleted == 0) {
+            throw new NoRowsAffectedException(
+                    HttpStatus.FORBIDDEN,
+                    "INVITE_DELETE_BLOCKED",
+                    "Forbidden operation",
+                    "Invite could not be deleted."
+            );
+        }
     }
 }

@@ -16,6 +16,14 @@ export class SystemAdminService {
     return this.http.post<Invite>(`${this.baseUrl}/invites`, { email });
   }
 
+  listInvites(userRole: string): Observable<Invite[]> {
+    return this.http.get<Invite[]>(`${this.baseUrl}/invites/${userRole}`);
+  }
+
+  deleteInvite(inviteId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/invites/${inviteId}`);
+  }
+
   getAdmins(): Observable<Profile[]> {
   return this.http.get<Profile[]>(`${this.baseUrl}/admins`);
   }
