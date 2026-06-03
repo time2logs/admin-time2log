@@ -65,6 +65,31 @@
         </ul>
       }
 
+      <section class="mb-8 mt-8">
+        <h2 class="text-xl font-medium mb-4 dark:text-[hsl(210,15%,90%)]">{{ 'systemAdmin.moderators' | translate }}</h2>
+        @if (isLoadingModerators()) {
+          <p class="text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ 'common.loading' | translate }}</p>
+        } @else if (moderators().length === 0) {
+          <p class="text-gray-500 dark:text-[hsl(210,15%,55%)] text-sm">{{ 'systemAdmin.noModerators' | translate }}</p>
+        } @else {
+          <ul class="space-y-2">
+            @for (member of moderators(); track member.id) {
+              <li class="flex items-center justify-between px-4 py-3 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm hover:border-gray-300 dark:hover:border-[hsl(215,20%,25%)] hover:shadow-md transition-all">
+                <div class="flex items-center gap-3">
+                  <div class="h-9 w-9 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center text-sm font-medium">
+                    {{ member.firstName.charAt(0) }}{{ member.lastName.charAt(0) }}
+                  </div>
+                  <span class="text-gray-800 dark:text-[hsl(210,15%,90%)] font-medium">{{ member.firstName }} {{ member.lastName }}</span>
+                </div>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+                {{ member.role }}
+              </span>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
       @if (invites().length > 0) {
         <div class="mt-6">
           <h3 class="text-sm font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] uppercase tracking-wide mb-3">

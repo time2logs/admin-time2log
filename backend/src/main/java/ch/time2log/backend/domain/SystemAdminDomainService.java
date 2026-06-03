@@ -77,6 +77,15 @@ public class SystemAdminDomainService {
         return Profile.ofList(profiles);
     }
 
+    public List<Profile> getModerators() {
+        var profiles = supabaseService.getListWithQuery(
+                "app.profiles",
+                "user_role=eq.moderator&order=first_name.asc",
+                ProfileResponse.class
+        );
+        return Profile.ofList(profiles);
+    }
+
     public List<Invite> listInvites(String userRole) {
         var responses = supabaseService.getListWithQuery(
                 "admin.invites",

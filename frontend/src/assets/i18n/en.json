@@ -412,6 +412,8 @@
     "title": "System Admin",
     "admins": "Admins",
     "noAdmins": "No admins yet",
+    "moderators": "Moderators",
+    "noModerators": "No moderators yet",
     "pendingInvites": "Pending Invites",
     "noPendingInvites": "No pending invites",
     "invite": "Invite Admin"

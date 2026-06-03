@@ -22,6 +22,8 @@ export class SystemAdmin implements OnInit {
 
   protected readonly admins = signal<Profile[]>([]);
   protected readonly isLoadingAdmins = signal(false);
+  protected readonly moderators = signal<Profile[]>([]);
+  protected readonly isLoadingModerators = signal(false);
   protected readonly inviteEmail = signal('');
   protected readonly isInviting = signal(false);
   protected readonly inviteError = signal(false);
@@ -33,6 +35,7 @@ export class SystemAdmin implements OnInit {
 
   ngOnInit(): void {
     this.loadAdmins();
+    this.loadModerators();
     this.loadInvites();
   }
 
@@ -74,6 +77,17 @@ export class SystemAdmin implements OnInit {
         this.isLoadingAdmins.set(false);
       },
       error: () => this.isLoadingAdmins.set(false),
+    });
+  }
+
+  private loadModerators(): void {
+    this.isLoadingModerators.set(true);
+    this.systemAdminService.getModerators().subscribe({
+      next: (moderators) => {
+        this.moderators.set(moderators);
+        this.isLoadingModerators.set(false);
+      },
+      error: () => this.isLoadingModerators.set(false),
     });
   }
 

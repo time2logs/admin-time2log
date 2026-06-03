@@ -36,6 +36,11 @@ public class SystemAdminController {
         return ProfileDto.ofList(systemAdminDomainService.getAdmins());
     }
 
+    @GetMapping("/moderators")
+    public List<ProfileDto> getModerators() {
+        return ProfileDto.ofList(systemAdminDomainService.getModerators());
+    }
+
     @GetMapping("/invites/{userRole}")
     public List<InviteDto> listInvites(@PathVariable String userRole) {
         return InviteDto.ofList(systemAdminDomainService.listInvites(userRole));
