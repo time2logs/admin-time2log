@@ -5,6 +5,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { OrganizationService } from '@services/organization.service';
 import { ToastService } from '@services/toast.service';
 import { Organization } from '@app/core/models/organizations.models';
+import { AuthService } from '@services/auth.service';
 
 @Component({
   selector: 'app-organizations',
@@ -17,14 +18,19 @@ export class OrganizationsComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
+  private readonly authService = inject(AuthService);
 
   protected readonly organizations = signal<Organization[]>([]);
   protected readonly memberCounts = signal<Record<string, number>>({});
   protected readonly newName = signal('');
   protected readonly isCreating = signal(false);
+  protected readonly isModerator = signal(false);
 
   ngOnInit(): void {
     this.loadOrganizations();
+    this.authService.currentProfile$.subscribe(profile => {
+      this.isModerator.set(profile?.role === 'moderator');
+    });
   }
 
   protected createOrganization(): void {

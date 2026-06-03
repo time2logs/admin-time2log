@@ -73,7 +73,7 @@ public class OrganizationDomainService {
     }
 
     public Invite createInvite(UUID organizationId, String email, String userRole, String semester, UUID invitedBy) {
-        var targetUrl = "admin".equals(userRole) ? adminAppUrl : userAppUrl;
+        var targetUrl = "moderator".equals(userRole) ? adminAppUrl : userAppUrl;
 
         var body = new HashMap<String, Object>();
         body.put("organization_id", organizationId);
@@ -95,7 +95,8 @@ public class OrganizationDomainService {
                 OrganizationResponse.class
         );
         var orgName = organizations.isEmpty() ? "the organization" : organizations.get(0).name();
-        var onboardingPath = "admin".equals(userRole) ? "/auth/onboarding" : "/onboarding";
+        var isAdminApp = "admin".equals(userRole) || "moderator".equals(userRole);
+        var onboardingPath = isAdminApp ? "/auth/onboarding" : "/onboarding";
         var redirectTo = targetUrl + onboardingPath + "?invite_token=" + invite.token();
         var metadata = Map.<String, Object>of(
                 "invite_token", invite.token().toString(),

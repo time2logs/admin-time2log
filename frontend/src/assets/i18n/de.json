@@ -164,6 +164,7 @@
       "emailPlaceholder": "E-Mail-Adresse",
       "roleMember": "Mitglied",
       "roleAdmin": "Admin",
+      "roleModerator": "Moderator",
       "semesterLabel": "Semester",
       "semesterOption": "Semester {{ semester }}",
       "inviteButton": "Einladung senden",
