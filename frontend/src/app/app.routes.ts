@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
+import { systemAdminGuard } from './core/guards/system-admin.guard';
 
 export const routes: Routes = [
   {
@@ -45,6 +46,7 @@ export const routes: Routes = [
   },
   {
     path: 'system-admin',
+    canActivate: [authGuard, systemAdminGuard],
     loadComponent: () => import('./features/system-admin/system-admin').then((m) => m.SystemAdmin),
   },
   {
