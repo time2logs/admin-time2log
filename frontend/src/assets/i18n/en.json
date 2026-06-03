@@ -401,6 +401,12 @@
       "description": "Deleting your account is permanent and cannot be undone. All your data will be removed.",
       "deleteAccount": "Delete Account",
       "deleteConfirm": "Are you sure? This will permanently delete your account."
+    },
+    "chartChange": {
+      "title": "Change chart type",
+      "bar": "Bar chart",
+      "column": "Column chart",
+      "pie": "Pie chart"
     }
   }
 }
