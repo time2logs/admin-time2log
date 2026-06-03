@@ -409,6 +409,12 @@
       "description": "Das Löschen deines Kontos ist dauerhaft und kann nicht rückgängig gemacht werden. Alle deine Daten werden entfernt.",
       "deleteAccount": "Konto löschen",
       "deleteConfirm": "Bist du sicher? Dein Konto wird unwiderruflich gelöscht."
+    },
+    "chartChange": {
+      "title": "Diagrammart ändern",
+      "bar": "Balkendiagramm",
+      "column": "Säulendiagramm",
+      "pie": "Kreissdiagramm"
     }
   },
   "systemAdmin": {
