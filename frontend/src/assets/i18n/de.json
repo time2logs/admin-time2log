@@ -405,6 +405,9 @@
   "systemAdmin": {
     "title": "System-Admin",
     "admins": "Admins",
-    "noAdmins": "Noch keine Admins"
+    "noAdmins": "Noch keine Admins",
+    "pendingInvites": "Offene Einladungen",
+    "noPendingInvites": "Keine ausstehenden Einladungen",
+    "invite": "Admin einladen"
   }
 }
