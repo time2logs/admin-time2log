@@ -421,6 +421,8 @@
     "title": "System-Admin",
     "admins": "Admins",
     "noAdmins": "Noch keine Admins",
+    "moderators": "Moderatoren",
+    "noModerators": "Noch keine Moderatoren",
     "pendingInvites": "Offene Einladungen",
     "noPendingInvites": "Keine ausstehenden Einladungen",
     "invite": "Admin einladen"

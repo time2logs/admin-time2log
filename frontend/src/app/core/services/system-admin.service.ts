@@ -27,4 +27,8 @@ export class SystemAdminService {
   getAdmins(): Observable<Profile[]> {
   return this.http.get<Profile[]>(`${this.baseUrl}/admins`);
   }
+
+  getModerators(): Observable<Profile[]> {
+    return this.http.get<Profile[]>(`${this.baseUrl}/moderators`);
+  }
 }
