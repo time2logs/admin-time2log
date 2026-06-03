@@ -46,15 +46,36 @@
                 class="text-xs px-2 py-0.5 rounded-full"
                 [class.bg-purple-100]="member.role === 'system_admin'"
                 [class.text-purple-700]="member.role === 'system_admin'"
-                [class.dark:bg-purple-900/40]="member.role === 'system_admin'"
+                [class.dark:bg-purple-90040]="member.role === 'system_admin'"
                 [class.dark:text-purple-300]="member.role === 'system_admin'"
                 [class.bg-blue-100]="member.role === 'admin'"
                 [class.text-blue-700]="member.role === 'admin'"
-                [class.dark:bg-blue-900/40]="member.role === 'admin'"
+                [class.dark:bg-blue-90040]="member.role === 'admin'"
                 [class.dark:text-blue-300]="member.role === 'admin'"
               >
                 {{ member.role }}
               </span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <section class="mb-8 mt-8">
+      <h2 class="text-xl font-medium mb-4 dark:text-[hsl(210,15%,90%)]">{{ 'systemAdmin.pendingInvites' | translate }}</h2>
+      @if (invites().length === 0) {
+        <p class="text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ 'systemAdmin.noPendingInvites' | translate }}</p>
+      } @else {
+        <ul class="space-y-2">
+          @for (invite of invites(); track invite.id) {
+            <li class="flex items-center justify-between px-4 py-3 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded shadow-sm">
+              <span class="text-gray-800 dark:text-[hsl(210,15%,90%)]">{{ invite.email }}</span>
+              <button
+                class="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                (click)="cancelInvite(invite)"
+              >
+                {{ 'common.delete' | translate }}
+              </button>
             </li>
           }
         </ul>

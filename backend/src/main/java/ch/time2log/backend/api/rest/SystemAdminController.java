@@ -7,14 +7,10 @@ import ch.time2log.backend.domain.SystemAdminDomainService;
 import ch.time2log.backend.security.AuthenticatedUser;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("api/system-admin")
@@ -38,5 +34,15 @@ public class SystemAdminController {
     @GetMapping("/admins")
     public List<ProfileDto> getAdmins() {
         return ProfileDto.ofList(systemAdminDomainService.getAdmins());
+    }
+
+    @GetMapping("/invites/{userRole}")
+    public List<InviteDto> listInvites(@PathVariable String userRole) {
+        return InviteDto.ofList(systemAdminDomainService.listInvites(userRole));
+    }
+
+    @DeleteMapping("/invites/{inviteId}")
+    public void deleteInvite(@PathVariable UUID inviteId) {
+        systemAdminDomainService.deleteInvite(inviteId);
     }
 }

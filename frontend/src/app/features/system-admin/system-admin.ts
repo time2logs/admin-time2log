@@ -2,7 +2,9 @@ import {Component, inject, OnInit, signal} from '@angular/core';
 import {Profile} from '@app/core/models/profile.models';
 import { SystemAdminService } from '@services/system-admin.service';
 import {FormsModule} from '@angular/forms';
-import {TranslatePipe} from '@ngx-translate/core';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {Invite} from '@app/core/models/system-admin.models';
+import {ToastService} from '@services/toast.service';
 
 @Component({
   selector: 'app-system-admin',
@@ -15,6 +17,8 @@ import {TranslatePipe} from '@ngx-translate/core';
 })
 export class SystemAdmin implements OnInit {
   private readonly systemAdminService = inject(SystemAdminService);
+  private readonly toast = inject(ToastService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly admins = signal<Profile[]>([]);
   protected readonly isLoadingAdmins = signal(false);
@@ -22,11 +26,14 @@ export class SystemAdmin implements OnInit {
   protected readonly isInviting = signal(false);
   protected readonly inviteError = signal(false);
   protected readonly inviteSuccess = signal(false);
+  protected readonly showDeleteConfirm = signal(false);
+  protected readonly invites = signal<Invite[]>([]);
 
   private static readonly EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   ngOnInit(): void {
     this.loadAdmins();
+    this.loadInvites();
   }
 
   protected isEmailValid(): boolean {
@@ -50,6 +57,7 @@ export class SystemAdmin implements OnInit {
         this.inviteSuccess.set(true);
         this.isInviting.set(false);
         this.loadAdmins();
+        this.loadInvites();
       },
       error: () => {
         this.inviteError.set(true);
@@ -66,6 +74,21 @@ export class SystemAdmin implements OnInit {
         this.isLoadingAdmins.set(false);
       },
       error: () => this.isLoadingAdmins.set(false),
+    });
+  }
+
+  protected cancelInvite(invite: Invite): void {
+    this.systemAdminService.deleteInvite(invite.id).subscribe({
+      next: () => {
+        this.toast.success(this.translate.instant('toast.inviteCancelled'));
+        this.loadInvites();
+      },
+    });
+  }
+
+  private loadInvites(): void {
+    this.systemAdminService.listInvites("admin").subscribe({
+      next: (invites) => this.invites.set(invites),
     });
   }
 }
