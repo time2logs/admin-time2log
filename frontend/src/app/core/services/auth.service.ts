@@ -99,7 +99,7 @@ export class AuthService implements OnDestroy {
     return from(this.supabase.auth.signInWithPassword({ email, password }));
   }
 
-  async signInWithGoogle(redirectPath: string = '/dashboard'): Promise<void> {
+  async signInWithGoogle(redirectPath = '/dashboard'): Promise<void> {
     const safePath = redirectPath.startsWith('/') && !redirectPath.startsWith('//') ? redirectPath : '/dashboard';
     const { error } = await this.supabase.auth.signInWithOAuth({
       provider: 'google',

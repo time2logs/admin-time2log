@@ -29,7 +29,7 @@ export class OnboardingService {
   complete(payload: CompleteOnboardingPayload): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/complete`, payload);
   }
-  
+
   acceptInvite(token: string): Observable<void> {
     return this.http.post<void>(`${this.inviteBaseUrl}/accept`, { token });
   }
