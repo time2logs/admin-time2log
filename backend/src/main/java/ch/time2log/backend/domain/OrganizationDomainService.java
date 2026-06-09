@@ -119,6 +119,12 @@ public class OrganizationDomainService {
     }
 
     public void deleteInvite(UUID organizationId, UUID inviteId) {
+        var existing = supabaseService.getListWithQuery(
+                "admin.invites",
+                "id=eq." + inviteId + "&organization_id=eq." + organizationId,
+                InviteResponse.class
+        );
+
         int deleted = supabaseService.deleteReturningCount(
                 "admin.invites",
                 "id=eq." + inviteId + "&organization_id=eq." + organizationId
@@ -130,6 +136,34 @@ public class OrganizationDomainService {
                     "Forbidden operation",
                     "Invite could not be deleted."
             );
+        }
+
+        if (existing != null && !existing.isEmpty()) {
+            var invite = existing.get(0);
+            if ("pending".equalsIgnoreCase(invite.status())) {
+                deleteAuthUserForPendingInvite(invite.email());
+            }
+        }
+    }
+
+    /**
+     * Supabase's generate_link creates a real auth.users row at invite time. If the
+     * admin revokes the invite while it's still pending, that auth user is dangling:
+     * the email link still resolves to a valid Supabase session, which would let the
+     * recipient bypass the deleted invite. Remove the auth user too. Only safe while
+     * status='pending' — once accepted, the same auth user backs a real profile.
+     */
+    private void deleteAuthUserForPendingInvite(String email) {
+        if (email == null || email.isBlank()) {
+            return;
+        }
+        try {
+            UUID userId = supabaseAdminClient.getUserIdByEmail(email);
+            if (userId != null) {
+                supabaseAdminClient.deleteUser(userId).block();
+            }
+        } catch (Exception ex) {
+            log.warn("Failed to delete dangling auth user for revoked invite {}: {}", email, ex.getMessage());
         }
     }
 

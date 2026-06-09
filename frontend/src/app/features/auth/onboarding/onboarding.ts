@@ -39,7 +39,7 @@ export class OnboardingComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     this.token = this.route.snapshot.queryParamMap.get('invite_token') ?? '';
     if (!this.token) {
-      this.state.set('invalid');
+      await this.markInvalid();
       return;
     }
 
@@ -49,8 +49,21 @@ export class OnboardingComponent implements OnInit {
       this.organizationName.set(invite.organizationName);
       this.state.set('form');
     } catch {
-      this.state.set('invalid');
+      await this.markInvalid();
     }
+  }
+
+  // Supabase's email invite link redirects here with tokens in the URL hash, which
+  // detectSessionInUrl silently consumes into a real session. If the backend invite
+  // is gone (revoked/expired), that session would let the recipient land on the
+  // dashboard as an empty auth-only account. Drop it before showing the error.
+  private async markInvalid(): Promise<void> {
+    try {
+      await firstValueFrom(this.authService.logout());
+    } catch {
+      // ignore — we only care about clearing any stealth session
+    }
+    this.state.set('invalid');
   }
 
   async onSubmit(): Promise<void> {
