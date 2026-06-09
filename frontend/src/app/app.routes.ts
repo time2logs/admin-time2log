@@ -18,6 +18,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/onboarding/onboarding').then((m) => m.OnboardingComponent),
   },
   {
+    path: 'auth/accept-invite',
+    loadComponent: () => import('./features/auth/accept-invite/accept-invite').then((m) => m.AcceptInviteComponent),
+  },
+  {
     path: 'auth',
     canActivate: [guestGuard],
     loadChildren: () => import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),

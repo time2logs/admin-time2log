@@ -52,6 +52,18 @@
       "successTitle": "Account set up",
       "successMessage": "Your account has been set up. Please sign in now."
     },
+    "acceptInvite": {
+      "successTitle": "Invitation accepted",
+      "successMessage": "You've joined the organization. Redirecting you now…",
+      "invalidTitle": "Invitation invalid",
+      "invalidMessage": "This invitation is invalid or has already been used.",
+      "expiredTitle": "Invitation expired",
+      "expiredMessage": "This invitation has expired. Ask the organization admin to send a new one.",
+      "wrongUserTitle": "Wrong account",
+      "wrongUserMessage": "This invitation was sent to a different email address. Sign out and sign in with the invited email to accept it.",
+      "signOutAndRetry": "Sign out and try again",
+      "toDashboard": "Go to dashboard"
+    },
     "validation": {
       "emailInvalid": "Please enter a valid email address.",
       "emailRequired": "Email is required.",

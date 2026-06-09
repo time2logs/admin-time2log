@@ -20,6 +20,7 @@ export interface CompleteOnboardingPayload {
 export class OnboardingService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiBaseUrl}/onboarding`;
+  private readonly inviteBaseUrl = `${environment.apiBaseUrl}/invites`;
 
   getInvite(token: string): Observable<OnboardingInvite> {
     return this.http.get<OnboardingInvite>(`${this.baseUrl}/invite`, { params: { token } });
@@ -27,5 +28,9 @@ export class OnboardingService {
 
   complete(payload: CompleteOnboardingPayload): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/complete`, payload);
+  }
+
+  acceptInvite(token: string): Observable<void> {
+    return this.http.post<void>(`${this.inviteBaseUrl}/accept`, { token });
   }
 }

@@ -2,6 +2,7 @@ package ch.time2log.backend.domain;
 
 import ch.time2log.backend.domain.exception.EntityNotFoundException;
 import ch.time2log.backend.domain.models.Profile;
+import ch.time2log.backend.infrastructure.supabase.SupabaseAdminClient;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
 import ch.time2log.backend.infrastructure.supabase.responses.ProfileResponse;
 import org.springframework.stereotype.Service;
@@ -15,9 +16,23 @@ import java.util.stream.Collectors;
 public class ProfileDomainService {
 
     private final SupabaseService supabaseService;
+    private final SupabaseAdminClient supabaseAdminClient;
 
-    public ProfileDomainService(SupabaseService supabaseService) {
+    public ProfileDomainService(SupabaseService supabaseService, SupabaseAdminClient supabaseAdminClient) {
         this.supabaseService = supabaseService;
+        this.supabaseAdminClient = supabaseAdminClient;
+    }
+
+    public boolean existsByEmail(String email) {
+        if (email == null || email.isBlank()) return false;
+        UUID userId = supabaseAdminClient.getUserIdByEmail(email);
+        if (userId == null) return false;
+        var profiles = supabaseAdminClient.getListWithQuery(
+                "app.profiles",
+                "id=eq." + userId + "&select=id&limit=1",
+                ProfileResponse.class
+        );
+        return profiles != null && !profiles.isEmpty();
     }
 
     public Profile getById(UUID id) {
