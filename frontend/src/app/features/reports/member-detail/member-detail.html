@@ -73,6 +73,11 @@
     </div>
   </div>
 
+  @if (absenceChartData().length > 0) {
+    <div class="bg-white dark:bg-[hsl(215,25%,13%)] ...">
+    </div>
+  }
+
   <!-- Progress section -->
   @for (group of teamGroups(); track group.teamId) {
     <div class="space-y-4">
@@ -101,6 +106,8 @@
           }
         </div>
       </div>
+
+
 
       <!-- Competency progress per team -->
       @if (group.curriculum && group.curriculum.competencies.length > 0) {

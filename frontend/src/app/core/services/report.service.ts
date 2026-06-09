@@ -97,4 +97,10 @@ export class ReportService {
       map((date) => (date ? new Date(date) : null))
     );
   }
+
+  getMemberAbsences(organizationId: string, userId: string): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.baseUrl}/${organizationId}/reports/members/${userId}/absences`
+    );
+  }
 }

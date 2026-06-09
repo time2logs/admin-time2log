@@ -1,15 +1,16 @@
-import { Location } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
-import { OrganizationService } from '@services/organization.service';
-import { ReportService } from '@services/report.service';
-import { TeamService } from '@services/team.service';
-import { Profile } from '@app/core/models/profile.models';
-import { Team } from '@app/core/models/team.models';
-import { CurriculumOverview, MemberActivityRecord, ReportStatus } from '@app/core/models/report.models';
-import { Calendar } from '@app/shared/calendar/calendar';
-import { formatLocalDate } from '@app/shared/utils/date.utils';
+import {Location} from '@angular/common';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {TranslateModule} from '@ngx-translate/core';
+import {OrganizationService} from '@services/organization.service';
+import {ReportService} from '@services/report.service';
+import {TeamService} from '@services/team.service';
+import {Profile} from '@app/core/models/profile.models';
+import {Team} from '@app/core/models/team.models';
+import {CurriculumOverview, MemberActivityRecord, ReportStatus} from '@app/core/models/report.models';
+import {Calendar} from '@app/shared/calendar/calendar';
+import {formatLocalDate} from '@app/shared/utils/date.utils';
+import {NgxChartsModule} from '@swimlane/ngx-charts';
 
 interface TeamCompetencyGroup {
   teamId: string | null;
@@ -19,6 +20,20 @@ interface TeamCompetencyGroup {
   maxActivityHours: number;
   competencyHours: Map<string, number>;
   maxCompetencyHours: number;
+}
+
+interface AbsenceRecord {
+  id: string;
+  absence_type_id: string;
+  start_date: string;
+  end_date: string;
+  day_fraction: number;
+}
+
+interface AbsenceBySemester {
+  semester: string;
+  type: string;
+  days: number;
 }
 
 @Component({
@@ -43,6 +58,8 @@ export class MemberDetail implements OnInit {
   protected readonly curriculaByProfession = signal<Map<string, CurriculumOverview>>(new Map());
   protected readonly fallbackProfessionId = signal<string | null>(null);
   protected readonly isLoadingRecords = signal(false);
+  protected readonly absences = signal<AbsenceRecord[]>([]);
+  protected readonly absenceChartData = signal<{ name: string; series: { name: string; value: number }[] }[]>([]);
 
   protected readonly statusMap = computed<Record<string, ReportStatus>>(() => {
     const map: Record<string, ReportStatus> = {};
@@ -74,6 +91,24 @@ export class MemberDetail implements OnInit {
     return map;
   });
 
+  protected readonly typeLabels: Record<string, string> = {
+    sick: 'Krank',
+    vacation: 'Urlaub',
+    military: 'Militär',
+    uk: 'ÜK',
+    berufsschule: 'Berufsschule',
+    custom: 'Andere'
+  };
+
+  protected readonly typeColors: Record<string, string> = {
+    sick: '#ef4444',
+    vacation: '#3b82f6',
+    military: '#10b981',
+    uk: '#f59e0b',
+    berufsschule: '#8b5cf6',
+    custom: '#6b7280'
+  };
+
   protected readonly currentYear = signal(new Date().getFullYear());
   protected readonly currentMonth = signal(new Date().getMonth());
 
@@ -100,11 +135,11 @@ export class MemberDetail implements OnInit {
         if (entry) {
           entry.hours += r.hours;
         } else {
-          activityMap.set(r.curriculumActivityId, { label: r.activityLabel || '—', hours: r.hours });
+          activityMap.set(r.curriculumActivityId, {label: r.activityLabel || '—', hours: r.hours});
         }
       }
       const activityProgress = Array.from(activityMap.entries())
-        .map(([id, { label, hours }]) => ({ id, label, hours }))
+        .map(([id, {label, hours}]) => ({id, label, hours}))
         .sort((a, b) => b.hours - a.hours);
 
       if (activityProgress.length === 0) continue;
@@ -239,4 +274,61 @@ export class MemberDetail implements OnInit {
       error: () => this.isLoadingRecords.set(false),
     });
   }
+
+  private loadAbsences(): void {
+    this.reportService.getMemberAbsences(this.organizationId, this.userId).subscribe({
+      next: (absences) => {
+        this.absences.set(absences);
+        this.updateAbsenceChartData();
+      },
+    });
+  }
+
+  private updateAbsenceChartData(): void {
+    const absenceData = this.computeAbsencesBySemester(this.absences());
+    const semesters = [...new Set(absenceData.map(d => d.semester))].sort();
+    const types = [...new Set(absenceData.map(d => d.type))].sort();
+
+    const chartData = semesters.map(semester => ({
+      name: semester,
+      series: types.map(type => ({
+        name: this.typeLabels[type] || type,
+        value: absenceData.find(d => d.semester === semester && d.type === type)?.days || 0
+      }))
+    }));
+
+    this.absenceChartData.set(chartData);
+  }
+
+  private computeAbsencesBySemester(absences: AbsenceRecord[]): AbsenceBySemester[] {
+    const map = new Map<string, Map<string, number>>();
+
+    for (const a of absences) {
+      const start = new Date(`${a.start_date}T12:00:00`);
+      const end = new Date(`${a.end_date}T12:00:00`);
+      const year = start.getFullYear();
+      const month = start.getMonth() + 1;
+
+      const semesterNum = month >= 8 ? 1 : 2;
+      const semesterYear = month >= 8 ? year : year - 1;
+      const semesterKey = `${semesterYear}/S${semesterNum}`;
+
+      const daysDiff = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      const totalDays = daysDiff * Number(a.day_fraction);
+
+      if (!map.has(semesterKey)) map.set(semesterKey, new Map());
+      const typeMap = map.get(semesterKey)!;
+      const current = typeMap.get(a.absence_type_id) ?? 0;
+      typeMap.set(a.absence_type_id, current + totalDays);
+    }
+
+    const result: AbsenceBySemester[] = [];
+    for (const [semester, typeMap] of [...map.entries()].sort()) {
+      for (const [type, days] of typeMap.entries()) {
+        result.push({semester, type, days: Math.round(days * 10) / 10});
+      }
+    }
+    return result;
+  }
 }
+
