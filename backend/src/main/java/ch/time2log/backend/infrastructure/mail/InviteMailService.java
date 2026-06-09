@@ -40,11 +40,26 @@ public class InviteMailService {
         var template = resource.getContentAsString(StandardCharsets.UTF_8);
 
         var isAdmin = "admin".equalsIgnoreCase(role);
+        var isModerator = "moderator".equalsIgnoreCase(role);
+
+        String roleClass;
+        String roleLabel;
+        if (isAdmin) {
+            roleClass = "role-badge role-admin";
+            roleLabel = "Admin";
+        } else if (isModerator) {
+            roleClass = "role-badge role-moderator";
+            roleLabel = "Moderator";
+        } else {
+            roleClass = "role-badge role-member";
+            roleLabel = "Member";
+        }
+
         return template
                 .replace("{{SUBJECT}}", "Du wurdest eingeladen!")
                 .replace("{{ORGANIZATION_NAME}}", organizationName)
-                .replace("{{ROLE_CLASS}}", isAdmin ? "role-badge role-admin" : "role-badge role-member")
-                .replace("{{ROLE_LABEL}}", isAdmin ? "Admin" : "Member")
+                .replace("{{ROLE_CLASS}}", roleClass)
+                .replace("{{ROLE_LABEL}}", roleLabel)
                 .replace("{{ACTION_LINK}}", actionLink);
     }
 }

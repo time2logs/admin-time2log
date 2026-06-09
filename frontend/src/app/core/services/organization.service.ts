@@ -28,7 +28,7 @@ export class OrganizationService {
 
   private static readonly ROLE_MAPPING: Record<string, string> = {
     member: 'user',
-    admin: 'admin',
+    moderator: 'moderator',
   };
 
   createInvite(organizationId: string, email: string, userRole: string, semester: string): Observable<Invite> {

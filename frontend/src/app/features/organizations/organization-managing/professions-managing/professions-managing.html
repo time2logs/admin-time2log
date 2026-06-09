@@ -260,7 +260,7 @@
                           <span class="text-sm font-mono font-medium text-gray-700 dark:text-[hsl(210,15%,75%)] w-12 flex-shrink-0">{{ code }}</span>
                           <input
                             type="text"
-                            [value]="competencyDescriptions()[code] ?? ''"
+                            [value]="competencyDescriptions()[code] || ''"
                             (input)="updateCompetencyDescription(code, $event)"
                             [placeholder]="'professionManaging.manual.competencyDescPlaceholder' | translate"
                             class="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded bg-white dark:bg-[hsl(215,25%,11%)] text-gray-800 dark:text-[hsl(210,15%,85%)] focus:outline-none focus:border-blue-400"

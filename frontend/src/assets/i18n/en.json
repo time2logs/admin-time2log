@@ -164,6 +164,7 @@
       "emailPlaceholder": "Email address",
       "roleMember": "Member",
       "roleAdmin": "Admin",
+      "roleModerator": "Moderator",
       "semesterLabel": "Semester",
       "semesterOption": "Semester {{ semester }}",
       "inviteButton": "Send Invite",
@@ -348,7 +349,10 @@
     "memberDetail": {
       "noRecordsForDay": "No entries for this day.",
       "progress": "Activity Progress",
-      "competencies": "Competencies"
+      "competencies": "Competencies",
+      "locationFilter": "Location",
+      "allLocations": "All locations",
+      "noLocations": "No locations available"
     },
     "calendar": {
       "mon": "Mo",
@@ -363,7 +367,8 @@
   "nav": {
     "dashboard": "Dashboard",
     "organizations": "Organization",
-    "reports": "Reports"
+    "reports": "Reports",
+    "systemAdmin": "System Admin"
   },
   "settings": {
     "title": "Settings",
@@ -401,6 +406,22 @@
       "description": "Deleting your account is permanent and cannot be undone. All your data will be removed.",
       "deleteAccount": "Delete Account",
       "deleteConfirm": "Are you sure? This will permanently delete your account."
+    },
+    "chartChange": {
+      "title": "Change chart type",
+      "bar": "Bar chart",
+      "column": "Column chart",
+      "pie": "Pie chart"
     }
+  },
+  "systemAdmin": {
+    "title": "System Admin",
+    "admins": "Admins",
+    "noAdmins": "No admins yet",
+    "moderators": "Moderators",
+    "noModerators": "No moderators yet",
+    "pendingInvites": "Pending Invites",
+    "noPendingInvites": "No pending invites",
+    "invite": "Invite Admin"
   }
 }

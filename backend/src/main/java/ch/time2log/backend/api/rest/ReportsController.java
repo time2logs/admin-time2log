@@ -35,8 +35,9 @@ public class ReportsController {
             @PathVariable UUID userId,
             @RequestParam(required = false) String date,
             @RequestParam(required = false) String from,
-            @RequestParam(required = false) String to) {
-        return MemberActivityRecordDto.ofList(reportsDomainService.getMemberRecords(organizationId, userId, date, from, to));
+            @RequestParam(required = false) String to,
+            @RequestParam(required = false) String location) {
+        return MemberActivityRecordDto.ofList(reportsDomainService.getMemberRecords(organizationId, userId, date, from, to, location));
     }
 
     @GetMapping("/activities/summary")

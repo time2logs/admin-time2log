@@ -23,15 +23,19 @@ export class ReportService {
     );
   }
 
-  getMemberRecordsByDate(organizationId: string, userId: string, date: string): Observable<MemberActivityRecord[]> {
+  getMemberRecordsByDate(organizationId: string, userId: string, date: string, location?: string | null): Observable<MemberActivityRecord[]> {
+    const params = [`date=${date}`];
+    if (location?.trim()) params.push(`location=${encodeURIComponent(location.trim())}`);
     return this.http.get<MemberActivityRecord[]>(
-      `${this.baseUrl}/${organizationId}/reports/members/${userId}/records?date=${date}`
+      `${this.baseUrl}/${organizationId}/reports/members/${userId}/records?${params.join('&')}`
     );
   }
 
-  getMemberRecordsByRange(organizationId: string, userId: string, from: string, to: string): Observable<MemberActivityRecord[]> {
+  getMemberRecordsByRange(organizationId: string, userId: string, from: string, to: string, location?: string | null): Observable<MemberActivityRecord[]> {
+    const params = [`from=${from}`, `to=${to}`];
+    if (location?.trim()) params.push(`location=${encodeURIComponent(location.trim())}`);
     return this.http.get<MemberActivityRecord[]>(
-      `${this.baseUrl}/${organizationId}/reports/members/${userId}/records?from=${from}&to=${to}`
+      `${this.baseUrl}/${organizationId}/reports/members/${userId}/records?${params.join('&')}`
     );
   }
 

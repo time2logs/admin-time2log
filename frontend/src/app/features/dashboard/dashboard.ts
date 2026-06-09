@@ -11,6 +11,7 @@ import { NgxChartEntry, LocationSummary, RatingSummary } from '@app/core/models/
 import { forkJoin } from 'rxjs';
 import { PaletteService } from '@services/palette.service';
 import { HostListener } from '@angular/core';
+import { ChartTypeService } from '@services/chart-type.service';
 
 
 type DateRange = '30d' | '90d' | '1y' | 'all';
@@ -236,6 +237,8 @@ export class DashboardComponent implements OnInit {
     protanopia:   ['#2166ac','#d4a017','#4393c3','#d4d400','#1a3a5c'],
     monochrome:   ['#404040','#737373','#999999','#bfbfbf','#e0e0e0'],
   };
+
+  protected readonly chartTypeService = inject(ChartTypeService);
 
   protected readonly colorScheme = computed<Color>(() => ({
     name: 'time2log',

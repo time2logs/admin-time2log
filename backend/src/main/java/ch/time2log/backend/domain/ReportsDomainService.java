@@ -65,7 +65,7 @@ public class ReportsDomainService {
         }).toList();
     }
 
-    public List<MemberActivityRecord> getMemberRecords(UUID organizationId, UUID userId, String date, String from, String to) {
+    public List<MemberActivityRecord> getMemberRecords(UUID organizationId, UUID userId, String date, String from, String to, String location) {
         String query = "organization_id=eq." + organizationId + "&user_id=eq." + userId;
         if (date != null && !date.isBlank()) {
             query += "&entry_date=eq." + date;
@@ -76,6 +76,12 @@ public class ReportsDomainService {
         query += "&order=entry_date.asc";
 
         var records = supabaseService.getListWithQuery("app.activity_records", query, ActivityRecordResponse.class);
+        String normalizedLocation = location == null ? "" : location.trim();
+        if (!normalizedLocation.isBlank()) {
+            records = records.stream()
+                    .filter(r -> r.location() != null && r.location().trim().equalsIgnoreCase(normalizedLocation))
+                    .toList();
+        }
         if (records.isEmpty()) return List.of();
 
         var activityIds = records.stream()
@@ -103,7 +109,8 @@ public class ReportsDomainService {
                 r.hours(),
                 r.notes(),
                 r.rating(),
-                r.team_id()
+                r.team_id(),
+                r.location()
         )).toList();
     }
     public List<ActivitySummary> getActivitySummary(UUID organizationId, UUID userId, String from, String to, List<String> semesters) {

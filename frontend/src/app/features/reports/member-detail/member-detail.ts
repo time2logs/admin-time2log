@@ -11,6 +11,18 @@ import {CurriculumOverview, MemberActivityRecord, ReportStatus} from '@app/core/
 import {Calendar} from '@app/shared/calendar/calendar';
 import {formatLocalDate} from '@app/shared/utils/date.utils';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
+import { Location } from '@angular/common';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
+import { OrganizationService } from '@services/organization.service';
+import { ReportService } from '@services/report.service';
+import { TeamService } from '@services/team.service';
+import { Profile } from '@app/core/models/profile.models';
+import { Team } from '@app/core/models/team.models';
+import { CurriculumOverview, LocationSummary, MemberActivityRecord, ReportStatus } from '@app/core/models/report.models';
+import { Calendar } from '@app/shared/calendar/calendar';
+import { formatLocalDate } from '@app/shared/utils/date.utils';
 
 interface TeamCompetencyGroup {
   teamId: string | null;
@@ -60,6 +72,9 @@ export class MemberDetail implements OnInit {
   protected readonly isLoadingRecords = signal(false);
   protected readonly absences = signal<AbsenceRecord[]>([]);
   protected readonly absenceChartData = signal<{ name: string; series: { name: string; value: number }[] }[]>([]);
+  protected readonly selectedLocation = signal('');
+  protected readonly availableLocations = signal<string[]>([]);
+  protected readonly hasLocationOptions = computed(() => this.availableLocations().length > 0);
 
   protected readonly statusMap = computed<Record<string, ReportStatus>>(() => {
     const map: Record<string, ReportStatus> = {};
@@ -188,6 +203,7 @@ export class MemberDetail implements OnInit {
 
     this.loadMember();
     this.loadTeamsAndCurricula();
+    this.loadLocationOptions();
     this.loadMonthRecords(this.selectedDate());
     this.loadAllRecords();
     this.loadDayRecords(this.selectedDate());
@@ -209,6 +225,11 @@ export class MemberDetail implements OnInit {
     const lastDay = new Date(event.year, event.month, 0).getDate();
     const to = `${event.year}-${String(event.month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
     this.loadMonthRecords(from, to);
+  }
+
+  protected onLocationSelected(location: string): void {
+    this.selectedLocation.set(location);
+    this.loadAllRecords();
   }
 
   private loadMember(): void {
@@ -258,8 +279,27 @@ export class MemberDetail implements OnInit {
     });
   }
 
+  private loadLocationOptions(): void {
+    this.reportService.getLocationSummary(this.organizationId, this.userId).subscribe({
+      next: (locations) => this.availableLocations.set(this.normalizeLocationOptions(locations)),
+    });
+  }
+
+  private normalizeLocationOptions(locations: LocationSummary[]): string[] {
+    const byNormalized = new Map<string, string>();
+    for (const entry of locations) {
+      const label = entry.location?.trim();
+      if (!label) continue;
+      const key = label.toLocaleLowerCase();
+      if (!byNormalized.has(key)) {
+        byNormalized.set(key, label);
+      }
+    }
+    return Array.from(byNormalized.values()).sort((a, b) => a.localeCompare(b));
+  }
+
   private loadAllRecords(): void {
-    this.reportService.getMemberRecordsByRange(this.organizationId, this.userId, '2020-01-01', '2099-12-31').subscribe({
+    this.reportService.getMemberRecordsByRange(this.organizationId, this.userId, '2020-01-01', '2099-12-31', this.selectedLocation()).subscribe({
       next: (records) => this.allRecords.set(records),
     });
   }

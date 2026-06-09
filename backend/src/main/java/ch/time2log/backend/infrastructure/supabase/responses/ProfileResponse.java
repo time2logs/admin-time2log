@@ -10,5 +10,6 @@ public record ProfileResponse(
         String phone_number,
         OffsetDateTime created_at,
         OffsetDateTime updated_at,
-        String colorblind_type
+        String colorblind_type,
+        String user_role
 ) {}
