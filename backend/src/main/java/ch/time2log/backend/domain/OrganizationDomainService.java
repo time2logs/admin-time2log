@@ -74,6 +74,7 @@ public class OrganizationDomainService {
 
     public Invite createInvite(UUID organizationId, String email, String userRole, String semester, UUID invitedBy) {
         var targetUrl = "moderator".equals(userRole) ? adminAppUrl : userAppUrl;
+        boolean isExistingUser = profileDomainService.existsByEmail(email);
 
         var body = new HashMap<String, Object>();
         body.put("organization_id", organizationId);
@@ -81,7 +82,7 @@ public class OrganizationDomainService {
         body.put("user_role", userRole);
         body.put("invited_by", invitedBy);
         body.put("current_semester", semester);
-        log.info("Creating invite with body={}", body);
+        log.info("Creating invite with body={} (existingUser={})", body, isExistingUser);
         var created = supabaseService.post("admin.invites", body, InviteResponse[].class);
         log.info("Supabase returned invite={}", created == null ? null : (created.length == 0 ? "[]" : created[0]));
         if (created == null || created.length == 0) {
@@ -95,16 +96,22 @@ public class OrganizationDomainService {
                 OrganizationResponse.class
         );
         var orgName = organizations.isEmpty() ? "the organization" : organizations.get(0).name();
-        var isAdminApp = "admin".equals(userRole) || "moderator".equals(userRole);
-        var onboardingPath = isAdminApp ? "/auth/onboarding" : "/onboarding";
-        var redirectTo = targetUrl + onboardingPath + "?invite_token=" + invite.token();
-        var metadata = Map.<String, Object>of(
-                "invite_token", invite.token().toString(),
-                "organization_id", organizationId.toString(),
-                "role", userRole
-        );
-        var actionLink = supabaseAdminClient.generateInviteLink(email, redirectTo, metadata).block();
-        inviteMailService.sendInvite(email, orgName, userRole, actionLink);
+
+        if (isExistingUser) {
+            var acceptUrl = targetUrl + "/auth/accept-invite?invite_token=" + invite.token();
+            inviteMailService.sendOrgJoinInvite(email, orgName, userRole, acceptUrl);
+        } else {
+            var isAdminApp = "admin".equals(userRole) || "moderator".equals(userRole);
+            var onboardingPath = isAdminApp ? "/auth/onboarding" : "/onboarding";
+            var redirectTo = targetUrl + onboardingPath + "?invite_token=" + invite.token();
+            var metadata = Map.<String, Object>of(
+                    "invite_token", invite.token().toString(),
+                    "organization_id", organizationId.toString(),
+                    "role", userRole
+            );
+            var actionLink = supabaseAdminClient.generateInviteLink(email, redirectTo, metadata).block();
+            inviteMailService.sendInvite(email, orgName, userRole, actionLink);
+        }
 
         return invite;
     }
@@ -150,8 +157,9 @@ public class OrganizationDomainService {
      * Supabase's generate_link creates a real auth.users row at invite time. If the
      * admin revokes the invite while it's still pending, that auth user is dangling:
      * the email link still resolves to a valid Supabase session, which would let the
-     * recipient bypass the deleted invite. Remove the auth user too. Only safe while
-     * status='pending' — once accepted, the same auth user backs a real profile.
+     * recipient bypass the deleted invite. Remove the auth user too — but only when
+     * no profile is attached, otherwise we'd be wiping a real existing user that
+     * was just invited to an additional organization.
      */
     private void deleteAuthUserForPendingInvite(String email) {
         if (email == null || email.isBlank()) {
@@ -159,9 +167,13 @@ public class OrganizationDomainService {
         }
         try {
             UUID userId = supabaseAdminClient.getUserIdByEmail(email);
-            if (userId != null) {
-                supabaseAdminClient.deleteUser(userId).block();
+            if (userId == null) return;
+            if (profileDomainService.existsByEmail(email)) {
+                log.info("Skipping auth user delete for revoked invite {}: profile exists", email);
+                return;
             }
+
+            supabaseAdminClient.deleteUser(userId).block();
         } catch (Exception ex) {
             log.warn("Failed to delete dangling auth user for revoked invite {}: {}", email, ex.getMessage());
         }

@@ -52,6 +52,18 @@
       "successTitle": "Konto eingerichtet",
       "successMessage": "Dein Konto wurde eingerichtet. Bitte melde dich jetzt an."
     },
+    "acceptInvite": {
+      "successTitle": "Einladung angenommen",
+      "successMessage": "Du bist der Organisation beigetreten. Du wirst weitergeleitet…",
+      "invalidTitle": "Einladung ungültig",
+      "invalidMessage": "Diese Einladung ist ungültig oder wurde bereits verwendet.",
+      "expiredTitle": "Einladung abgelaufen",
+      "expiredMessage": "Diese Einladung ist abgelaufen. Bitte einen Admin der Organisation um eine neue.",
+      "wrongUserTitle": "Falsches Konto",
+      "wrongUserMessage": "Diese Einladung wurde an eine andere E-Mail-Adresse gesendet. Melde dich ab und mit der eingeladenen E-Mail-Adresse wieder an, um sie anzunehmen.",
+      "signOutAndRetry": "Abmelden und erneut versuchen",
+      "toDashboard": "Zum Dashboard"
+    },
     "validation": {
       "emailInvalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
       "emailRequired": "E-Mail ist erforderlich.",

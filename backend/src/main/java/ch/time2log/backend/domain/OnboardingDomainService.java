@@ -2,6 +2,7 @@ package ch.time2log.backend.domain;
 
 import ch.time2log.backend.domain.exception.EntityNotFoundException;
 import ch.time2log.backend.infrastructure.supabase.SupabaseAdminClient;
+import ch.time2log.backend.infrastructure.supabase.SupabaseService;
 import ch.time2log.backend.infrastructure.supabase.responses.InviteDetailsResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +19,11 @@ public class OnboardingDomainService {
     private static final Set<String> ADMIN_ROLES = Set.of("admin", "system_admin", "moderator");
 
     private final SupabaseAdminClient adminClient;
+    private final SupabaseService supabaseService;
 
-    public OnboardingDomainService(SupabaseAdminClient adminClient) {
+    public OnboardingDomainService(SupabaseAdminClient adminClient, SupabaseService supabaseService) {
         this.adminClient = adminClient;
+        this.supabaseService = supabaseService;
     }
 
     /**
@@ -70,5 +73,16 @@ public class OnboardingDomainService {
         );
 
         log.info("Completed admin onboarding for {}", email);
+    }
+
+    public void acceptInviteAsExistingUser(UUID token) {
+        if (token == null) {
+            throw new EntityNotFoundException("Invite token is required");
+        }
+        supabaseService.rpc(
+                "admin.accept_org_invite_for_existing_user",
+                Map.of("invite_token", token),
+                Void.class
+        );
     }
 }

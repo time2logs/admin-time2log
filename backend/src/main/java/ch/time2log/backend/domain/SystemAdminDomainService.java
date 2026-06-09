@@ -30,16 +30,19 @@ public class SystemAdminDomainService {
     private final SupabaseService supabaseService;
     private final SupabaseAdminClient supabaseAdminClient;
     private final InviteMailService inviteMailService;
+    private final ProfileDomainService profileDomainService;
 
     @Value("${app.url.admin}")
     private String adminAppUrl;
 
     public SystemAdminDomainService(SupabaseService supabaseService,
                                     SupabaseAdminClient supabaseAdminClient,
-                                    InviteMailService inviteMailService) {
+                                    InviteMailService inviteMailService,
+                                    ProfileDomainService profileDomainService) {
         this.supabaseService = supabaseService;
         this.supabaseAdminClient = supabaseAdminClient;
         this.inviteMailService = inviteMailService;
+        this.profileDomainService = profileDomainService;
     }
 
     public Invite createPlatformInvite(String email, UUID invitedBy) {
@@ -136,9 +139,12 @@ public class SystemAdminDomainService {
         }
         try {
             UUID userId = supabaseAdminClient.getUserIdByEmail(email);
-            if (userId != null) {
-                supabaseAdminClient.deleteUser(userId).block();
+            if (userId == null) return;
+            if (profileDomainService.existsByEmail(email)) {
+                log.info("Skipping auth user delete for revoked platform invite {}: profile exists", email);
+                return;
             }
+            supabaseAdminClient.deleteUser(userId).block();
         } catch (Exception ex) {
             log.warn("Failed to delete dangling auth user for revoked invite {}: {}", email, ex.getMessage());
         }
