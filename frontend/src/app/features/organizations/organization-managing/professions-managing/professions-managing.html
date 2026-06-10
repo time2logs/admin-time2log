@@ -68,10 +68,10 @@
               <div class="flex items-center gap-3 pt-2">
                 <button
                   class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors disabled:opacity-50 text-sm inline-flex items-center gap-2"
-                  [disabled]="isApplying()"
-                  (click)="applyImport()"
+                  [disabled]="applyingId() === pendingImport()!.id"
+                  (click)="applyImport(pendingImport()!.id)"
                 >
-                  @if (isApplying()) {
+                  @if (applyingId() === pendingImport()!.id) {
                     <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
@@ -329,6 +329,12 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
+                } @else if (entry.status === 'superseded') {
+                  <div class="h-8 w-8 rounded-full bg-gray-100 dark:bg-[hsl(215,25%,20%)] text-gray-500 dark:text-[hsl(210,15%,55%)] flex items-center justify-center flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    </svg>
+                  </div>
                 } @else {
                   <div class="h-8 w-8 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -344,6 +350,22 @@
                   <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400">
                     {{ 'professionManaging.import.statusApplied' | translate }}
                   </span>
+                } @else if (entry.status === 'superseded') {
+                  <button
+                    class="px-3 py-1.5 text-sm border border-green-300 dark:border-green-700 rounded hover:bg-green-50 dark:hover:bg-green-900/20 text-green-700 dark:text-green-300 inline-flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                    [disabled]="applyingId() !== null"
+                    (click)="applyImport(entry.id, true)"
+                  >
+                    @if (applyingId() === entry.id) {
+                      <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                      </svg>
+                      {{ 'professionManaging.import.activating' | translate }}
+                    } @else {
+                      {{ 'professionManaging.import.activate' | translate }}
+                    }
+                  </button>
                 } @else {
                   <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400" [title]="entry.error ?? ''">
                     {{ 'professionManaging.import.statusFailed' | translate }}
