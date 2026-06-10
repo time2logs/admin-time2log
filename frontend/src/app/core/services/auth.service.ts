@@ -110,16 +110,6 @@ export class AuthService implements OnDestroy {
     if (error) throw error;
   }
 
-  register(email: string, password: string, firstName: string, lastName: string): Observable<AuthResponse> {
-    return from(
-      this.supabase.auth.signUp({
-        email,
-        password,
-        options: { data: { first_name: firstName, last_name: lastName } },
-      })
-    );
-  }
-
   resetPasswordForEmail(email: string): Promise<{ error: Error | null }> {
     return this.supabase.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + '/auth/reset-password',
