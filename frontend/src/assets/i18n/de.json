@@ -17,34 +17,19 @@
       "error": "E-Mail oder Passwort ist falsch.",
       "google": "Weiter mit Google",
       "orDivider": "oder",
-      "noAccount": "Noch kein Konto?",
-      "registerLink": "Jetzt registrieren",
       "forgotPassword": "Passwort vergessen?",
       "emailNotConfirmed": {
         "title": "E-Mail-Bestätigung erforderlich",
         "message": "Bitte bestätigen Sie Ihre E-Mail-Adresse über den Link, den wir Ihnen gesendet haben."
       }
     },
-    "register": {
-      "title": "Registrieren",
-      "firstName": "Vorname",
-      "lastName": "Nachnamen",
-      "email": "E-Mail",
-      "password": "Passwort",
-      "submit": "Konto erstellen",
-      "error": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
-      "google": "Weiter mit Google",
-      "hasAccount": "Bereits ein Konto?",
-      "loginLink": "Jetzt anmelden",
-      "success": {
-        "title": "Konto erstellt",
-        "message": "Wir haben Ihnen eine E-Mail gesendet. Bitte bestätigen Sie Ihre E-Mail-Adresse, um sich anzumelden."
-      },
-      "emailExists": "Diese E-Mail-Adresse ist bereits registriert."
-    },
     "onboarding": {
       "title": "Konto einrichten",
       "subtitle": "Du wurdest zu {{organization}} eingeladen. Vervollständige dein Konto, um loszulegen.",
+      "email": "E-Mail",
+      "firstName": "Vorname",
+      "lastName": "Nachnamen",
+      "password": "Passwort",
       "submit": "Konto einrichten",
       "error": "Das Konto konnte nicht eingerichtet werden. Bitte versuche es erneut.",
       "invalidTitle": "Einladung ungültig",

@@ -50,17 +50,6 @@ export class LoginComponent {
     }
   }
 
-  async signInWithGoogle(): Promise<void> {
-    this.isLoading.set(true);
-    this.errorType.set(null);
-    try {
-      await this.authService.signInWithGoogle(this.resolveRedirect());
-    } catch {
-      this.errorType.set('generic');
-      this.isLoading.set(false);
-    }
-  }
-
   /**
    * Honors a ?redirectTo=... query param so the accept-invite flow can bounce
    * the user through login and back. Restricted to internal absolute paths so

@@ -17,34 +17,19 @@
       "error": "Invalid email or password.",
       "google": "Continue with Google",
       "orDivider": "or",
-      "noAccount": "Don't have an account?",
-      "registerLink": "Sign up now",
       "forgotPassword": "Forgot password?",
       "emailNotConfirmed": {
         "title": "Email confirmation required",
         "message": "Please confirm your email address using the link we sent you."
       }
     },
-    "register": {
-      "title": "Sign Up",
-      "firstName": "First Name",
-      "lastName": "Last Name",
-      "email": "Email",
-      "password": "Password",
-      "submit": "Create Account",
-      "error": "Registration failed. Please try again.",
-      "google": "Continue with Google",
-      "hasAccount": "Already have an account?",
-      "loginLink": "Sign in now",
-      "success": {
-        "title": "Account created",
-        "message": "We've sent you an email. Please confirm your email address to sign in."
-      },
-      "emailExists": "This email address is already registered."
-    },
     "onboarding": {
       "title": "Set up your account",
       "subtitle": "You've been invited to {{organization}}. Complete your account to get started.",
+      "email": "Email",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "password": "Password",
       "submit": "Set up account",
       "error": "Your account could not be set up. Please try again.",
       "invalidTitle": "Invalid invite",
