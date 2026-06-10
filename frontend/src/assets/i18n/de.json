@@ -15,8 +15,6 @@
       "password": "Passwort",
       "submit": "Anmelden",
       "error": "E-Mail oder Passwort ist falsch.",
-      "google": "Weiter mit Google",
-      "orDivider": "oder",
       "forgotPassword": "Passwort vergessen?",
       "emailNotConfirmed": {
         "title": "E-Mail-Bestätigung erforderlich",

@@ -15,8 +15,6 @@
       "password": "Password",
       "submit": "Sign In",
       "error": "Invalid email or password.",
-      "google": "Continue with Google",
-      "orDivider": "or",
       "forgotPassword": "Forgot password?",
       "emailNotConfirmed": {
         "title": "Email confirmation required",
