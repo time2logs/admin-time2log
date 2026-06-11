@@ -353,7 +353,24 @@
       "competencies": "Kompetenzen",
       "locationFilter": "Standort",
       "allLocations": "Alle Standorte",
-      "noLocations": "Keine Standorte verfügbar"
+      "noLocations": "Keine Standorte verfügbar",
+      "absences": {
+        "title": "Abwesenheiten",
+        "semesterFilter": "Semester",
+        "allSemesters": "Alle Semester",
+        "empty": "Keine Abwesenheiten erfasst.",
+        "daysAxis": "Tage",
+        "partialDay": "{{fraction}} Tag",
+        "recurring": "Wiederkehrend",
+        "type": {
+          "sick": "Krank",
+          "vacation": "Ferien",
+          "military": "Militär",
+          "uk": "ÜK",
+          "berufsschule": "Berufsschule",
+          "custom": "Sonstiges"
+        }
+      }
     },
     "calendar": {
       "mon": "Mo",

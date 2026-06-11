@@ -7,6 +7,7 @@ import {
   CurriculumOverview,
   DailyMemberReport,
   LocationSummary,
+  MemberAbsence,
   MemberActivityRecord,
   RatingSummary,
 } from '@app/core/models/report.models';
@@ -86,6 +87,12 @@ export class ReportService {
     }
     if (params.length) url += '?' + params.join('&');
     return this.http.get<RatingSummary[]>(url);
+  }
+
+  getMemberAbsences(organizationId: string, userId: string): Observable<MemberAbsence[]> {
+    return this.http.get<MemberAbsence[]>(
+      `${this.baseUrl}/${organizationId}/reports/members/${userId}/absences`
+    );
   }
 
   getAvailableSemesters(organizationId: string, userId: string): Observable<string[]> {

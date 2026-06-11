@@ -44,11 +44,13 @@ describe('MemberDetail computed signals', () => {
       'getMemberRecordsByRange',
       'getCurriculum',
       'getLocationSummary',
+      'getMemberAbsences',
     ]);
     reportServiceSpy.getMemberRecordsByDate.and.returnValue(of([]));
     reportServiceSpy.getMemberRecordsByRange.and.returnValue(of([]));
     reportServiceSpy.getCurriculum.and.returnValue(of({ nodes: [], competencies: [] }));
     reportServiceSpy.getLocationSummary.and.returnValue(of([]));
+    reportServiceSpy.getMemberAbsences.and.returnValue(of([]));
 
     const teamServiceSpy = jasmine.createSpyObj('TeamService', ['getTeams']);
     teamServiceSpy.getTeams.and.returnValue(of([]));

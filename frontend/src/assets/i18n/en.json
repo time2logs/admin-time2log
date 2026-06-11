@@ -350,7 +350,24 @@
       "competencies": "Competencies",
       "locationFilter": "Location",
       "allLocations": "All locations",
-      "noLocations": "No locations available"
+      "noLocations": "No locations available",
+      "absences": {
+        "title": "Absences",
+        "semesterFilter": "Semester",
+        "allSemesters": "All semesters",
+        "empty": "No absences recorded.",
+        "daysAxis": "Days",
+        "partialDay": "{{fraction}} day",
+        "recurring": "Recurring",
+        "type": {
+          "sick": "Sick",
+          "vacation": "Vacation",
+          "military": "Military",
+          "uk": "Inter-company course",
+          "berufsschule": "Vocational school",
+          "custom": "Other"
+        }
+      }
     },
     "calendar": {
       "mon": "Mo",
