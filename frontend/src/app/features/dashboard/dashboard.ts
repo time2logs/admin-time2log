@@ -231,20 +231,13 @@ export class DashboardComponent implements OnInit {
   }
   private readonly paletteService = inject(PaletteService);
 
-  private readonly paletteColors: Record<string, string[]> = {
-    default:      ['#29b6d6','#1a8fa8','#5ecde0','#4a7fc1','#2ea89e','#6090d8','#3db8ad','#5580c8'],
-    deuteranopia: ['#4575b4','#d4a017','#7b3f9e','#74c2a8','#d4d400'],
-    protanopia:   ['#2166ac','#d4a017','#4393c3','#d4d400','#1a3a5c'],
-    monochrome:   ['#404040','#737373','#999999','#bfbfbf','#e0e0e0'],
-  };
-
   protected readonly chartTypeService = inject(ChartTypeService);
 
   protected readonly colorScheme = computed<Color>(() => ({
     name: 'time2log',
     selectable: true,
     group: ScaleType.Ordinal,
-    domain: this.paletteColors[this.paletteService.current()] ?? this.paletteColors['default'],
+    domain: this.paletteService.domain(),
   }));
 
   private loadAllMembersWithActivity(orgs: Organization[]): void {

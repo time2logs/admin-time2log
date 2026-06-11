@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
 import { OrganizationService } from '@services/organization.service';
+import { PaletteService } from '@services/palette.service';
 import { ReportService } from '@services/report.service';
 import { TeamService } from '@services/team.service';
 import { Profile } from '@app/core/models/profile.models';
@@ -35,6 +36,7 @@ export class MemberDetail implements OnInit {
   private readonly reportService = inject(ReportService);
   private readonly teamService = inject(TeamService);
   private readonly translate = inject(TranslateService);
+  private readonly paletteService = inject(PaletteService);
 
   protected readonly member = signal<Profile | null>(null);
   protected readonly selectedDate = signal(formatLocalDate(new Date()));
@@ -88,16 +90,28 @@ export class MemberDetail implements OnInit {
     name: 'absence',
     selectable: true,
     group: ScaleType.Ordinal,
-    domain: this.absenceTotals().map(e => e.meta.color),
+    domain: this.paletteService.domain(),
   }));
 
-  protected readonly absenceEntries = computed(() =>
-    this.filteredAbsences().map(a => {
+  /**
+   * Farbe je Absenz-Typ aus der gewählten Palette, in Säulen-Reihenfolge —
+   * so stimmen die Punkte in der Liste mit den Säulen im Diagramm überein.
+   */
+  private readonly absenceTypeColor = computed(() => {
+    const palette = this.paletteService.domain();
+    const map = new Map<string, string>();
+    this.absenceTotals().forEach((e, i) => map.set(e.meta.id, palette[i % palette.length]));
+    return map;
+  });
+
+  protected readonly absenceEntries = computed(() => {
+    const colorByType = this.absenceTypeColor();
+    return this.filteredAbsences().map(a => {
       const meta = ABSENCE_TYPE_BY_ID.get(a.absenceTypeId);
       return {
         id: a.id,
         typeLabel: meta ? this.translate.instant(meta.labelKey) : a.absenceTypeId,
-        color: meta?.color ?? DEFAULT_ABSENCE_COLOR,
+        color: colorByType.get(a.absenceTypeId) ?? DEFAULT_ABSENCE_COLOR,
         startDate: a.startDate,
         endDate: a.endDate,
         isRange: a.startDate !== a.endDate,
@@ -105,8 +119,8 @@ export class MemberDetail implements OnInit {
         dayFraction: a.dayFraction,
         notes: a.notes,
       };
-    })
-  );
+    });
+  });
 
   protected readonly statusMap = computed<Record<string, ReportStatus>>(() => {
     const map: Record<string, ReportStatus> = {};
