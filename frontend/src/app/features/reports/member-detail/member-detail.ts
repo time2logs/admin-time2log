@@ -1,13 +1,14 @@
-import { Location } from '@angular/common';
+import { DatePipe, Location } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
 import { OrganizationService } from '@services/organization.service';
 import { ReportService } from '@services/report.service';
 import { TeamService } from '@services/team.service';
 import { Profile } from '@app/core/models/profile.models';
 import { Team } from '@app/core/models/team.models';
-import { CurriculumOverview, LocationSummary, MemberActivityRecord, ReportStatus } from '@app/core/models/report.models';
+import { ABSENCE_TYPES, ABSENCE_TYPE_BY_ID, CurriculumOverview, DEFAULT_ABSENCE_COLOR, LocationSummary, MemberAbsence, MemberActivityRecord, NgxChartEntry, ReportStatus } from '@app/core/models/report.models';
 import { Calendar } from '@app/shared/calendar/calendar';
 import { formatLocalDate } from '@app/shared/utils/date.utils';
 
@@ -24,7 +25,7 @@ interface TeamCompetencyGroup {
 @Component({
   selector: 'app-member-detail',
   standalone: true,
-  imports: [TranslateModule, Calendar],
+  imports: [TranslateModule, Calendar, NgxChartsModule, DatePipe],
   templateUrl: './member-detail.html',
 })
 export class MemberDetail implements OnInit {
@@ -33,6 +34,7 @@ export class MemberDetail implements OnInit {
   private readonly organizationService = inject(OrganizationService);
   private readonly reportService = inject(ReportService);
   private readonly teamService = inject(TeamService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly member = signal<Profile | null>(null);
   protected readonly selectedDate = signal(formatLocalDate(new Date()));
@@ -46,6 +48,65 @@ export class MemberDetail implements OnInit {
   protected readonly selectedLocation = signal('');
   protected readonly availableLocations = signal<string[]>([]);
   protected readonly hasLocationOptions = computed(() => this.availableLocations().length > 0);
+
+  /** Alle Absenzen des Members (ungefiltert); Filterung erfolgt clientseitig. */
+  protected readonly absences = signal<MemberAbsence[]>([]);
+  protected readonly selectedAbsenceSemester = signal('');
+
+  /** Auswählbare Semester aus den vorhandenen Absenzen (nicht aus activity_records). */
+  protected readonly availableSemesters = computed(() =>
+    [...new Set(
+      this.absences()
+        .map(a => a.currentSemester)
+        .filter((s): s is string => s !== null && s !== '')
+    )].sort()
+  );
+
+  /** Nach gewähltem Semester gefilterte Absenzen ('' = alle). */
+  private readonly filteredAbsences = computed(() => {
+    const semester = this.selectedAbsenceSemester();
+    const all = this.absences();
+    return semester ? all.filter(a => a.currentSemester === semester) : all;
+  });
+
+  /** Tage je Absenz-Typ (nur belegte Typen), Basis für Diagramm und Farbschema. */
+  private readonly absenceTotals = computed(() => {
+    const days = new Map<string, number>();
+    for (const a of this.filteredAbsences()) {
+      days.set(a.absenceTypeId, (days.get(a.absenceTypeId) ?? 0) + this.absenceDays(a));
+    }
+    return ABSENCE_TYPES
+      .map(meta => ({ meta, days: Math.round((days.get(meta.id) ?? 0) * 100) / 100 }))
+      .filter(e => e.days > 0);
+  });
+
+  protected readonly absenceChartData = computed<NgxChartEntry[]>(() =>
+    this.absenceTotals().map(e => ({ name: this.translate.instant(e.meta.labelKey), value: e.days }))
+  );
+
+  protected readonly absenceColorScheme = computed<Color>(() => ({
+    name: 'absence',
+    selectable: true,
+    group: ScaleType.Ordinal,
+    domain: this.absenceTotals().map(e => e.meta.color),
+  }));
+
+  protected readonly absenceEntries = computed(() =>
+    this.filteredAbsences().map(a => {
+      const meta = ABSENCE_TYPE_BY_ID.get(a.absenceTypeId);
+      return {
+        id: a.id,
+        typeLabel: meta ? this.translate.instant(meta.labelKey) : a.absenceTypeId,
+        color: meta?.color ?? DEFAULT_ABSENCE_COLOR,
+        startDate: a.startDate,
+        endDate: a.endDate,
+        isRange: a.startDate !== a.endDate,
+        isRecurring: a.isRecurring,
+        dayFraction: a.dayFraction,
+        notes: a.notes,
+      };
+    })
+  );
 
   protected readonly statusMap = computed<Record<string, ReportStatus>>(() => {
     const map: Record<string, ReportStatus> = {};
@@ -160,6 +221,48 @@ export class MemberDetail implements OnInit {
     this.loadMonthRecords(this.selectedDate());
     this.loadAllRecords();
     this.loadDayRecords(this.selectedDate());
+    this.loadAbsences();
+  }
+
+  protected onAbsenceSemesterSelected(semester: string): void {
+    this.selectedAbsenceSemester.set(semester);
+  }
+
+  private loadAbsences(): void {
+    this.reportService.getMemberAbsences(this.organizationId, this.userId).subscribe({
+      next: (absences) => this.absences.set(absences),
+    });
+  }
+
+  /**
+   * Anzahl abwesender Tage einer Absenz × Tagesbruchteil. Ohne rrule zählt der
+   * volle Bereich [start, end]; mit rrule nur die passenden Wochentage (BYDAY).
+   */
+  private absenceDays(a: MemberAbsence): number {
+    const start = new Date(a.startDate + 'T00:00:00');
+    const end = new Date(a.endDate + 'T00:00:00');
+    if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) return 0;
+
+    const byday = this.parseByDay(a.rrule);
+    let count = 0;
+    for (const d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      if (byday && !byday.has(d.getDay())) continue;
+      count++;
+    }
+    return count * (a.dayFraction || 1);
+  }
+
+  /** Parst BYDAY (z. B. "MO,WE" oder "2MO") aus einer iCal-rrule zu Wochentagen (0=So). */
+  private parseByDay(rrule: string | null): Set<number> | null {
+    if (!rrule) return null;
+    const match = /BYDAY=([^;]+)/i.exec(rrule);
+    if (!match) return null;
+    const map: Record<string, number> = { SU: 0, MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6 };
+    const days = match[1]
+      .split(',')
+      .map(token => map[token.trim().toUpperCase().slice(-2)])
+      .filter((n): n is number => n !== undefined);
+    return days.length ? new Set(days) : null;
   }
 
   protected goBack(): void {

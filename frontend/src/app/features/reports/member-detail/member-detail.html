@@ -73,6 +73,79 @@
     </div>
   </div>
 
+  <!-- Absence -->
+  <div class="bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm overflow-hidden">
+    <div class="px-5 py-3 bg-gray-50 dark:bg-[hsl(215,25%,16%)] border-b border-gray-200 dark:border-[hsl(215,20%,22%)] flex items-center justify-between gap-3 flex-wrap">
+      <h2 class="text-lg font-medium text-gray-800 dark:text-[hsl(210,15%,90%)]">{{ 'reports.memberDetail.absences.title' | translate }}</h2>
+      <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-[hsl(210,15%,70%)]">
+        <span>{{ 'reports.memberDetail.absences.semesterFilter' | translate }}</span>
+        <select
+          class="border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-[hsl(215,25%,16%)] dark:text-[hsl(210,15%,90%)] focus:outline-none focus:ring-2 focus:ring-[hsl(199,80%,52%)]"
+          [value]="selectedAbsenceSemester()"
+          (change)="onAbsenceSemesterSelected($any($event.target).value)"
+        >
+          <option value="">{{ 'reports.memberDetail.absences.allSemesters' | translate }}</option>
+          @for (semester of availableSemesters(); track semester) {
+            <option [value]="semester">{{ semester }}</option>
+          }
+        </select>
+      </label>
+    </div>
+    <div class="p-4">
+      @if (absenceEntries().length === 0) {
+        <p class="text-gray-500 dark:text-[hsl(210,15%,55%)] text-sm">{{ 'reports.memberDetail.absences.empty' | translate }}</p>
+      } @else {
+        <!-- Days per absence type -->
+        <div class="h-64">
+          <ngx-charts-bar-vertical
+            [results]="absenceChartData()"
+            [scheme]="absenceColorScheme()"
+            [xAxis]="true"
+            [yAxis]="true"
+            [legend]="false"
+            [roundEdges]="false"
+            [showYAxisLabel]="true"
+            [yAxisLabel]="'reports.memberDetail.absences.daysAxis' | translate"
+          />
+        </div>
+
+        <!-- Individual absences -->
+        <ul class="mt-4 divide-y divide-gray-100 dark:divide-[hsl(215,20%,22%)]">
+          @for (entry of absenceEntries(); track entry.id) {
+            <li class="py-2.5 flex items-start gap-3">
+              <span class="mt-1.5 h-2.5 w-2.5 rounded-full flex-shrink-0" [style.background-color]="entry.color"></span>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-sm font-medium text-gray-800 dark:text-[hsl(210,15%,90%)]">{{ entry.typeLabel }}</span>
+                  @if (entry.dayFraction < 1) {
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-[hsl(215,25%,20%)] text-gray-600 dark:text-[hsl(210,15%,65%)]">
+                      {{ 'reports.memberDetail.absences.partialDay' | translate:{ fraction: entry.dayFraction } }}
+                    </span>
+                  }
+                  @if (entry.isRecurring) {
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+                      {{ 'reports.memberDetail.absences.recurring' | translate }}
+                    </span>
+                  }
+                </div>
+                <p class="text-xs text-gray-500 dark:text-[hsl(210,15%,55%)]">
+                  @if (entry.isRange) {
+                    {{ entry.startDate | date:'dd.MM.yyyy' }} – {{ entry.endDate | date:'dd.MM.yyyy' }}
+                  } @else {
+                    {{ entry.startDate | date:'dd.MM.yyyy' }}
+                  }
+                </p>
+                @if (entry.notes) {
+                  <p class="text-xs text-gray-400 dark:text-[hsl(210,15%,45%)] mt-0.5">{{ entry.notes }}</p>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  </div>
+
   <!-- Progress section -->
   <div class="flex justify-end">
     <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-[hsl(210,15%,70%)]">

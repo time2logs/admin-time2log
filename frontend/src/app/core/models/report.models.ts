@@ -64,3 +64,39 @@ export interface NgxChartEntry {
   name: string;
   value: number;
 }
+
+export interface MemberAbsence {
+  id: string;
+  absenceTypeId: string;
+  startDate: string;
+  endDate: string;
+  rrule: string | null;
+  isRecurring: boolean;
+  dayFraction: number;
+  notes: string | null;
+  currentSemester: string | null;
+}
+
+export interface AbsenceTypeMeta {
+  id: string;
+  labelKey: string;
+  color: string;
+}
+
+/** Fallback-Farbe für unbekannte Absenz-Typen. */
+export const DEFAULT_ABSENCE_COLOR = '#9ca3af';
+
+/** Reihenfolge bestimmt Säulen-Reihenfolge und Farbzuordnung im Diagramm. */
+export const ABSENCE_TYPES: AbsenceTypeMeta[] = [
+  { id: 'sick', labelKey: 'reports.memberDetail.absences.type.sick', color: '#ef4444' },
+  { id: 'vacation', labelKey: 'reports.memberDetail.absences.type.vacation', color: '#3b82f6' },
+  { id: 'military', labelKey: 'reports.memberDetail.absences.type.military', color: '#22c55e' },
+  { id: 'uk', labelKey: 'reports.memberDetail.absences.type.uk', color: '#f59e0b' },
+  { id: 'berufsschule', labelKey: 'reports.memberDetail.absences.type.berufsschule', color: '#a855f7' },
+  { id: 'custom', labelKey: 'reports.memberDetail.absences.type.custom', color: DEFAULT_ABSENCE_COLOR },
+];
+
+/** Lookup nach Typ-Id für die Einzelliste (einmal aufgebaut, nicht pro Recompute). */
+export const ABSENCE_TYPE_BY_ID = new Map<string, AbsenceTypeMeta>(
+  ABSENCE_TYPES.map(t => [t.id, t])
+);

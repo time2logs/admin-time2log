@@ -2,9 +2,11 @@ package ch.time2log.backend.domain;
 
 import ch.time2log.backend.domain.models.ActivitySummary;
 import ch.time2log.backend.domain.models.DailyMemberReport;
+import ch.time2log.backend.domain.models.MemberAbsence;
 import ch.time2log.backend.domain.models.MemberActivityRecord;
 import ch.time2log.backend.domain.models.RatingSummary;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
+import ch.time2log.backend.infrastructure.supabase.responses.AbsenceResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.ActivityRecordResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.CurriculumNodeResponse;
 import org.springframework.stereotype.Service;
@@ -182,9 +184,12 @@ public class ReportsDomainService {
 
     public List<String> getAvailableSemesters(UUID organizationId, UUID userId) {
         if (userId == null) return List.of();
+        // Kein &select=current_semester: die Teil-Projektion ließe das primitive
+        // Feld `hours` in ActivityRecordResponse fehlen, was die Deserialisierung
+        // (Record mit primitivem int) zum Scheitern bringt. Volle Zeilen laden.
         var records = supabaseService.getListWithQuery(
                 "app.activity_records",
-                "organization_id=eq." + organizationId + "&user_id=eq." + userId + "&select=current_semester",
+                "organization_id=eq." + organizationId + "&user_id=eq." + userId,
                 ActivityRecordResponse.class
         );
         return records.stream()
@@ -193,6 +198,19 @@ public class ReportsDomainService {
                 .distinct()
                 .sorted()
                 .toList();
+    }
+
+    public List<MemberAbsence> getMemberAbsences(UUID organizationId, UUID userId, List<String> semesters) {
+        if (userId == null) return List.of();
+
+        String query = "organization_id=eq." + organizationId + "&user_id=eq." + userId;
+        if (semesters != null && !semesters.isEmpty()) {
+            query += "&current_semester=in.(" + semesters.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")) + ")";
+        }
+        query += "&order=start_date.desc";
+
+        var responses = supabaseService.getListWithQuery("app.absences", query, AbsenceResponse.class);
+        return MemberAbsence.ofList(responses);
     }
 
     public OffsetDateTime getLastEntryDate(UUID organizationId, UUID userId) {

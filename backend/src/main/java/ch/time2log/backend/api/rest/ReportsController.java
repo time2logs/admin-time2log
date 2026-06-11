@@ -3,6 +3,7 @@ package ch.time2log.backend.api.rest;
 import ch.time2log.backend.api.rest.dto.outbound.ActivitySummaryDto;
 import ch.time2log.backend.api.rest.dto.outbound.DailyMemberReportDto;
 import ch.time2log.backend.api.rest.dto.outbound.LocationSummaryDto;
+import ch.time2log.backend.api.rest.dto.outbound.MemberAbsenceDto;
 import ch.time2log.backend.api.rest.dto.outbound.MemberActivityRecordDto;
 import ch.time2log.backend.api.rest.dto.outbound.RatingSummaryDto;
 import ch.time2log.backend.domain.ReportsDomainService;
@@ -58,6 +59,14 @@ public class ReportsController {
             @RequestParam(required = false) String to,
             @RequestParam(required = false) List<String> semesters) {
         return LocationSummaryDto.ofMap(reportsDomainService.getLocationSummary(organizationId, userId, from, to, semesters));
+    }
+
+    @GetMapping("/members/{userId}/absences")
+    public List<MemberAbsenceDto> getMemberAbsences(
+            @PathVariable UUID organizationId,
+            @PathVariable UUID userId,
+            @RequestParam(required = false) List<String> semesters) {
+        return MemberAbsenceDto.ofList(reportsDomainService.getMemberAbsences(organizationId, userId, semesters));
     }
 
     @GetMapping("/semesters/available")
