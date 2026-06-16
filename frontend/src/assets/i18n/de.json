@@ -440,6 +440,8 @@
     "noModerators": "Noch keine Moderatoren",
     "pendingInvites": "Offene Einladungen",
     "noPendingInvites": "Keine ausstehenden Einladungen",
-    "invite": "Admin einladen"
+    "invite": "Admin einladen",
+    "inviteError": "Ungültige Email. Gib eine gültige Email ein und versuche es erneut",
+    "inviteSuccess": "Einladung erfolgreich versendet."
   }
 }
