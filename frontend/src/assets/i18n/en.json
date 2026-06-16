@@ -437,6 +437,8 @@
     "noModerators": "No moderators yet",
     "pendingInvites": "Pending Invites",
     "noPendingInvites": "No pending invites",
-    "invite": "Invite Admin"
+    "invite": "Invite Admin",
+    "inviteError":  "Invalid email address. Please enter a valid email address and try again.",
+    "inviteSuccess": "Invitation successfully sent."
   }
 }
