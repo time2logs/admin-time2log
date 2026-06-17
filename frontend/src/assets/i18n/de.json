@@ -229,6 +229,10 @@
       "semester": {
         "title": "Semester",
         "endDate": "Enddatum des aktuellen Semesters"
+      },
+      "targetHours": {
+        "title": "Sollstunden",
+        "maxHours": "Sollstunden von einem Arbeitstag"
       }
     }
   },

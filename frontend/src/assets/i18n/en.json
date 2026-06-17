@@ -228,6 +228,10 @@
       "semester": {
         "title": "Semester",
         "endDate": "End date of the current semester"
+      },
+      "targetHours": {
+        "title": "Target hours",
+        "maxHours": "Target hours for a workday"
       }
     }
   },

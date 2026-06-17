@@ -9,5 +9,6 @@ public record OrganizationResponse(
         UUID created_by,
         OffsetDateTime created_at,
         OffsetDateTime updated_at,
-        java.time.LocalDate semester_end_date
+        java.time.LocalDate semester_end_date,
+        java.math.BigDecimal target_hours
 ) {}

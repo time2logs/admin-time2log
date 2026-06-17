@@ -105,4 +105,14 @@ public class OrganizationController {
         var date = (raw == null || raw.isBlank()) ? null : java.time.LocalDate.parse(raw);
         orgDomainService.saveSemesterEndDate(id, date);
     }
+
+    @GetMapping("/{id}/targetHours")
+    public Map<String, Object> getTargetHours(@PathVariable UUID id) {
+        return java.util.Collections.singletonMap("targetHours", orgDomainService.getTargetHours(id));
+    }
+
+    @PutMapping("/{id}/targetHours")
+    public void saveTargetHours(@PathVariable UUID id, @RequestBody Map<String, java.math.BigDecimal> body) {
+        orgDomainService.saveTargetHours(id, body.get("targetHours"));
+    }
 }
