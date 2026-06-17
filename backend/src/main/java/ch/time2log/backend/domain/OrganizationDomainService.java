@@ -53,8 +53,8 @@ public class OrganizationDomainService {
     }
 
     public Organization createOrganization(String name) {
-        var created = supabaseService.post("admin.organizations", Map.of("name", name), OrganizationResponse[].class);
-        if (created == null || created.length == 0) {
+        var created = supabaseService.post("admin.organizations", Map.of("name", name, "target_hours", 8), OrganizationResponse[].class);
+        if (created == null || created.length == 0) { 
             throw new EntityNotCreatedException("Supabase returned no created organization");
         }
         return Organization.of(created[0]);
@@ -284,6 +284,24 @@ public class OrganizationDomainService {
                 "admin.organizations",
                 "id=eq." + organizationId,
                 java.util.Collections.singletonMap("semester_end_date", endDate),
+                Object.class
+        );
+    }
+
+    public Number getTargetHours(UUID organizationId){
+        var list = supabaseService.getListWithQuery(
+                "admin.organizations",
+                "id=eq." + organizationId + "&select=target_hours",
+                OrganizationResponse.class
+        );
+        return list.isEmpty() ? null : list.get(0).target_hours();
+    }
+
+    public void saveTargetHours(UUID organizationId, Number targetHours) {
+        supabaseService.patch(
+                "admin.organizations",
+                "id=eq." + organizationId,
+                java.util.Collections.singletonMap("target_hours", targetHours),
                 Object.class
         );
     }

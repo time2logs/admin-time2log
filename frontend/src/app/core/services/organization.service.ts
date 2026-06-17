@@ -80,4 +80,12 @@ export class OrganizationService {
   saveSemesterEndDate(organizationId: string, semesterEndDate: string | null): Observable<void> {
     return this.http.put<void>(`${this.baseUrl}/${organizationId}/semester-end-date`, { semesterEndDate });
   }
+
+  getTargetHours(organizationId: string): Observable<{ targetHours: number | null}>{
+    return this.http.get<{ targetHours: number | null }>(`${this.baseUrl}/${organizationId}/targetHours`);
+  }
+
+  saveTargetHours(organizationId: string, targetHours: number | null): Observable<void>{
+    return this.http.put<void>(`${this.baseUrl}/${organizationId}/targetHours`, { targetHours });
+  }
 }

@@ -40,6 +40,9 @@ export class OrganizationManaging implements OnInit {
   protected readonly isInviting = signal(false);
   protected readonly isSavingSemester = signal(false);
 
+  protected readonly isSavingTargetHours = signal(false);
+  protected readonly targetHours = signal<number>(8);
+
   protected readonly professions = signal<Profession[]>([]);
   protected readonly showCreateProfession = signal(false);
   protected readonly newProfessionKey = signal('');
@@ -96,6 +99,7 @@ export class OrganizationManaging implements OnInit {
     this.loadTeams();
     this.loadReminder();
     this.loadSemesterEndDate();
+    this.loadTargetHours();
 
     this.authService.currentUser$.subscribe(user => {
       this.currentUserId.set(user?.id ?? null);
@@ -399,6 +403,25 @@ protected confirmDeleteTeam(team: Team, event: Event): void {
           this.toast.success(this.translate.instant('toast.semesterSaved'));
         },
         error: () => this.isSavingSemester.set(false),
+      });
+  }
+
+  private loadTargetHours(): void{
+    this.organizationService.getTargetHours(this.organizationId).subscribe({
+      next: (res) => this.targetHours.set(res.targetHours ?? 8),
+    });
+  }
+
+  protected saveTargetHours(): void {
+    this.isSavingTargetHours.set(true);
+    this.organizationService
+      .saveTargetHours(this.organizationId, this.targetHours())
+      .subscribe({
+        next: () => {
+          this.isSavingTargetHours.set(false);
+          this.toast.success(this.translate.instant('toast.targetHoursSaved'));
+        },
+        error: () => this.isSavingTargetHours.set(false),
       });
   }
 }

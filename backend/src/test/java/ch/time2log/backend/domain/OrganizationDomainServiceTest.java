@@ -248,7 +248,7 @@ class OrganizationDomainServiceTest {
     }
 
     private OrganizationResponse orgResponse(String name) {
-        return new OrganizationResponse(orgId, name, memberId,OffsetDateTime.now(), OffsetDateTime.now(), null);
+        return new OrganizationResponse(orgId, name, memberId,OffsetDateTime.now(), OffsetDateTime.now(), null, null);
     }
 
     // =====================================================================
@@ -661,7 +661,7 @@ class OrganizationDomainServiceTest {
         }
 
         private OrganizationResponse reminderOrgResponse(UUID id, String name) {
-            return new OrganizationResponse(id, name, UUID.randomUUID(), OffsetDateTime.now(), OffsetDateTime.now(), null);
+            return new OrganizationResponse(id, name, UUID.randomUUID(), OffsetDateTime.now(), OffsetDateTime.now(), null, null);
         }
 
         private OrganizationMemberResponse memberResponse(UUID userId, UUID orgId) {
