@@ -8,5 +8,6 @@ public record OrganizationResponse(
         String name,
         UUID created_by,
         OffsetDateTime created_at,
-        OffsetDateTime updated_at
+        OffsetDateTime updated_at,
+        java.time.LocalDate semester_end_date
 ) {}
