@@ -225,7 +225,11 @@
       },
       "NewOrganizationOwner": "Neuer Eigentümer der Organisation",
       "transferConfirm": "Wirklich übertragen? Diese Aktion ist unwiderruflich.",
-      "changeOwner": "Eigentümer wechseln"
+      "changeOwner": "Eigentümer wechseln",
+      "semester": {
+        "title": "Semester",
+        "endDate": "Enddatum des aktuellen Semesters"
+      }
     }
   },
   "teamManaging": {
@@ -333,6 +337,7 @@
     "teamCreated": "Team erstellt.",
     "teamDeleted": "Team gelöscht.",
     "reminderSaved": "Erinnerungseinstellungen gespeichert.",
+    "semesterSaved": "Semester-Enddatum gespeichert.",
     "ownershipTransferred": "Organisation erfolgreich übertragen",
     "inviteMemberNeedsSemester": "Für Mitglieder muss ein Semester (1-8) ausgewählt werden.",
     "inviteAdminNoSemester": "Für Admins muss als Semester \"-\" ausgewählt werden."

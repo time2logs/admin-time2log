@@ -93,4 +93,16 @@ public class OrganizationController {
     public void transferOwnership(@PathVariable UUID id, @RequestBody Map<String, String> body) {
         orgDomainService.transferOwnership(id, UUID.fromString(body.get("newOwnerId")));
     }
+
+    @GetMapping("/{id}/semester-end-date")
+    public Map<String, Object> getSemesterEndDate(@PathVariable UUID id) {
+        return java.util.Collections.singletonMap("semesterEndDate", orgDomainService.getSemesterEndDate(id));
+    }
+
+    @PutMapping("/{id}/semester-end-date")
+    public void saveSemesterEndDate(@PathVariable UUID id, @RequestBody Map<String, String> body) {
+        var raw = body.get("semesterEndDate");
+        var date = (raw == null || raw.isBlank()) ? null : java.time.LocalDate.parse(raw);
+        orgDomainService.saveSemesterEndDate(id, date);
+    }
 }

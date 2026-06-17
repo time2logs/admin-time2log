@@ -269,4 +269,22 @@ public class OrganizationDomainService {
                 Object.class
         );
     }
+
+    public java.time.LocalDate getSemesterEndDate(UUID organizationId) {
+        var list = supabaseService.getListWithQuery(
+                "admin.organizations",
+                "id=eq." + organizationId + "&select=semester_end_date",
+                OrganizationResponse.class
+        );
+        return list.isEmpty() ? null : list.get(0).semester_end_date();
+    }
+
+    public void saveSemesterEndDate(UUID organizationId, java.time.LocalDate endDate) {
+        supabaseService.patch(
+                "admin.organizations",
+                "id=eq." + organizationId,
+                java.util.Collections.singletonMap("semester_end_date", endDate),
+                Object.class
+        );
+    }
 }

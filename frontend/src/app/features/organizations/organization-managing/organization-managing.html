@@ -400,6 +400,25 @@
           </div>
         </div>
 
+        <!-- Semester start/stop -->
+        <div class="bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm overflow-hidden">
+          <div class="px-5 py-3 bg-gray-50 dark:bg-[hsl(215,25%,16%)] border-b border-gray-200 dark:border-[hsl(215,20%,22%)]">
+            <h2 class="text-lg font-medium text-gray-800 dark:text-[hsl(210,15%,90%)]">{{ 'organizationManaging.settings.semester.title' | translate }}</h2>
+          </div>
+          <div class="p-5 space-y-4">
+            <div>
+              <label for="semester-end-date" class="block text-sm font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] mb-1">{{ 'organizationManaging.settings.semester.endDate' | translate }}</label>
+              <input id="semester-end-date" type="date"
+                     class="w-full sm:w-auto px-4 py-2 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-[hsl(210,15%,90%)]"
+                     [ngModel]="semesterEndDate()" (ngModelChange)="semesterEndDate.set($event)" />
+            </div>
+            <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+                    [disabled]="isSavingSemester()" (click)="saveSemesterEndDate()">
+              {{ isSavingSemester() ? ('common.loading' | translate) : ('common.save' | translate) }}
+            </button>
+          </div>
+        </div>
+
         <!-- Reminder / Notification Settings -->
         <div class="bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm overflow-hidden">
           <div class="px-5 py-3 bg-gray-50 dark:bg-[hsl(215,25%,16%)] border-b border-gray-200 dark:border-[hsl(215,20%,22%)]">

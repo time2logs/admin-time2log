@@ -224,7 +224,11 @@
       },
       "NewOrganizationOwner": "New Organization Owner",
       "transferConfirm": "Really transfer? This action is irreversible.",
-      "changeOwner": "Change Owner"
+      "changeOwner": "Change Owner",
+      "semester": {
+        "title": "Semester",
+        "endDate": "End date of the current semester"
+      }
     }
   },
   "teamManaging": {
@@ -330,6 +334,7 @@
     "teamCreated": "Team created.",
     "teamDeleted": "Team deleted.",
     "reminderSaved": "Reminder settings saved.",
+    "semesterSaved": "Semester end date saved.",
     "ownershipTransferred": "Organization successfully transferred",
     "inviteMemberNeedsSemester": "Members must have a semester (1-8) selected.",
     "inviteAdminNoSemester": "Admins must have \"-\" selected as semester."

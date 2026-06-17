@@ -36,7 +36,9 @@ export class OrganizationManaging implements OnInit {
   protected readonly inviteRole = signal('member');
   protected readonly inviteSemester = signal('1');
   protected readonly semesterOptions = ['-', '1', '2', '3', '4', '5', '6', '7', '8'] as const;
+  protected readonly semesterEndDate = signal<string>('');
   protected readonly isInviting = signal(false);
+  protected readonly isSavingSemester = signal(false);
 
   protected readonly professions = signal<Profession[]>([]);
   protected readonly showCreateProfession = signal(false);
@@ -93,6 +95,7 @@ export class OrganizationManaging implements OnInit {
     this.loadProfessions();
     this.loadTeams();
     this.loadReminder();
+    this.loadSemesterEndDate();
 
     this.authService.currentUser$.subscribe(user => {
       this.currentUserId.set(user?.id ?? null);
@@ -374,11 +377,28 @@ protected confirmDeleteTeam(team: Team, event: Event): void {
   }
 
 
-@HostListener('document:click')
+  @HostListener('document:click')
     onDocumentClick(): void {
     this.memberToConfirmRemoval.set(null);
     this.teamToConfirmDeletion.set(null);
   }
 
+  private loadSemesterEndDate(): void {
+    this.organizationService.getSemesterEndDate(this.organizationId).subscribe({
+      next: (res) => this.semesterEndDate.set(res.semesterEndDate ?? ''),
+    });
+  }
 
+  protected saveSemesterEndDate(): void {
+    this.isSavingSemester.set(true);
+    this.organizationService
+      .saveSemesterEndDate(this.organizationId, this.semesterEndDate() || null)
+      .subscribe({
+        next: () => {
+          this.isSavingSemester.set(false);
+          this.toast.success(this.translate.instant('toast.semesterSaved'));
+        },
+        error: () => this.isSavingSemester.set(false),
+      });
+  }
 }

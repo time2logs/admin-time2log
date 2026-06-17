@@ -72,4 +72,12 @@ export class OrganizationService {
   transferOwnership(organizationId: string, newOwnerId: string): Observable<void> {
     return this.http.patch<void>(`${this.baseUrl}/${organizationId}/owner`, { newOwnerId });
   }
+
+  getSemesterEndDate(organizationId: string): Observable<{ semesterEndDate: string | null }> {
+    return this.http.get<{ semesterEndDate: string | null }>(`${this.baseUrl}/${organizationId}/semester-end-date`);
+  }
+
+  saveSemesterEndDate(organizationId: string, semesterEndDate: string | null): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${organizationId}/semester-end-date`, { semesterEndDate });
+  }
 }
