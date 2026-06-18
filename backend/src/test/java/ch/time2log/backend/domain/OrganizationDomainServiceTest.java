@@ -432,47 +432,21 @@ class OrganizationDomainServiceTest {
             verifyNoInteractions(reminderMailService);
         }
 
-        // --- SMS channel ---
+        // --- SMS channel (disabled: falls back to EMAIL) ---
 
         @Test
-        void sendWeeklyReminders_smsChannel_sendsSmsReminder() {
+        void sendWeeklyReminders_smsChannelConfigured_fallsBackToEmailAndNeverSendsSms() {
             stubReminderWithOrg("SMS", 3);
             stubMember(userId1);
             stubInactiveUserNoRecords(userId1);
             stubProfile(userId1, "Max");
+            when(supabaseAdminClient.getUserEmail(userId1)).thenReturn("max@example.com");
 
             reminderService.sendWeeklyReminders();
 
-            verify(reminderSmsService).sendReminder("+41791234567", "Max", remOrgName, 3);
-            verifyNoInteractions(reminderMailService);
-        }
-
-        @Test
-        void sendWeeklyReminders_smsChannel_noPhoneNumber_skips() {
-            stubReminderWithOrg("SMS", 3);
-            stubMember(userId1);
-            stubInactiveUserNoRecords(userId1);
-            when(supabaseAdminClient.getListWithQuery(eq("app.profiles"), contains("id=eq." + userId1), eq(ProfileResponse.class)))
-                    .thenReturn(List.of(profileResponseNoPhone(userId1, "Max")));
-
-            reminderService.sendWeeklyReminders();
-
+            // SMS is disabled, so an org still configured for "SMS" must receive an EMAIL instead.
+            verify(reminderMailService).sendReminder("max@example.com", "Max", remOrgName, 3, remAppUrl);
             verifyNoInteractions(reminderSmsService);
-            verifyNoInteractions(reminderMailService);
-        }
-
-        @Test
-        void sendWeeklyReminders_smsChannel_noProfile_skips() {
-            stubReminderWithOrg("SMS", 3);
-            stubMember(userId1);
-            stubInactiveUserNoRecords(userId1);
-            when(supabaseAdminClient.getListWithQuery(eq("app.profiles"), contains("id=eq." + userId1), eq(ProfileResponse.class)))
-                    .thenReturn(List.of());
-
-            reminderService.sendWeeklyReminders();
-
-            verifyNoInteractions(reminderSmsService);
-            verifyNoInteractions(reminderMailService);
         }
 
         // --- Multiple orgs ---
@@ -670,10 +644,6 @@ class OrganizationDomainServiceTest {
 
         private ProfileResponse profileResponse(UUID id, String firstName) {
             return new ProfileResponse(id, firstName, "Lastname", "+41791234567", OffsetDateTime.now(), OffsetDateTime.now(), "normal", "user");
-        }
-
-        private ProfileResponse profileResponseNoPhone(UUID id, String firstName) {
-            return new ProfileResponse(id, firstName, "Lastname", null, OffsetDateTime.now(), OffsetDateTime.now(), "normal", "user");
         }
 
         private ActivityRecordResponse activityRecordResponse(UUID userId, UUID orgId, String entryDate) {

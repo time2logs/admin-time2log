@@ -58,7 +58,7 @@ export class OrganizationManaging implements OnInit {
   protected readonly showDeleteConfirm = signal(false);
   protected readonly isDeleting = signal(false);
 
-  protected readonly reminderChannel = signal<string>('SMS');
+  protected readonly reminderChannel = signal<string>('EMAIL');
   protected readonly reminderSendDay = signal<string>('FRIDAY');
   protected readonly reminderSendTime = signal<string>('08:00');
   protected readonly reminderIdleDays = signal<number>(3);
@@ -335,7 +335,8 @@ protected confirmDeleteTeam(team: Team, event: Event): void {
     this.organizationService.getReminder(this.organizationId).subscribe({
       next: (reminder) => {
         if (reminder) {
-          this.reminderChannel.set(reminder.channel);
+          // SMS reminders are disabled; normalize any legacy 'SMS' config to 'EMAIL'.
+          this.reminderChannel.set(reminder.channel === 'SMS' ? 'EMAIL' : reminder.channel);
           this.reminderSendDay.set(reminder.sendDay);
           this.reminderSendTime.set(reminder.sendTime);
           this.reminderIdleDays.set(reminder.idleDays);
