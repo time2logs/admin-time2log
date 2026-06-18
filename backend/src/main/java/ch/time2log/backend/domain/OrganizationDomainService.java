@@ -7,6 +7,7 @@ import ch.time2log.backend.domain.models.Organization;
 import ch.time2log.backend.domain.models.Profile;
 import ch.time2log.backend.infrastructure.mail.InviteMailService;
 import ch.time2log.backend.infrastructure.supabase.SupabaseAdminClient;
+import ch.time2log.backend.infrastructure.supabase.SupabaseApiException;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
 import ch.time2log.backend.infrastructure.supabase.responses.InviteResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.OrganizationMemberResponse;
@@ -180,9 +181,21 @@ public class OrganizationDomainService {
     }
 
     public void removeOrganizationMember(UUID organizationId, UUID userId) {
+        String memberFilter = "organization_id=eq." + organizationId + "&user_id=eq." + userId;
+
+        // Rolle vor dem Löschen ermitteln – danach ist die Zeile weg.
+        var memberships = supabaseService.getListWithQuery(
+                "admin.organization_members",
+                memberFilter,
+                OrganizationMemberResponse.class
+        );
+        String role = memberships.isEmpty() ? null : memberships.getFirst().user_role();
+
+        // Autorisierung (nur Org-Admin) und Creator-Schutz werden über die
+        // RLS-Policy auf diesem DELETE erzwungen – läuft unter dem JWT des Aufrufers.
         int deleted = supabaseService.deleteReturningCount(
                 "admin.organization_members",
-                "organization_id=eq." + organizationId + "&user_id=eq." + userId
+                memberFilter
         );
         if (deleted == 0) {
             throw new NoRowsAffectedException(
@@ -191,6 +204,30 @@ public class OrganizationDomainService {
                     "Forbidden operation",
                     "Organization member could not be removed."
             );
+        }
+
+        // Nur einfache Mitglieder (Rolle 'user') werden vollständig entfernt: das
+        // Löschen des Auth-Users kaskadiert über ON DELETE CASCADE auf Profil,
+        // Absenzen, Activity-Records, Locations sowie Team- und weitere
+        // Org-Mitgliedschaften. Admins/Moderatoren behalten Account und Daten.
+        if ("user".equalsIgnoreCase(role)) {
+            try {
+                supabaseAdminClient.deleteUser(userId).block();
+            } catch (SupabaseApiException ex) {
+                // 404 = Auth-User existiert nicht (mehr). Ohne auth.users-Zeile gibt es
+                // auch keine kaskadierten Daten – der Vorgang gilt damit als erledigt.
+                if (ex.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
+                    log.info("Auth user already absent while removing member; nothing to cascade-delete",);
+                } else {
+                    log.error("Removed org membership but failed to cascade-delete auth user",
+                            userId, ex.getMessage());
+                    throw new IllegalStateException("Failed to delete member data for user ", ex);
+                }
+            } catch (Exception ex) {
+                log.error("Removed org membership but failed to cascade-delete auth user",
+                        userId, ex.getMessage());
+                throw new IllegalStateException("Failed to delete member data for user ", ex);
+            }
         }
     }
 

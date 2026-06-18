@@ -218,6 +218,84 @@ class OrganizationDomainServiceTest {
                 .isInstanceOf(NoRowsAffectedException.class);
     }
 
+    // --- removeOrganizationMember ---
+
+    @Test
+    void removeOrganizationMember_whenRoleUser_removesMembershipAndCascadeDeletesAuthUser() {
+        when(supabaseService.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
+                .thenReturn(List.of(orgMember(memberId, orgId, "user")));
+        when(supabaseService.deleteReturningCount(eq("admin.organization_members"), anyString())).thenReturn(1);
+        when(supabaseAdminClient.deleteUser(memberId)).thenReturn(Mono.empty());
+
+        organizationDomainService.removeOrganizationMember(orgId, memberId);
+
+        verify(supabaseService).deleteReturningCount(eq("admin.organization_members"),
+                contains("user_id=eq." + memberId));
+        verify(supabaseAdminClient).deleteUser(memberId);
+    }
+
+    @Test
+    void removeOrganizationMember_whenRoleAdmin_onlyRemovesMembershipAndKeepsAuthUser() {
+        when(supabaseService.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
+                .thenReturn(List.of(orgMember(memberId, orgId, "admin")));
+        when(supabaseService.deleteReturningCount(eq("admin.organization_members"), anyString())).thenReturn(1);
+
+        organizationDomainService.removeOrganizationMember(orgId, memberId);
+
+        verify(supabaseAdminClient, never()).deleteUser(any());
+    }
+
+    @Test
+    void removeOrganizationMember_whenRoleModerator_onlyRemovesMembershipAndKeepsAuthUser() {
+        when(supabaseService.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
+                .thenReturn(List.of(orgMember(memberId, orgId, "moderator")));
+        when(supabaseService.deleteReturningCount(eq("admin.organization_members"), anyString())).thenReturn(1);
+
+        organizationDomainService.removeOrganizationMember(orgId, memberId);
+
+        verify(supabaseAdminClient, never()).deleteUser(any());
+    }
+
+    @Test
+    void removeOrganizationMember_whenNoneDeleted_throwsAndDoesNotDeleteAuthUser() {
+        when(supabaseService.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
+                .thenReturn(List.of());
+        when(supabaseService.deleteReturningCount(eq("admin.organization_members"), anyString())).thenReturn(0);
+
+        assertThatThrownBy(() -> organizationDomainService.removeOrganizationMember(orgId, memberId))
+                .isInstanceOf(NoRowsAffectedException.class);
+
+        verify(supabaseAdminClient, never()).deleteUser(any());
+    }
+
+    @Test
+    void removeOrganizationMember_whenAuthUserAlreadyGone404_doesNotThrow() {
+        when(supabaseService.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
+                .thenReturn(List.of(orgMember(memberId, orgId, "user")));
+        when(supabaseService.deleteReturningCount(eq("admin.organization_members"), anyString())).thenReturn(1);
+        when(supabaseAdminClient.deleteUser(memberId))
+                .thenReturn(Mono.error(new SupabaseApiException(404, "{\"error_code\":\"user_not_found\"}")));
+
+        organizationDomainService.removeOrganizationMember(orgId, memberId);
+
+        verify(supabaseAdminClient).deleteUser(memberId);
+    }
+
+    @Test
+    void removeOrganizationMember_whenAuthUserDeleteFails_throwsIllegalState() {
+        when(supabaseService.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
+                .thenReturn(List.of(orgMember(memberId, orgId, "user")));
+        when(supabaseService.deleteReturningCount(eq("admin.organization_members"), anyString())).thenReturn(1);
+        when(supabaseAdminClient.deleteUser(memberId)).thenReturn(Mono.error(new RuntimeException("boom")));
+
+        assertThatThrownBy(() -> organizationDomainService.removeOrganizationMember(orgId, memberId))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    private OrganizationMemberResponse orgMember(UUID userId, UUID organizationId, String role) {
+        return new OrganizationMemberResponse(userId, organizationId, role, OffsetDateTime.now());
+    }
+
     // --- createOrganization ---
 
     @Test
