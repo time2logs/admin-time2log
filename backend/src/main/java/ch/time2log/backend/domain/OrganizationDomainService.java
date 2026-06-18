@@ -7,6 +7,7 @@ import ch.time2log.backend.domain.models.Organization;
 import ch.time2log.backend.domain.models.Profile;
 import ch.time2log.backend.infrastructure.mail.InviteMailService;
 import ch.time2log.backend.infrastructure.supabase.SupabaseAdminClient;
+import ch.time2log.backend.infrastructure.supabase.SupabaseApiException;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
 import ch.time2log.backend.infrastructure.supabase.responses.InviteResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.OrganizationMemberResponse;
@@ -180,9 +181,18 @@ public class OrganizationDomainService {
     }
 
     public void removeOrganizationMember(UUID organizationId, UUID userId) {
+        String memberFilter = "organization_id=eq." + organizationId + "&user_id=eq." + userId;
+
+        var memberships = supabaseService.getListWithQuery(
+                "admin.organization_members",
+                memberFilter,
+                OrganizationMemberResponse.class
+        );
+        String role = memberships.isEmpty() ? null : memberships.getFirst().user_role();
+
         int deleted = supabaseService.deleteReturningCount(
                 "admin.organization_members",
-                "organization_id=eq." + organizationId + "&user_id=eq." + userId
+                memberFilter
         );
         if (deleted == 0) {
             throw new NoRowsAffectedException(
@@ -191,6 +201,24 @@ public class OrganizationDomainService {
                     "Forbidden operation",
                     "Organization member could not be removed."
             );
+        }
+
+        if ("user".equalsIgnoreCase(role)) {
+            try {
+                supabaseAdminClient.deleteUser(userId).block();
+            } catch (SupabaseApiException ex) {
+                if (ex.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
+                    log.info("Auth user {} already absent while removing member; nothing to cascade-delete", userId);
+                } else {
+                    log.error("Removed org membership for {} but failed to cascade-delete auth user: {}",
+                            userId, ex.getMessage());
+                    throw new IllegalStateException("Failed to delete member data for user " + userId, ex);
+                }
+            } catch (Exception ex) {
+                log.error("Removed org membership for {} but failed to cascade-delete auth user: {}",
+                        userId, ex.getMessage());
+                throw new IllegalStateException("Failed to delete member data for user " + userId, ex);
+            }
         }
     }
 
