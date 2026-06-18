@@ -217,16 +217,16 @@ public class OrganizationDomainService {
                 // 404 = Auth-User existiert nicht (mehr). Ohne auth.users-Zeile gibt es
                 // auch keine kaskadierten Daten – der Vorgang gilt damit als erledigt.
                 if (ex.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
-                    log.info("Auth user already absent while removing member; nothing to cascade-delete",);
+                    log.info("Auth user {} already absent while removing member; nothing to cascade-delete", userId);
                 } else {
-                    log.error("Removed org membership but failed to cascade-delete auth user",
+                    log.error("Removed org membership for {} but failed to cascade-delete auth user: {}",
                             userId, ex.getMessage());
-                    throw new IllegalStateException("Failed to delete member data for user ", ex);
+                    throw new IllegalStateException("Failed to delete member data for user " + userId, ex);
                 }
             } catch (Exception ex) {
-                log.error("Removed org membership but failed to cascade-delete auth user",
+                log.error("Removed org membership for {} but failed to cascade-delete auth user: {}",
                         userId, ex.getMessage());
-                throw new IllegalStateException("Failed to delete member data for user ", ex);
+                throw new IllegalStateException("Failed to delete member data for user " + userId, ex);
             }
         }
     }
