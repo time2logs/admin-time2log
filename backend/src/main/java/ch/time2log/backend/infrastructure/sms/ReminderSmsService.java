@@ -16,7 +16,7 @@ public class ReminderSmsService {
     private static final Logger log = LoggerFactory.getLogger(ReminderSmsService.class);
     private static final String SWISSCOM_SMS_URL = "https://api.swisscom.com/messaging/sms";
 
-    private final HttpClient httpClient;
+    private HttpClient httpClient;
 
     @Value("${app.sms.swisscom.client-id:}")
     private String clientId;
@@ -24,8 +24,11 @@ public class ReminderSmsService {
     @Value("${app.sms.swisscom.from:}")
     private String sender;
 
-    public ReminderSmsService() {
-        this.httpClient = HttpClient.newHttpClient();
+    private HttpClient httpClient() {
+        if (httpClient == null) {
+            httpClient = HttpClient.newHttpClient();
+        }
+        return httpClient;
     }
 
     public void sendReminder(String phoneNumber, String firstName, String organizationName, long daysInactive) {
@@ -58,7 +61,7 @@ public class ReminderSmsService {
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
 
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            var response = httpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
                 var messageId = response.headers().firstValue("SCS-MessageId").orElse("unknown");
