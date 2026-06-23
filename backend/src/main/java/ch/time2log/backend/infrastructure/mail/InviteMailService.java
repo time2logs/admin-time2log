@@ -41,10 +41,9 @@ public class InviteMailService {
         try {
             var html = loadTemplate(organizationName, role, actionLink, existingUser);
             emailSender.send(from, toEmail, "Einladung zu " + organizationName, html);
-            log.info("Invite email sent to {} (existingUser={})", toEmail, existingUser);
+            log.info("Invite email sent (existingUser={})", existingUser);
         } catch (Exception e) {
-            log.error("Failed to send invite email to {}: {}", toEmail, e.getMessage());
-            log.info("Invite link for {} (visit manually): {}", toEmail, actionLink);
+            log.error("Failed to send invite email: {}", e.getMessage());
         }
     }
 

@@ -53,7 +53,7 @@ public class SystemAdminDomainService {
         body.put("invited_by", invitedBy);
         body.put("current_semester", null);
 
-        log.info("Creating platform invite for {}", email);
+        log.info("Creating platform invite");
         var created = supabaseService.post("admin.invites", body, InviteResponse[].class);
         if (created == null || created.length == 0) {
             throw new EntityNotCreatedException("Supabase returned no created platform invite");
@@ -141,12 +141,12 @@ public class SystemAdminDomainService {
             UUID userId = supabaseAdminClient.getUserIdByEmail(email);
             if (userId == null) return;
             if (profileDomainService.existsByEmail(email)) {
-                log.info("Skipping auth user delete for revoked platform invite {}: profile exists", email);
+                log.info("Skipping auth user delete for revoked platform invite: profile exists");
                 return;
             }
             supabaseAdminClient.deleteUser(userId).block();
         } catch (Exception ex) {
-            log.warn("Failed to delete dangling auth user for revoked invite {}: {}", email, ex.getMessage());
+            log.warn("Failed to delete dangling auth user for revoked invite: {}", ex.getMessage());
         }
     }
 }

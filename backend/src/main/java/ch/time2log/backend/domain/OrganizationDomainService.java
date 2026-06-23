@@ -83,9 +83,10 @@ public class OrganizationDomainService {
         body.put("user_role", userRole);
         body.put("invited_by", invitedBy);
         body.put("current_semester", semester);
-        log.info("Creating invite with body={} (existingUser={})", body, isExistingUser);
+        log.info("Creating invite for org {} (role={}, existingUser={})", organizationId, userRole, isExistingUser);
         var created = supabaseService.post("admin.invites", body, InviteResponse[].class);
-        log.info("Supabase returned invite={}", created == null ? null : (created.length == 0 ? "[]" : created[0]));
+        log.info("Supabase returned invite id={}", created == null ? null
+                : (created.length == 0 ? "[]" : created[0].id()));
         if (created == null || created.length == 0) {
             throw new EntityNotCreatedException("Supabase returned no created invite");
         }
@@ -170,13 +171,13 @@ public class OrganizationDomainService {
             UUID userId = supabaseAdminClient.getUserIdByEmail(email);
             if (userId == null) return;
             if (profileDomainService.existsByEmail(email)) {
-                log.info("Skipping auth user delete for revoked invite {}: profile exists", email);
+                log.info("Skipping auth user delete for revoked invite: profile exists");
                 return;
             }
 
             supabaseAdminClient.deleteUser(userId).block();
         } catch (Exception ex) {
-            log.warn("Failed to delete dangling auth user for revoked invite {}: {}", email, ex.getMessage());
+            log.warn("Failed to delete dangling auth user for revoked invite: {}", ex.getMessage());
         }
     }
 

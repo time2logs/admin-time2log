@@ -72,7 +72,7 @@ public class OnboardingDomainService {
                 Void.class
         );
 
-        log.info("Completed admin onboarding for {}", email);
+        log.info("Completed admin onboarding for user {}", userId);
     }
 
     public void acceptInviteAsExistingUser(UUID token) {
