@@ -33,7 +33,7 @@ public class ReminderSmsService {
 
     public void sendReminder(String phoneNumber, String firstName, String organizationName, long daysInactive) {
         if (clientId == null || clientId.isBlank()) {
-            log.warn("Swisscom SMS client ID not configured, skipping SMS to {}", phoneNumber);
+            log.warn("Swisscom SMS client ID not configured, skipping SMS");
             return;
         }
 
@@ -65,12 +65,12 @@ public class ReminderSmsService {
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
                 var messageId = response.headers().firstValue("SCS-MessageId").orElse("unknown");
-                log.info("SMS reminder sent to {} (messageId={})", phoneNumber, messageId);
+                log.info("SMS reminder sent (messageId={})", messageId);
             } else {
                 log.error("Swisscom SMS failed ({}): {}", response.statusCode(), response.body());
             }
         } catch (IOException | InterruptedException e) {
-            log.error("Failed to send SMS reminder to {}: {}", phoneNumber, e.getMessage());
+            log.error("Failed to send SMS reminder: {}", e.getMessage());
             if (e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
             }

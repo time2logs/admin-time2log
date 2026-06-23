@@ -87,9 +87,7 @@ public class SecurityConfig {
     }
 
     private UsernamePasswordAuthenticationToken convertJwtToAuthentication(Jwt jwt) {
-        log.debug("Converting JWT to authentication. Subject: {}, Email: {}",
-                jwt.getSubject(), jwt.getClaimAsString("email"));
-        log.debug("All JWT claims: {}", jwt.getClaims());
+        log.debug("Converting JWT to authentication. Subject: {}", jwt.getSubject());
 
         UUID userId = UUID.fromString(jwt.getSubject());
         String email = jwt.getClaimAsString("email");

@@ -121,7 +121,7 @@ public class ReminderService {
                         + "&entry_date=gte." + cutoffDate + "&limit=1",
                 ActivityRecordResponse.class
         );
-        log.info("Checking reminder for user {} in org {}", userId, orgName);
+        log.info("Checking reminder for user {} in org {}", userId, orgId);
         if (!recentRecords.isEmpty()) return;
 
         var lastRecords = adminClient.getListWithQuery(
@@ -149,7 +149,7 @@ public class ReminderService {
         // SMS reminders are disabled. The ReminderSmsService is kept in the codebase
         // but is no longer invoked; any existing "SMS" channel config falls back to EMAIL.
         if ("SMS".equals(channel)) {
-            log.warn("SMS reminders are disabled, falling back to EMAIL for user {} in org {}", userId, orgName);
+            log.warn("SMS reminders are disabled, falling back to EMAIL for user {} in org {}", userId, orgId);
         }
 
         var email = adminClient.getUserEmail(userId);
@@ -158,6 +158,6 @@ public class ReminderService {
             return;
         }
         reminderMailService.sendReminder(email, firstName, orgName, daysInactive, appUrl);
-        log.info("Sent EMAIL reminder to {} ({}) - {} days inactive in org {}", email, firstName, daysInactive, orgName);
+        log.info("Sent EMAIL reminder to user {} - {} days inactive in org {}", userId, daysInactive, orgId);
     }
 }

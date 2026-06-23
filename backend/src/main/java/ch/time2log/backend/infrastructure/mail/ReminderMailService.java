@@ -28,9 +28,9 @@ public class ReminderMailService {
         try {
             var html = loadTemplate(firstName, organizationName, daysInactive, appLink);
             emailSender.send(from, toEmail, "Erinnerung: Erfasse deine Aktivitäten in " + organizationName, html);
-            log.info("Reminder email sent to {}", toEmail);
+            log.info("Reminder email sent");
         } catch (Exception e) {
-            log.error("Failed to send reminder email to {}: {}", toEmail, e.getMessage());
+            log.error("Failed to send reminder email: {}", e.getMessage());
         }
     }
 

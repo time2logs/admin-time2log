@@ -33,7 +33,7 @@ public class SemesterRolloverService {
             try {
                 adminClient.callRpc("admin", "rollover_semester",
                         Map.of("p_org_id", org.id()), Void.class);
-                log.info("Semester rollover done for org {} ({})", org.id(), org.name());
+                log.info("Semester rollover done for org {}", org.id());
             } catch (Exception e) {
                 log.error("Rollover failed for org {}: {}", org.id(), e.getMessage());
             }

@@ -43,6 +43,6 @@ public class ResendEmailSender implements EmailSender {
             throw new EmailSendException("Resend API returned: " + status);
         }
 
-        log.debug("Resend email sent to {}", to);
+        log.debug("Resend email sent");
     }
 }
