@@ -339,6 +339,7 @@
     "teamDeleted": "Team deleted.",
     "reminderSaved": "Reminder settings saved.",
     "semesterSaved": "Semester end date saved.",
+    "targetHoursSaved": "Target hours saved.",
     "ownershipTransferred": "Organization successfully transferred",
     "inviteMemberNeedsSemester": "Members must have a semester (1-8) selected.",
     "inviteAdminNoSemester": "Admins must have \"-\" selected as semester."
