@@ -15,6 +15,7 @@ import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -151,13 +152,12 @@ public class ReportsDomainService {
                 CurriculumNodeResponse.class
         );
 
-        var labelMap = nodes.stream()
-                .collect(Collectors.toMap(CurriculumNodeResponse::id, CurriculumNodeResponse::label));
+        var displayLabels = buildActivityLabels(nodes);
 
         return hoursByActivity.entrySet().stream()
                 .map(e -> new ActivitySummary(
                         e.getKey(),
-                        labelMap.getOrDefault(e.getKey(), "Unbekannt"),
+                        displayLabels.getOrDefault(e.getKey(), "Unbekannt"),
                         e.getValue()
                 ))
                 .sorted(Comparator.comparingInt(ActivitySummary::totalHours).reversed())
@@ -259,16 +259,39 @@ public class ReportsDomainService {
                 CurriculumNodeResponse.class
         );
 
-        var labelMap = nodes.stream()
-                .collect(Collectors.toMap(CurriculumNodeResponse::id, CurriculumNodeResponse::label));
+        var displayLabels = buildActivityLabels(nodes);
 
         return ratingsByActivity.entrySet().stream()
                 .map(e -> new RatingSummary(
                         e.getKey(),
-                        labelMap.getOrDefault(e.getKey(), "Unbekannt"),
+                        displayLabels.getOrDefault(e.getKey(), "Unbekannt"),
                         e.getValue().stream().mapToInt(Integer::intValue).average().orElse(0)
                 ))
                 .sorted(Comparator.comparingDouble(RatingSummary::averageRating).reversed())
                 .toList();
+    }
+
+    private Map<UUID, String> buildActivityLabels(List<CurriculumNodeResponse> nodes) {
+        var parentIds = nodes.stream()
+                .map(CurriculumNodeResponse::parent_id)
+                .filter(Objects::nonNull)
+                .map(UUID::toString)
+                .distinct()
+                .collect(Collectors.joining(","));
+
+        Map<UUID, String> parentLabelMap = parentIds.isEmpty() ? Map.of() :
+                supabaseService.getListWithQuery(
+                        "admin.curriculum_nodes",
+                        "id=in.(" + parentIds + ")",
+                        CurriculumNodeResponse.class
+                ).stream().collect(Collectors.toMap(CurriculumNodeResponse::id, CurriculumNodeResponse::label));
+
+        return nodes.stream().collect(Collectors.toMap(
+                CurriculumNodeResponse::id,
+                n -> {
+                    String parentLabel = n.parent_id() != null ? parentLabelMap.get(n.parent_id()) : null;
+                    return parentLabel != null ? parentLabel + " / " + n.label() : n.label();
+                }
+        ));
     }
 }

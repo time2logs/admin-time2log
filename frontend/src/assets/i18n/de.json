@@ -342,6 +342,7 @@
     "teamDeleted": "Team gelöscht.",
     "reminderSaved": "Erinnerungseinstellungen gespeichert.",
     "semesterSaved": "Semester-Enddatum gespeichert.",
+    "targetHoursSaved": "Sollstunden gespeichert.",
     "ownershipTransferred": "Organisation erfolgreich übertragen",
     "inviteMemberNeedsSemester": "Für Mitglieder muss ein Semester (1-8) ausgewählt werden.",
     "inviteAdminNoSemester": "Für Admins muss als Semester \"-\" ausgewählt werden."
