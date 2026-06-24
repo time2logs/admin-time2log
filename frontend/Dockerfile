@@ -1,4 +1,4 @@
-FROM node:25.9.0-alpine AS build
+FROM node:26.1.0-alpine AS build
 
 ARG BUILD_CONFIGURATION=development
 ARG API_BASE_URL
