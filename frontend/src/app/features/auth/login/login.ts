@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from '@services/auth.service';
 import { firstValueFrom } from 'rxjs';
@@ -17,6 +17,7 @@ export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly isLoading = signal(false);
   protected readonly errorType = signal<ErrorType>(null);
@@ -41,7 +42,7 @@ export class LoginComponent {
         return;
       }
 
-      await this.router.navigate(['/dashboard']);
+      await this.router.navigateByUrl(this.resolveRedirect());
     } catch {
       this.errorType.set('generic');
     } finally {
@@ -49,15 +50,17 @@ export class LoginComponent {
     }
   }
 
-  async signInWithGoogle(): Promise<void> {
-    this.isLoading.set(true);
-    this.errorType.set(null);
-    try {
-      await this.authService.signInWithGoogle();
-    } catch {
-      this.errorType.set('generic');
-      this.isLoading.set(false);
+  /**
+   * Honors a ?redirectTo=... query param so the accept-invite flow can bounce
+   * the user through login and back. Restricted to internal absolute paths so
+   * a crafted link can't redirect off-site after we authenticated the user.
+   */
+  private resolveRedirect(): string {
+    const raw = this.route.snapshot.queryParamMap.get('redirectTo');
+    if (raw && raw.startsWith('/') && !raw.startsWith('//')) {
+      return raw;
     }
+    return '/dashboard';
   }
 
   private mapError(message: string): ErrorType {

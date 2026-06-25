@@ -9,7 +9,7 @@
     <span class="text-xs text-gray-500">Admin</span>
   </a>
 
-    @if (authService.isAuthenticated()) {
+    @if (showNav()) {
       <div class="relative">
         @if (isSettingsMenuOpen()) {
           <div class="fixed inset-0 z-40" (click)="toggleSettingsMenu()" tabindex="0" role="button" aria-label="Close menu"></div>
@@ -83,7 +83,7 @@
 <nav
   class="flex flex-row md:flex-col flex-1 justify-around md:justify-start items-center md:items-stretch md:px-4 md:space-y-2"
 >
-  @if (authService.isAuthenticated()) {
+  @if (showNav()) {
 
     <!-- ==================== DASHBOARD ==================== -->
     <a
@@ -219,6 +219,45 @@
       </span>
     </a>
 
+    <!-- ==================== SYSTEM-ADMIN ==================== -->
+    @if (isSystemAdmin()) {
+      <a
+        routerLink="/system-admin"
+        #systemAdminLink="routerLinkActive"
+        routerLinkActive="md:bg-[#2d3a4f] md:!text-blue-400 shadow-sm"
+        [class.dark:md:bg-[#1f252e]]="systemAdminLink.isActive"
+        class="flex items-center justify-center md:justify-start py-1 md:py-3 md:px-4 md:rounded-lg font-medium transition-all w-full group text-[#8E9AAF] hover:md:bg-[#2d3a4f]/50 hover:md:text-gray-200"
+      >
+        <!-- Mobile Icon + Text -->
+        <span class="md:hidden" [class.svg-active]="systemAdminLink.isActive">
+          <svg width="90" height="60" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+            <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M60 13 L72 18 V27 C72 33 67 37 60 40 C53 37 48 33 48 27 V18 Z"/>
+              <path d="M55 26 L59 30 L66 22"/>
+            </g>
+            <text x="60" y="58" font-family="Arial, sans-serif" font-size="14" fill="currentColor" text-anchor="middle">
+              {{ 'nav.systemAdmin' | translate }}
+            </text>
+          </svg>
+        </span>
+
+        <!-- Desktop Icon + Text -->
+        <span class="hidden md:flex items-center" [class.svg-active]="systemAdminLink.isActive">
+          <svg class="w-[18px] h-[18px] mr-3 shrink-0"
+               viewBox="0 0 24 24"
+               fill="none"
+               stroke="currentColor"
+               stroke-width="1.75"
+               stroke-linecap="round"
+               stroke-linejoin="round">
+            <path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/>
+            <path d="M9 12 L11 14 L15 10"/>
+          </svg>
+          <span class="text-sm leading-tight">{{ 'nav.systemAdmin' | translate }}</span>
+        </span>
+      </a>
+    }
+
   }
 </nav>
 
@@ -281,7 +320,7 @@
       }
     </div>
 
-    @if (authService.isAuthenticated()) {
+    @if (showNav()) {
       <a
         routerLink="/settings"
         #settingsLink="routerLinkActive"

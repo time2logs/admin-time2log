@@ -2,8 +2,11 @@ package ch.time2log.backend.domain;
 
 import ch.time2log.backend.domain.models.ActivitySummary;
 import ch.time2log.backend.domain.models.DailyMemberReport;
+import ch.time2log.backend.domain.models.MemberAbsence;
 import ch.time2log.backend.domain.models.MemberActivityRecord;
+import ch.time2log.backend.domain.models.RatingSummary;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
+import ch.time2log.backend.infrastructure.supabase.responses.AbsenceResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.ActivityRecordResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.CurriculumNodeResponse;
 import org.springframework.stereotype.Service;
@@ -12,6 +15,7 @@ import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -64,7 +68,7 @@ public class ReportsDomainService {
         }).toList();
     }
 
-    public List<MemberActivityRecord> getMemberRecords(UUID organizationId, UUID userId, String date, String from, String to) {
+    public List<MemberActivityRecord> getMemberRecords(UUID organizationId, UUID userId, String date, String from, String to, String location) {
         String query = "organization_id=eq." + organizationId + "&user_id=eq." + userId;
         if (date != null && !date.isBlank()) {
             query += "&entry_date=eq." + date;
@@ -75,6 +79,12 @@ public class ReportsDomainService {
         query += "&order=entry_date.asc";
 
         var records = supabaseService.getListWithQuery("app.activity_records", query, ActivityRecordResponse.class);
+        String normalizedLocation = location == null ? "" : location.trim();
+        if (!normalizedLocation.isBlank()) {
+            records = records.stream()
+                    .filter(r -> r.location() != null && r.location().trim().equalsIgnoreCase(normalizedLocation))
+                    .toList();
+        }
         if (records.isEmpty()) return List.of();
 
         var activityIds = records.stream()
@@ -102,7 +112,8 @@ public class ReportsDomainService {
                 r.hours(),
                 r.notes(),
                 r.rating(),
-                r.team_id()
+                r.team_id(),
+                r.location()
         )).toList();
     }
     public List<ActivitySummary> getActivitySummary(UUID organizationId, UUID userId, String from, String to, List<String> semesters) {
@@ -141,13 +152,12 @@ public class ReportsDomainService {
                 CurriculumNodeResponse.class
         );
 
-        var labelMap = nodes.stream()
-                .collect(Collectors.toMap(CurriculumNodeResponse::id, CurriculumNodeResponse::label));
+        var displayLabels = buildActivityLabels(nodes);
 
         return hoursByActivity.entrySet().stream()
                 .map(e -> new ActivitySummary(
                         e.getKey(),
-                        labelMap.getOrDefault(e.getKey(), "Unbekannt"),
+                        displayLabels.getOrDefault(e.getKey(), "Unbekannt"),
                         e.getValue()
                 ))
                 .sorted(Comparator.comparingInt(ActivitySummary::totalHours).reversed())
@@ -174,9 +184,12 @@ public class ReportsDomainService {
 
     public List<String> getAvailableSemesters(UUID organizationId, UUID userId) {
         if (userId == null) return List.of();
+        // Kein &select=current_semester: die Teil-Projektion ließe das primitive
+        // Feld `hours` in ActivityRecordResponse fehlen, was die Deserialisierung
+        // (Record mit primitivem int) zum Scheitern bringt. Volle Zeilen laden.
         var records = supabaseService.getListWithQuery(
                 "app.activity_records",
-                "organization_id=eq." + organizationId + "&user_id=eq." + userId + "&select=current_semester",
+                "organization_id=eq." + organizationId + "&user_id=eq." + userId,
                 ActivityRecordResponse.class
         );
         return records.stream()
@@ -185,6 +198,19 @@ public class ReportsDomainService {
                 .distinct()
                 .sorted()
                 .toList();
+    }
+
+    public List<MemberAbsence> getMemberAbsences(UUID organizationId, UUID userId, List<String> semesters) {
+        if (userId == null) return List.of();
+
+        String query = "organization_id=eq." + organizationId + "&user_id=eq." + userId;
+        if (semesters != null && !semesters.isEmpty()) {
+            query += "&current_semester=in.(" + semesters.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")) + ")";
+        }
+        query += "&order=start_date.desc";
+
+        var responses = supabaseService.getListWithQuery("app.absences", query, AbsenceResponse.class);
+        return MemberAbsence.ofList(responses);
     }
 
     public OffsetDateTime getLastEntryDate(UUID organizationId, UUID userId) {
@@ -197,5 +223,75 @@ public class ReportsDomainService {
         if (records.isEmpty()) return null;
 
         return records.getFirst().created_at();
+    }
+
+    public List<RatingSummary> getRatingSummary(UUID organizationId, UUID userId, String from, String to, List<String> semesters) {
+        if (userId == null) return List.of();
+
+        String query = "organization_id=eq." + organizationId + "&user_id=eq." + userId;
+        if (semesters != null && !semesters.isEmpty()) {
+            query += "&current_semester=in.(" + semesters.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")) + ")";
+        } else {
+            if (from != null && !from.isBlank()) query += "&entry_date=gte." + from;
+            if (to != null && !to.isBlank()) query += "&entry_date=lte." + to;
+        }
+
+        var records = supabaseService.getListWithQuery("app.activity_records", query, ActivityRecordResponse.class);
+        if (records.isEmpty()) return List.of();
+
+        // Gruppiere ratings pro Aktivität und berechne Durchschnitt
+        Map<UUID, List<Integer>> ratingsByActivity = records.stream()
+                .filter(r -> r.curriculum_activity_id() != null && r.rating() != null)
+                .collect(Collectors.groupingBy(
+                        ActivityRecordResponse::curriculum_activity_id,
+                        Collectors.mapping(ActivityRecordResponse::rating, Collectors.toList())
+                ));
+
+        if (ratingsByActivity.isEmpty()) return List.of();
+
+        var activityIds = ratingsByActivity.keySet().stream()
+                .map(UUID::toString)
+                .collect(Collectors.joining(","));
+
+        var nodes = supabaseService.getListWithQuery(
+                "admin.curriculum_nodes",
+                "id=in.(" + activityIds + ")",
+                CurriculumNodeResponse.class
+        );
+
+        var displayLabels = buildActivityLabels(nodes);
+
+        return ratingsByActivity.entrySet().stream()
+                .map(e -> new RatingSummary(
+                        e.getKey(),
+                        displayLabels.getOrDefault(e.getKey(), "Unbekannt"),
+                        e.getValue().stream().mapToInt(Integer::intValue).average().orElse(0)
+                ))
+                .sorted(Comparator.comparingDouble(RatingSummary::averageRating).reversed())
+                .toList();
+    }
+
+    private Map<UUID, String> buildActivityLabels(List<CurriculumNodeResponse> nodes) {
+        var parentIds = nodes.stream()
+                .map(CurriculumNodeResponse::parent_id)
+                .filter(Objects::nonNull)
+                .map(UUID::toString)
+                .distinct()
+                .collect(Collectors.joining(","));
+
+        Map<UUID, String> parentLabelMap = parentIds.isEmpty() ? Map.of() :
+                supabaseService.getListWithQuery(
+                        "admin.curriculum_nodes",
+                        "id=in.(" + parentIds + ")",
+                        CurriculumNodeResponse.class
+                ).stream().collect(Collectors.toMap(CurriculumNodeResponse::id, CurriculumNodeResponse::label));
+
+        return nodes.stream().collect(Collectors.toMap(
+                CurriculumNodeResponse::id,
+                n -> {
+                    String parentLabel = n.parent_id() != null ? parentLabelMap.get(n.parent_id()) : null;
+                    return parentLabel != null ? parentLabel + " / " + n.label() : n.label();
+                }
+        ));
     }
 }

@@ -1,4 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from '@services/auth.service';
@@ -42,6 +43,13 @@ export class HeaderComponent {
   protected get currentLang() {
     return this.languages.find((l) => l.code === this.languageService.currentLang) ?? this.languages[0];
   }
+
+  protected showNav(): boolean {
+    return this.authService.isAuthenticated() && !this.router.url.startsWith('/auth');
+  }
+
+  private readonly currentProfile = toSignal(this.authService.currentProfile$, { initialValue: null });
+  protected readonly isSystemAdmin = computed(() => this.currentProfile()?.role === 'system_admin');
 
   toggleLangMenu(): void {
     this.isLangMenuOpen.update((v) => !v);

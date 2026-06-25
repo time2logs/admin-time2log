@@ -7,9 +7,11 @@ import { OrganizationService } from '@services/organization.service';
 import { Profile } from '@app/core/models/profile.models';
 import { Organization } from '@app/core/models/organizations.models';
 import { ReportService } from '@services/report.service';
-import { NgxChartEntry, LocationSummary } from '@app/core/models/report.models';
+import { NgxChartEntry, LocationSummary, RatingSummary } from '@app/core/models/report.models';
 import { forkJoin } from 'rxjs';
+import { PaletteService } from '@services/palette.service';
 import { HostListener } from '@angular/core';
+import { ChartTypeService } from '@services/chart-type.service';
 
 
 type DateRange = '30d' | '90d' | '1y' | 'all';
@@ -46,6 +48,7 @@ export class DashboardComponent implements OnInit {
   protected readonly selectedSemesters = signal<string[]>([]);
   protected readonly activityChartData = signal<NgxChartEntry[]>([]);
   protected readonly locationChartData = signal<NgxChartEntry[]>([]);
+  protected readonly ratingChartData = signal<NgxChartEntry[]>([]);
   protected readonly chartLoading = signal(false);
 
   protected readonly orgMembers = computed(() => {
@@ -56,21 +59,7 @@ export class DashboardComponent implements OnInit {
 
   protected readonly legendPosition = LegendPosition.Below;
 
-  protected readonly colorScheme: Color = {
-    name: 'time2log',
-    selectable: true,
-    group: ScaleType.Ordinal,
-    domain: [
-      '#29b6d6',
-      '#1a8fa8',
-      '#5ecde0',
-      '#4a7fc1',
-      '#2ea89e',
-      '#6090d8',
-      '#3db8ad',
-      '#5580c8',
-    ],
-  };
+
 
   protected readonly totalMemberCount = computed(() => this.membersWithActivity().length);
 
@@ -96,8 +85,8 @@ export class DashboardComponent implements OnInit {
       if (!orgId || !userId) return;
       this.loadActivityChart(orgId, userId, range, mode, semesters);
       this.loadLocationChart(orgId, userId, range, mode, semesters);
+      this.loadRatingChart(orgId, userId, range, mode, semesters);
     });
-
   }
 
   ngOnInit(): void {
@@ -177,6 +166,21 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  private loadRatingChart(orgId: string, userId: string, range: DateRange, mode: FilterMode, semesters: string[]): void {
+    const useSemesters = mode === 'semester' && semesters.length > 0;
+    const { from, to } = useSemesters ? {} as { from?: string; to?: string } : this.getDateParams(range);
+    this.reportService.getRatingSummary(orgId, userId, from, to, useSemesters ? semesters : undefined).subscribe({
+      next: (data) => {
+        this.ratingChartData.set(
+          data.map((r: RatingSummary) => ({
+            name: r.activityName,
+            value: Math.round(r.averageRating * 10) / 10,
+          }))
+        );
+      },
+    });
+  }
+
   chartView = signal<[number, number]>(this.getChartSize());
   trimLabels = signal(window.innerWidth < 640);
 
@@ -225,6 +229,16 @@ export class DashboardComponent implements OnInit {
       },
     });
   }
+  private readonly paletteService = inject(PaletteService);
+
+  protected readonly chartTypeService = inject(ChartTypeService);
+
+  protected readonly colorScheme = computed<Color>(() => ({
+    name: 'time2log',
+    selectable: true,
+    group: ScaleType.Ordinal,
+    domain: this.paletteService.domain(),
+  }));
 
   private loadAllMembersWithActivity(orgs: Organization[]): void {
     if (orgs.length === 0) {
@@ -279,4 +293,5 @@ export class DashboardComponent implements OnInit {
       },
     });
   }
+
 }

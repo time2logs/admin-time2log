@@ -23,6 +23,7 @@ function makeRecord(overrides: Partial<MemberActivityRecord> = {}): MemberActivi
     notes: '',
     rating: null,
     teamId: null,
+    location: null,
     ...overrides,
   };
 }
@@ -30,6 +31,7 @@ function makeRecord(overrides: Partial<MemberActivityRecord> = {}): MemberActivi
 describe('MemberDetail computed signals', () => {
   let fixture: ComponentFixture<MemberDetail>;
   let component: MemberDetail;
+  let reportServiceSpy: jasmine.SpyObj<ReportService>;
 
   beforeEach(async () => {
     const orgServiceSpy = jasmine.createSpyObj('OrganizationService', ['getOrganizationMembers', 'getProfessions', 'getOnlyOrganizationMembers']);
@@ -37,14 +39,18 @@ describe('MemberDetail computed signals', () => {
     orgServiceSpy.getProfessions.and.returnValue(of([]));
     orgServiceSpy.getOnlyOrganizationMembers.and.returnValue(of([]));
 
-    const reportServiceSpy = jasmine.createSpyObj('ReportService', [
+    reportServiceSpy = jasmine.createSpyObj('ReportService', [
       'getMemberRecordsByDate',
       'getMemberRecordsByRange',
       'getCurriculum',
+      'getLocationSummary',
+      'getMemberAbsences',
     ]);
     reportServiceSpy.getMemberRecordsByDate.and.returnValue(of([]));
     reportServiceSpy.getMemberRecordsByRange.and.returnValue(of([]));
-    reportServiceSpy.getCurriculum.and.returnValue(of(null));
+    reportServiceSpy.getCurriculum.and.returnValue(of({ nodes: [], competencies: [] }));
+    reportServiceSpy.getLocationSummary.and.returnValue(of([]));
+    reportServiceSpy.getMemberAbsences.and.returnValue(of([]));
 
     const teamServiceSpy = jasmine.createSpyObj('TeamService', ['getTeams']);
     teamServiceSpy.getTeams.and.returnValue(of([]));
@@ -208,6 +214,56 @@ describe('MemberDetail computed signals', () => {
       expect(groups).toHaveSize(1);
       expect(groups[0].teamName).toBe('Ohne Team');
       expect(groups[0].competencyHours.get('comp-A')).toBe(4);
+    });
+  });
+
+  describe('location filter', () => {
+    it('loads all progress records when no location is selected', () => {
+      c().organizationId = 'org-1';
+      c().userId = 'user-1';
+
+      c().loadAllRecords();
+
+      expect(reportServiceSpy.getMemberRecordsByRange).toHaveBeenCalledWith(
+        'org-1',
+        'user-1',
+        '2020-01-01',
+        '2099-12-31',
+        ''
+      );
+    });
+
+    it('reloads progress records with the selected location', () => {
+      c().organizationId = 'org-1';
+      c().userId = 'user-1';
+
+      c().onLocationSelected('Ward A');
+
+      expect(c().selectedLocation()).toBe('Ward A');
+      expect(reportServiceSpy.getMemberRecordsByRange).toHaveBeenCalledWith(
+        'org-1',
+        'user-1',
+        '2020-01-01',
+        '2099-12-31',
+        'Ward A'
+      );
+    });
+
+    it('merges location options by trimmed case-insensitive value', () => {
+      const options = c().normalizeLocationOptions([
+        { location: ' Ward A ', totalHours: 2 },
+        { location: 'ward a', totalHours: 3 },
+        { location: 'Station B', totalHours: 1 },
+        { location: '', totalHours: 4 },
+      ]);
+
+      expect(options).toEqual(['Station B', 'Ward A']);
+    });
+
+    it('reports no location options when none are available', () => {
+      c().availableLocations.set([]);
+
+      expect(c().hasLocationOptions()).toBeFalse();
     });
   });
 });

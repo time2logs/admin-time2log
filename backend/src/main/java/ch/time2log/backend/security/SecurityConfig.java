@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(
                         org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/actuator/**", "/api/onboarding/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
@@ -87,9 +87,7 @@ public class SecurityConfig {
     }
 
     private UsernamePasswordAuthenticationToken convertJwtToAuthentication(Jwt jwt) {
-        log.debug("Converting JWT to authentication. Subject: {}, Email: {}",
-                jwt.getSubject(), jwt.getClaimAsString("email"));
-        log.debug("All JWT claims: {}", jwt.getClaims());
+        log.debug("Converting JWT to authentication. Subject: {}", jwt.getSubject());
 
         UUID userId = UUID.fromString(jwt.getSubject());
         String email = jwt.getClaimAsString("email");

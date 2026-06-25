@@ -6,6 +6,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from '@services/auth.service';
 import { LanguageService } from '@services/language.service';
 import { ThemeService } from '@services/theme.service';
+import { PaletteService, type Palette } from '@services/palette.service';
+import { ChartTypeService, type ChartTypeServiceEnum } from '@services/chart-type.service';
 
 @Component({
   selector: 'app-settings',
@@ -64,4 +66,18 @@ export class Settings {
       error: () => this.isDeleting.set(false),
     });
   }
+  protected readonly paletteService = inject(PaletteService);
+  protected readonly palettes: { value: Palette; label: string }[] = [
+    { value: 'default',      label: 'settings.colorScheme.default' },
+    { value: 'deuteranopia', label: 'settings.colorScheme.deuteranopia' },
+    { value: 'protanopia',   label: 'settings.colorScheme.protanopia' },
+    { value: 'monochrome',   label: 'settings.colorScheme.monochrome' },
+  ];
+
+  protected readonly chartTypeService = inject(ChartTypeService);
+  protected readonly chartTypes: { value: ChartTypeServiceEnum; label: string }[] = [
+    { value: 'bar',    label: 'settings.chartChange.bar' },
+    { value: 'column', label: 'settings.chartChange.column' },
+    { value: 'pie',    label: 'settings.chartChange.pie' },
+  ];
 }

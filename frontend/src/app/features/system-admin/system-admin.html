@@ -1,0 +1,128 @@
+<div class="max-w-4xl mx-auto">
+  <h1 class="text-3xl font-semibold mt-10 mb-6 dark:text-[hsl(210,15%,90%)]">{{ 'systemAdmin.title' | translate }}</h1>
+  @if (true) {
+    <section>
+      <h2 class="text-xl font-medium mb-4 dark:text-[hsl(210,15%,90%)]">{{ 'systemAdmin.invite' | translate }}</h2>
+
+      <div class="flex flex-col gap-3 sm:flex-row">
+        <input
+          type="email"
+          autocomplete="email"
+          placeholder="admin@example.com"
+          class="flex-1 px-4 py-2 border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[hsl(215,25%,13%)] text-gray-900 dark:text-[hsl(210,15%,90%)] placeholder-gray-400 dark:placeholder-[hsl(210,15%,55%)]"
+          [ngModel]="inviteEmail()"
+          (ngModelChange)="inviteEmail.set($event)"
+          (keyup.enter)="invite()"
+        />
+        <button
+          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors disabled:opacity-50"
+          [disabled]="isInviting() || !isEmailValid()"
+          (click)="invite()"
+        >
+          {{ 'organizationDetail.inviteButton' | translate }}
+        </button>
+      </div>
+
+      @if (inviteError()) {
+        <p class="mt-2 text-red-600 dark:text-red-400 text-sm">{{ 'systemAdmin.inviteError' | translate }}</p>
+      }
+      @if (inviteSuccess()) {
+        <p class="mt-2 text-green-600 dark:text-green-400 text-sm">{{ 'systemAdmin.inviteSuccess' | translate }}</p>
+      }
+    </section>
+
+    <section class="mb-8 mt-8">
+      <h2 class="text-xl font-medium mb-4 dark:text-[hsl(210,15%,90%)]">{{ 'systemAdmin.admins' | translate }}</h2>
+      @if (isLoadingAdmins()) {
+        <p class="text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ 'common.loading' | translate }}</p>
+      } @else if (admins().length === 0) {
+        <p class="text-gray-500 dark:text-[hsl(210,15%,55%)] text-sm">{{ 'systemAdmin.noAdmins' | translate }}</p>
+      } @else {
+        <ul class="space-y-2">
+          @for (member of admins(); track member.id) {
+            <li class="flex items-center justify-between px-4 py-3 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm hover:border-gray-300 dark:hover:border-[hsl(215,20%,25%)] hover:shadow-md transition-all">
+              <div class="flex items-center gap-3">
+                <div class="h-9 w-9 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm font-medium">
+                  {{ member.firstName.charAt(0) }}{{ member.lastName.charAt(0) }}
+                </div>
+                <span class="text-gray-800 dark:text-[hsl(210,15%,90%)] font-medium">{{ member.firstName }} {{ member.lastName }}</span>
+              </div>
+              <span
+                class="text-xs px-2 py-0.5 rounded-full"
+                [class.bg-purple-100]="member.role === 'system_admin'"
+                [class.text-purple-700]="member.role === 'system_admin'"
+                [class.dark:bg-purple-900-40]="member.role === 'system_admin'"
+                [class.dark:text-purple-300]="member.role === 'system_admin'"
+                [class.bg-blue-100]="member.role === 'admin'"
+                [class.text-blue-700]="member.role === 'admin'"
+                [class.dark:bg-blue-900-40]="member.role === 'admin'"
+                [class.dark:text-blue-300]="member.role === 'admin'"
+              >
+                {{ member.role }}
+              </span>
+            </li>
+          }
+        </ul>
+      }
+
+      <section class="mb-8 mt-8">
+        <h2 class="text-xl font-medium mb-4 dark:text-[hsl(210,15%,90%)]">{{ 'systemAdmin.moderators' | translate }}</h2>
+        @if (isLoadingModerators()) {
+          <p class="text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ 'common.loading' | translate }}</p>
+        } @else if (moderators().length === 0) {
+          <p class="text-gray-500 dark:text-[hsl(210,15%,55%)] text-sm">{{ 'systemAdmin.noModerators' | translate }}</p>
+        } @else {
+          <ul class="space-y-2">
+            @for (member of moderators(); track member.id) {
+              <li class="flex items-center justify-between px-4 py-3 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm hover:border-gray-300 dark:hover:border-[hsl(215,20%,25%)] hover:shadow-md transition-all">
+                <div class="flex items-center gap-3">
+                  <div class="h-9 w-9 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center text-sm font-medium">
+                    {{ member.firstName.charAt(0) }}{{ member.lastName.charAt(0) }}
+                  </div>
+                  <span class="text-gray-800 dark:text-[hsl(210,15%,90%)] font-medium">{{ member.firstName }} {{ member.lastName }}</span>
+                </div>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+                {{ member.role }}
+              </span>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      @if (invites().length > 0) {
+        <div class="mt-6">
+          <h3 class="text-sm font-medium text-gray-500 dark:text-[hsl(210,15%,55%)] uppercase tracking-wide mb-3">
+            {{ 'systemAdmin.pendingInvites' | translate }}
+          </h3>
+          <ul class="space-y-2">
+            @for (invite of invites(); track invite.id) {
+              <li class="flex items-center justify-between px-4 py-3 bg-white dark:bg-[hsl(215,25%,13%)] border border-dashed border-gray-300 dark:border-[hsl(215,20%,25%)] rounded-lg group">
+                <div class="flex items-center gap-3">
+                  <div class="h-9 w-9 rounded-full bg-gray-100 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-gray-800 dark:text-[hsl(210,15%,90%)] text-sm font-medium">{{ invite.email }}</p>
+                    <p class="text-gray-400 dark:text-[hsl(210,15%,45%)] text-xs">{{ invite.userRole }}</p>
+                  </div>
+                </div>
+                <button
+                  class="px-2 py-1 text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
+                  (click)="cancelInvite(invite)"
+                >
+                  {{ 'common.delete' | translate }}
+                </button>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </section>
+
+  } @else {
+    <p class="text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ 'common.loading' | translate }}</p>
+  }
+</div>

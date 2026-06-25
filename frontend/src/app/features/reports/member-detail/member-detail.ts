@@ -1,13 +1,15 @@
-import { Location } from '@angular/common';
+import { DatePipe, Location } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
 import { OrganizationService } from '@services/organization.service';
+import { PaletteService } from '@services/palette.service';
 import { ReportService } from '@services/report.service';
 import { TeamService } from '@services/team.service';
 import { Profile } from '@app/core/models/profile.models';
 import { Team } from '@app/core/models/team.models';
-import { CurriculumOverview, MemberActivityRecord, ReportStatus } from '@app/core/models/report.models';
+import { ABSENCE_TYPES, ABSENCE_TYPE_BY_ID, CurriculumOverview, DEFAULT_ABSENCE_COLOR, LocationSummary, MemberAbsence, MemberActivityRecord, NgxChartEntry, ReportStatus } from '@app/core/models/report.models';
 import { Calendar } from '@app/shared/calendar/calendar';
 import { formatLocalDate } from '@app/shared/utils/date.utils';
 
@@ -24,7 +26,7 @@ interface TeamCompetencyGroup {
 @Component({
   selector: 'app-member-detail',
   standalone: true,
-  imports: [TranslateModule, Calendar],
+  imports: [TranslateModule, Calendar, NgxChartsModule, DatePipe],
   templateUrl: './member-detail.html',
 })
 export class MemberDetail implements OnInit {
@@ -33,6 +35,8 @@ export class MemberDetail implements OnInit {
   private readonly organizationService = inject(OrganizationService);
   private readonly reportService = inject(ReportService);
   private readonly teamService = inject(TeamService);
+  private readonly translate = inject(TranslateService);
+  private readonly paletteService = inject(PaletteService);
 
   protected readonly member = signal<Profile | null>(null);
   protected readonly selectedDate = signal(formatLocalDate(new Date()));
@@ -43,6 +47,80 @@ export class MemberDetail implements OnInit {
   protected readonly curriculaByProfession = signal<Map<string, CurriculumOverview>>(new Map());
   protected readonly fallbackProfessionId = signal<string | null>(null);
   protected readonly isLoadingRecords = signal(false);
+  protected readonly selectedLocation = signal('');
+  protected readonly availableLocations = signal<string[]>([]);
+  protected readonly hasLocationOptions = computed(() => this.availableLocations().length > 0);
+
+  /** Alle Absenzen des Members (ungefiltert); Filterung erfolgt clientseitig. */
+  protected readonly absences = signal<MemberAbsence[]>([]);
+  protected readonly selectedAbsenceSemester = signal('');
+
+  /** Auswählbare Semester aus den vorhandenen Absenzen (nicht aus activity_records). */
+  protected readonly availableSemesters = computed(() =>
+    [...new Set(
+      this.absences()
+        .map(a => a.currentSemester)
+        .filter((s): s is string => s !== null && s !== '')
+    )].sort()
+  );
+
+  /** Nach gewähltem Semester gefilterte Absenzen ('' = alle). */
+  private readonly filteredAbsences = computed(() => {
+    const semester = this.selectedAbsenceSemester();
+    const all = this.absences();
+    return semester ? all.filter(a => a.currentSemester === semester) : all;
+  });
+
+  /** Tage je Absenz-Typ (nur belegte Typen), Basis für Diagramm und Farbschema. */
+  private readonly absenceTotals = computed(() => {
+    const days = new Map<string, number>();
+    for (const a of this.filteredAbsences()) {
+      days.set(a.absenceTypeId, (days.get(a.absenceTypeId) ?? 0) + this.absenceDays(a));
+    }
+    return ABSENCE_TYPES
+      .map(meta => ({ meta, days: Math.round((days.get(meta.id) ?? 0) * 100) / 100 }))
+      .filter(e => e.days > 0);
+  });
+
+  protected readonly absenceChartData = computed<NgxChartEntry[]>(() =>
+    this.absenceTotals().map(e => ({ name: this.translate.instant(e.meta.labelKey), value: e.days }))
+  );
+
+  protected readonly absenceColorScheme = computed<Color>(() => ({
+    name: 'absence',
+    selectable: true,
+    group: ScaleType.Ordinal,
+    domain: this.paletteService.domain(),
+  }));
+
+  /**
+   * Farbe je Absenz-Typ aus der gewählten Palette, in Säulen-Reihenfolge —
+   * so stimmen die Punkte in der Liste mit den Säulen im Diagramm überein.
+   */
+  private readonly absenceTypeColor = computed(() => {
+    const palette = this.paletteService.domain();
+    const map = new Map<string, string>();
+    this.absenceTotals().forEach((e, i) => map.set(e.meta.id, palette[i % palette.length]));
+    return map;
+  });
+
+  protected readonly absenceEntries = computed(() => {
+    const colorByType = this.absenceTypeColor();
+    return this.filteredAbsences().map(a => {
+      const meta = ABSENCE_TYPE_BY_ID.get(a.absenceTypeId);
+      return {
+        id: a.id,
+        typeLabel: meta ? this.translate.instant(meta.labelKey) : a.absenceTypeId,
+        color: colorByType.get(a.absenceTypeId) ?? DEFAULT_ABSENCE_COLOR,
+        startDate: a.startDate,
+        endDate: a.endDate,
+        isRange: a.startDate !== a.endDate,
+        isRecurring: a.isRecurring,
+        dayFraction: a.dayFraction,
+        notes: a.notes,
+      };
+    });
+  });
 
   protected readonly statusMap = computed<Record<string, ReportStatus>>(() => {
     const map: Record<string, ReportStatus> = {};
@@ -153,9 +231,52 @@ export class MemberDetail implements OnInit {
 
     this.loadMember();
     this.loadTeamsAndCurricula();
+    this.loadLocationOptions();
     this.loadMonthRecords(this.selectedDate());
     this.loadAllRecords();
     this.loadDayRecords(this.selectedDate());
+    this.loadAbsences();
+  }
+
+  protected onAbsenceSemesterSelected(semester: string): void {
+    this.selectedAbsenceSemester.set(semester);
+  }
+
+  private loadAbsences(): void {
+    this.reportService.getMemberAbsences(this.organizationId, this.userId).subscribe({
+      next: (absences) => this.absences.set(absences),
+    });
+  }
+
+  /**
+   * Anzahl abwesender Tage einer Absenz × Tagesbruchteil. Ohne rrule zählt der
+   * volle Bereich [start, end]; mit rrule nur die passenden Wochentage (BYDAY).
+   */
+  private absenceDays(a: MemberAbsence): number {
+    const start = new Date(a.startDate + 'T00:00:00');
+    const end = new Date(a.endDate + 'T00:00:00');
+    if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) return 0;
+
+    const byday = this.parseByDay(a.rrule);
+    let count = 0;
+    for (const d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      if (byday && !byday.has(d.getDay())) continue;
+      count++;
+    }
+    return count * (a.dayFraction || 1);
+  }
+
+  /** Parst BYDAY (z. B. "MO,WE" oder "2MO") aus einer iCal-rrule zu Wochentagen (0=So). */
+  private parseByDay(rrule: string | null): Set<number> | null {
+    if (!rrule) return null;
+    const match = /BYDAY=([^;]+)/i.exec(rrule);
+    if (!match) return null;
+    const map: Record<string, number> = { SU: 0, MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6 };
+    const days = match[1]
+      .split(',')
+      .map(token => map[token.trim().toUpperCase().slice(-2)])
+      .filter((n): n is number => n !== undefined);
+    return days.length ? new Set(days) : null;
   }
 
   protected goBack(): void {
@@ -174,6 +295,11 @@ export class MemberDetail implements OnInit {
     const lastDay = new Date(event.year, event.month, 0).getDate();
     const to = `${event.year}-${String(event.month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
     this.loadMonthRecords(from, to);
+  }
+
+  protected onLocationSelected(location: string): void {
+    this.selectedLocation.set(location);
+    this.loadAllRecords();
   }
 
   private loadMember(): void {
@@ -223,8 +349,27 @@ export class MemberDetail implements OnInit {
     });
   }
 
+  private loadLocationOptions(): void {
+    this.reportService.getLocationSummary(this.organizationId, this.userId).subscribe({
+      next: (locations) => this.availableLocations.set(this.normalizeLocationOptions(locations)),
+    });
+  }
+
+  private normalizeLocationOptions(locations: LocationSummary[]): string[] {
+    const byNormalized = new Map<string, string>();
+    for (const entry of locations) {
+      const label = entry.location?.trim();
+      if (!label) continue;
+      const key = label.toLocaleLowerCase();
+      if (!byNormalized.has(key)) {
+        byNormalized.set(key, label);
+      }
+    }
+    return Array.from(byNormalized.values()).sort((a, b) => a.localeCompare(b));
+  }
+
   private loadAllRecords(): void {
-    this.reportService.getMemberRecordsByRange(this.organizationId, this.userId, '2020-01-01', '2099-12-31').subscribe({
+    this.reportService.getMemberRecordsByRange(this.organizationId, this.userId, '2020-01-01', '2099-12-31', this.selectedLocation()).subscribe({
       next: (records) => this.allRecords.set(records),
     });
   }

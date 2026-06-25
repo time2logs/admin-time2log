@@ -15,32 +15,37 @@
       "password": "Passwort",
       "submit": "Anmelden",
       "error": "E-Mail oder Passwort ist falsch.",
-      "google": "Weiter mit Google",
-      "orDivider": "oder",
-      "noAccount": "Noch kein Konto?",
-      "registerLink": "Jetzt registrieren",
       "forgotPassword": "Passwort vergessen?",
       "emailNotConfirmed": {
         "title": "E-Mail-Bestätigung erforderlich",
         "message": "Bitte bestätigen Sie Ihre E-Mail-Adresse über den Link, den wir Ihnen gesendet haben."
       }
     },
-    "register": {
-      "title": "Registrieren",
+    "onboarding": {
+      "title": "Konto einrichten",
+      "subtitle": "Du wurdest zu {{organization}} eingeladen. Vervollständige dein Konto, um loszulegen.",
+      "email": "E-Mail",
       "firstName": "Vorname",
       "lastName": "Nachnamen",
-      "email": "E-Mail",
       "password": "Passwort",
-      "submit": "Konto erstellen",
-      "error": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
-      "google": "Weiter mit Google",
-      "hasAccount": "Bereits ein Konto?",
-      "loginLink": "Jetzt anmelden",
-      "success": {
-        "title": "Konto erstellt",
-        "message": "Wir haben Ihnen eine E-Mail gesendet. Bitte bestätigen Sie Ihre E-Mail-Adresse, um sich anzumelden."
-      },
-      "emailExists": "Diese E-Mail-Adresse ist bereits registriert."
+      "submit": "Konto einrichten",
+      "error": "Das Konto konnte nicht eingerichtet werden. Bitte versuche es erneut.",
+      "invalidTitle": "Einladung ungültig",
+      "invalidMessage": "Diese Einladung ist ungültig oder abgelaufen. Bitte fordere eine neue Einladung an.",
+      "successTitle": "Konto eingerichtet",
+      "successMessage": "Dein Konto wurde eingerichtet. Bitte melde dich jetzt an."
+    },
+    "acceptInvite": {
+      "successTitle": "Einladung angenommen",
+      "successMessage": "Du bist der Organisation beigetreten. Du wirst weitergeleitet…",
+      "invalidTitle": "Einladung ungültig",
+      "invalidMessage": "Diese Einladung ist ungültig oder wurde bereits verwendet.",
+      "expiredTitle": "Einladung abgelaufen",
+      "expiredMessage": "Diese Einladung ist abgelaufen. Bitte einen Admin der Organisation um eine neue.",
+      "wrongUserTitle": "Falsches Konto",
+      "wrongUserMessage": "Diese Einladung wurde an eine andere E-Mail-Adresse gesendet. Melde dich ab und mit der eingeladenen E-Mail-Adresse wieder an, um sie anzunehmen.",
+      "signOutAndRetry": "Abmelden und erneut versuchen",
+      "toDashboard": "Zum Dashboard"
     },
     "validation": {
       "emailInvalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
@@ -100,6 +105,11 @@
       "locations": {
         "title": "Stunden pro Standort",
         "desc": "Wo wurden die Stunden geleistet"
+      },
+      "rating": {
+        "title": "Bewertung der Arbeit",
+        "desc": "Durchschnitt der bewerteten Arbeit",
+        "yAxis": "Bewertung durch Lernenden"
       }
     },
     "noData": "Keine Daten für diesen Zeitraum.",
@@ -149,6 +159,7 @@
       "emailPlaceholder": "E-Mail-Adresse",
       "roleMember": "Mitglied",
       "roleAdmin": "Admin",
+      "roleModerator": "Moderator",
       "semesterLabel": "Semester",
       "semesterOption": "Semester {{ semester }}",
       "inviteButton": "Einladung senden",
@@ -214,7 +225,15 @@
       },
       "NewOrganizationOwner": "Neuer Eigentümer der Organisation",
       "transferConfirm": "Wirklich übertragen? Diese Aktion ist unwiderruflich.",
-      "changeOwner": "Eigentümer wechseln"
+      "changeOwner": "Eigentümer wechseln",
+      "semester": {
+        "title": "Semester",
+        "endDate": "Enddatum des aktuellen Semesters"
+      },
+      "targetHours": {
+        "title": "Sollstunden",
+        "maxHours": "Sollstunden von einem Arbeitstag"
+      }
     }
   },
   "teamManaging": {
@@ -249,6 +268,9 @@
       "applying": "Wird angewendet...",
       "applySuccess": "Bildungsplan erfolgreich importiert.",
       "applyFailed": "Import fehlgeschlagen.",
+      "activate": "Aktivieren",
+      "activating": "Wird aktiviert...",
+      "activateSuccess": "Bildungsplan aktiviert.",
       "invalidJson": "Ungültige JSON-Datei.",
       "invalidCsv": "Ungültige CSV-Datei.",
       "version": "Version",
@@ -319,7 +341,11 @@
     "teamCreated": "Team erstellt.",
     "teamDeleted": "Team gelöscht.",
     "reminderSaved": "Erinnerungseinstellungen gespeichert.",
-    "ownershipTransferred": "Organisation erfolgreich übertragen"
+    "semesterSaved": "Semester-Enddatum gespeichert.",
+    "targetHoursSaved": "Sollstunden gespeichert.",
+    "ownershipTransferred": "Organisation erfolgreich übertragen",
+    "inviteMemberNeedsSemester": "Für Mitglieder muss ein Semester (1-8) ausgewählt werden.",
+    "inviteAdminNoSemester": "Für Admins muss als Semester \"-\" ausgewählt werden."
   },
   "reports": {
     "title": "Reports",
@@ -334,7 +360,27 @@
     "memberDetail": {
       "noRecordsForDay": "Keine Einträge für diesen Tag.",
       "progress": "Aktivitätsfortschritt",
-      "competencies": "Kompetenzen"
+      "competencies": "Kompetenzen",
+      "locationFilter": "Standort",
+      "allLocations": "Alle Standorte",
+      "noLocations": "Keine Standorte verfügbar",
+      "absences": {
+        "title": "Abwesenheiten",
+        "semesterFilter": "Semester",
+        "allSemesters": "Alle Semester",
+        "empty": "Keine Abwesenheiten erfasst.",
+        "daysAxis": "Tage",
+        "partialDay": "{{fraction}} Tag",
+        "recurring": "Wiederkehrend",
+        "type": {
+          "sick": "Krank",
+          "vacation": "Ferien",
+          "military": "Militär",
+          "uk": "ÜK",
+          "berufsschule": "Berufsschule",
+          "custom": "Sonstiges"
+        }
+      }
     },
     "calendar": {
       "mon": "Mo",
@@ -349,7 +395,8 @@
   "nav": {
     "dashboard": "Dashboard",
     "organizations": "Organisation",
-    "reports": "Reports"
+    "reports": "Reports",
+    "systemAdmin": "System-Admin"
   },
   "settings": {
     "title": "Einstellungen",
@@ -358,6 +405,13 @@
       "title": "Design",
       "light": "Hell",
       "dark": "Dunkel"
+    },
+    "colorScheme": {
+      "title": "Farbschema",
+      "default": "Standard",
+      "deuteranopia": "Deuteranopie",
+      "protanopia": "Protanopie",
+      "monochrome": "Monochrom"
     },
     "account": "Konto",
     "profile": {
@@ -380,6 +434,24 @@
       "description": "Das Löschen deines Kontos ist dauerhaft und kann nicht rückgängig gemacht werden. Alle deine Daten werden entfernt.",
       "deleteAccount": "Konto löschen",
       "deleteConfirm": "Bist du sicher? Dein Konto wird unwiderruflich gelöscht."
+    },
+    "chartChange": {
+      "title": "Diagrammart ändern",
+      "bar": "Balkendiagramm",
+      "column": "Säulendiagramm",
+      "pie": "Kreissdiagramm"
     }
+  },
+  "systemAdmin": {
+    "title": "System-Admin",
+    "admins": "Admins",
+    "noAdmins": "Noch keine Admins",
+    "moderators": "Moderatoren",
+    "noModerators": "Noch keine Moderatoren",
+    "pendingInvites": "Offene Einladungen",
+    "noPendingInvites": "Keine ausstehenden Einladungen",
+    "invite": "Admin einladen",
+    "inviteError": "Ungültige Email. Gib eine gültige Email ein und versuche es erneut",
+    "inviteSuccess": "Einladung erfolgreich versendet."
   }
 }

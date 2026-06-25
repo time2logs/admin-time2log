@@ -35,8 +35,13 @@ export class OrganizationManaging implements OnInit {
   protected readonly inviteEmail = signal('');
   protected readonly inviteRole = signal('member');
   protected readonly inviteSemester = signal('1');
-  protected readonly semesterOptions = ['1', '2', '3', '4', '5', '6', '7', '8'] as const;
+  protected readonly semesterOptions = ['-', '1', '2', '3', '4', '5', '6', '7', '8'] as const;
+  protected readonly semesterEndDate = signal<string>('');
   protected readonly isInviting = signal(false);
+  protected readonly isSavingSemester = signal(false);
+
+  protected readonly isSavingTargetHours = signal(false);
+  protected readonly targetHours = signal<number>(8);
 
   protected readonly professions = signal<Profession[]>([]);
   protected readonly showCreateProfession = signal(false);
@@ -53,7 +58,7 @@ export class OrganizationManaging implements OnInit {
   protected readonly showDeleteConfirm = signal(false);
   protected readonly isDeleting = signal(false);
 
-  protected readonly reminderChannel = signal<string>('SMS');
+  protected readonly reminderChannel = signal<string>('EMAIL');
   protected readonly reminderSendDay = signal<string>('FRIDAY');
   protected readonly reminderSendTime = signal<string>('08:00');
   protected readonly reminderIdleDays = signal<number>(3);
@@ -77,6 +82,7 @@ export class OrganizationManaging implements OnInit {
 
   private readonly authService = inject(AuthService);
   protected readonly currentUserId = signal<string | null>(null);
+  protected readonly isModerator = signal(false);
 
   ngOnInit(): void {
     this.organizationId = this.route.snapshot.params['id'];
@@ -92,9 +98,15 @@ export class OrganizationManaging implements OnInit {
     this.loadProfessions();
     this.loadTeams();
     this.loadReminder();
+    this.loadSemesterEndDate();
+    this.loadTargetHours();
 
     this.authService.currentUser$.subscribe(user => {
       this.currentUserId.set(user?.id ?? null);
+    });
+
+    this.authService.currentProfile$.subscribe(profile => {
+      this.isModerator.set(profile?.role === 'moderator');
     });
   }
 
@@ -119,6 +131,17 @@ export class OrganizationManaging implements OnInit {
   protected invite(): void {
     const email = this.inviteEmail().trim();
     if (!email) return;
+
+    const role = this.inviteRole();
+    const semester = this.inviteSemester();
+    if (role === 'member' && semester === '-') {
+      this.toast.error(this.translate.instant('toast.inviteMemberNeedsSemester'));
+      return;
+    }
+    if (role === 'moderator' && semester !== '-') {
+      this.toast.error(this.translate.instant('toast.inviteAdminNoSemester'));
+      return;
+    }
 
     this.isInviting.set(true);
 
@@ -274,9 +297,15 @@ export class OrganizationManaging implements OnInit {
   }
 
   protected getRoleLabel(role: string): string {
-    return role === 'admin'
-      ? this.translate.instant('organizationManaging.members.roleAdmin')
-      : this.translate.instant('organizationManaging.members.roleMember');
+    if (role === 'admin' || role === 'system_admin') {
+      return this.translate.instant('organizationManaging.members.roleAdmin')
+    }
+    else if (role === 'moderator') {
+      return this.translate.instant('organizationManaging.members.roleModerator');
+    }
+    else{
+      return this.translate.instant('organizationManaging.members.roleMember');
+    }
   }
 
   protected confirmRemoveMember(member: Profile, event: Event): void {
@@ -306,7 +335,8 @@ protected confirmDeleteTeam(team: Team, event: Event): void {
     this.organizationService.getReminder(this.organizationId).subscribe({
       next: (reminder) => {
         if (reminder) {
-          this.reminderChannel.set(reminder.channel);
+          // SMS reminders are disabled; normalize any legacy 'SMS' config to 'EMAIL'.
+          this.reminderChannel.set(reminder.channel === 'SMS' ? 'EMAIL' : reminder.channel);
           this.reminderSendDay.set(reminder.sendDay);
           this.reminderSendTime.set(reminder.sendTime);
           this.reminderIdleDays.set(reminder.idleDays);
@@ -352,11 +382,47 @@ protected confirmDeleteTeam(team: Team, event: Event): void {
   }
 
 
-@HostListener('document:click')
+  @HostListener('document:click')
     onDocumentClick(): void {
     this.memberToConfirmRemoval.set(null);
     this.teamToConfirmDeletion.set(null);
   }
 
+  private loadSemesterEndDate(): void {
+    this.organizationService.getSemesterEndDate(this.organizationId).subscribe({
+      next: (res) => this.semesterEndDate.set(res.semesterEndDate ?? ''),
+    });
+  }
 
+  protected saveSemesterEndDate(): void {
+    this.isSavingSemester.set(true);
+    this.organizationService
+      .saveSemesterEndDate(this.organizationId, this.semesterEndDate() || null)
+      .subscribe({
+        next: () => {
+          this.isSavingSemester.set(false);
+          this.toast.success(this.translate.instant('toast.semesterSaved'));
+        },
+        error: () => this.isSavingSemester.set(false),
+      });
+  }
+
+  private loadTargetHours(): void{
+    this.organizationService.getTargetHours(this.organizationId).subscribe({
+      next: (res) => this.targetHours.set(res.targetHours ?? 8),
+    });
+  }
+
+  protected saveTargetHours(): void {
+    this.isSavingTargetHours.set(true);
+    this.organizationService
+      .saveTargetHours(this.organizationId, this.targetHours())
+      .subscribe({
+        next: () => {
+          this.isSavingTargetHours.set(false);
+          this.toast.success(this.translate.instant('toast.targetHoursSaved'));
+        },
+        error: () => this.isSavingTargetHours.set(false),
+      });
+  }
 }

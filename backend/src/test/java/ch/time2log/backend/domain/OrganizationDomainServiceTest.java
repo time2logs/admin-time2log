@@ -66,7 +66,8 @@ class OrganizationDomainServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(organizationDomainService, "appUrl", "http://localhost:4300");
+        ReflectionTestUtils.setField(organizationDomainService, "userAppUrl", "http://localhost:4300");
+        ReflectionTestUtils.setField(organizationDomainService, "adminAppUrl", "http://localhost:4200");
     }
 
     // --- createInvite ---
@@ -217,6 +218,84 @@ class OrganizationDomainServiceTest {
                 .isInstanceOf(NoRowsAffectedException.class);
     }
 
+    // --- removeOrganizationMember ---
+
+    @Test
+    void removeOrganizationMember_whenRoleUser_removesMembershipAndCascadeDeletesAuthUser() {
+        when(supabaseService.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
+                .thenReturn(List.of(orgMember(memberId, orgId, "user")));
+        when(supabaseService.deleteReturningCount(eq("admin.organization_members"), anyString())).thenReturn(1);
+        when(supabaseAdminClient.deleteUser(memberId)).thenReturn(Mono.empty());
+
+        organizationDomainService.removeOrganizationMember(orgId, memberId);
+
+        verify(supabaseService).deleteReturningCount(eq("admin.organization_members"),
+                contains("user_id=eq." + memberId));
+        verify(supabaseAdminClient).deleteUser(memberId);
+    }
+
+    @Test
+    void removeOrganizationMember_whenRoleAdmin_onlyRemovesMembershipAndKeepsAuthUser() {
+        when(supabaseService.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
+                .thenReturn(List.of(orgMember(memberId, orgId, "admin")));
+        when(supabaseService.deleteReturningCount(eq("admin.organization_members"), anyString())).thenReturn(1);
+
+        organizationDomainService.removeOrganizationMember(orgId, memberId);
+
+        verify(supabaseAdminClient, never()).deleteUser(any());
+    }
+
+    @Test
+    void removeOrganizationMember_whenRoleModerator_onlyRemovesMembershipAndKeepsAuthUser() {
+        when(supabaseService.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
+                .thenReturn(List.of(orgMember(memberId, orgId, "moderator")));
+        when(supabaseService.deleteReturningCount(eq("admin.organization_members"), anyString())).thenReturn(1);
+
+        organizationDomainService.removeOrganizationMember(orgId, memberId);
+
+        verify(supabaseAdminClient, never()).deleteUser(any());
+    }
+
+    @Test
+    void removeOrganizationMember_whenNoneDeleted_throwsAndDoesNotDeleteAuthUser() {
+        when(supabaseService.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
+                .thenReturn(List.of());
+        when(supabaseService.deleteReturningCount(eq("admin.organization_members"), anyString())).thenReturn(0);
+
+        assertThatThrownBy(() -> organizationDomainService.removeOrganizationMember(orgId, memberId))
+                .isInstanceOf(NoRowsAffectedException.class);
+
+        verify(supabaseAdminClient, never()).deleteUser(any());
+    }
+
+    @Test
+    void removeOrganizationMember_whenAuthUserAlreadyGone404_doesNotThrow() {
+        when(supabaseService.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
+                .thenReturn(List.of(orgMember(memberId, orgId, "user")));
+        when(supabaseService.deleteReturningCount(eq("admin.organization_members"), anyString())).thenReturn(1);
+        when(supabaseAdminClient.deleteUser(memberId))
+                .thenReturn(Mono.error(new SupabaseApiException(404, "{\"error_code\":\"user_not_found\"}")));
+
+        organizationDomainService.removeOrganizationMember(orgId, memberId);
+
+        verify(supabaseAdminClient).deleteUser(memberId);
+    }
+
+    @Test
+    void removeOrganizationMember_whenAuthUserDeleteFails_throwsIllegalState() {
+        when(supabaseService.getListWithQuery(eq("admin.organization_members"), anyString(), eq(OrganizationMemberResponse.class)))
+                .thenReturn(List.of(orgMember(memberId, orgId, "user")));
+        when(supabaseService.deleteReturningCount(eq("admin.organization_members"), anyString())).thenReturn(1);
+        when(supabaseAdminClient.deleteUser(memberId)).thenReturn(Mono.error(new RuntimeException("boom")));
+
+        assertThatThrownBy(() -> organizationDomainService.removeOrganizationMember(orgId, memberId))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    private OrganizationMemberResponse orgMember(UUID userId, UUID organizationId, String role) {
+        return new OrganizationMemberResponse(userId, organizationId, role, OffsetDateTime.now());
+    }
+
     // --- createOrganization ---
 
     @Test
@@ -247,7 +326,7 @@ class OrganizationDomainServiceTest {
     }
 
     private OrganizationResponse orgResponse(String name) {
-        return new OrganizationResponse(orgId, name, memberId,OffsetDateTime.now(), OffsetDateTime.now());
+        return new OrganizationResponse(orgId, name, memberId,OffsetDateTime.now(), OffsetDateTime.now(), null, null);
     }
 
     // =====================================================================
@@ -431,47 +510,21 @@ class OrganizationDomainServiceTest {
             verifyNoInteractions(reminderMailService);
         }
 
-        // --- SMS channel ---
+        // --- SMS channel (disabled: falls back to EMAIL) ---
 
         @Test
-        void sendWeeklyReminders_smsChannel_sendsSmsReminder() {
+        void sendWeeklyReminders_smsChannelConfigured_fallsBackToEmailAndNeverSendsSms() {
             stubReminderWithOrg("SMS", 3);
             stubMember(userId1);
             stubInactiveUserNoRecords(userId1);
             stubProfile(userId1, "Max");
+            when(supabaseAdminClient.getUserEmail(userId1)).thenReturn("max@example.com");
 
             reminderService.sendWeeklyReminders();
 
-            verify(reminderSmsService).sendReminder("+41791234567", "Max", remOrgName, 3);
-            verifyNoInteractions(reminderMailService);
-        }
-
-        @Test
-        void sendWeeklyReminders_smsChannel_noPhoneNumber_skips() {
-            stubReminderWithOrg("SMS", 3);
-            stubMember(userId1);
-            stubInactiveUserNoRecords(userId1);
-            when(supabaseAdminClient.getListWithQuery(eq("app.profiles"), contains("id=eq." + userId1), eq(ProfileResponse.class)))
-                    .thenReturn(List.of(profileResponseNoPhone(userId1, "Max")));
-
-            reminderService.sendWeeklyReminders();
-
+            // SMS is disabled, so an org still configured for "SMS" must receive an EMAIL instead.
+            verify(reminderMailService).sendReminder("max@example.com", "Max", remOrgName, 3, remAppUrl);
             verifyNoInteractions(reminderSmsService);
-            verifyNoInteractions(reminderMailService);
-        }
-
-        @Test
-        void sendWeeklyReminders_smsChannel_noProfile_skips() {
-            stubReminderWithOrg("SMS", 3);
-            stubMember(userId1);
-            stubInactiveUserNoRecords(userId1);
-            when(supabaseAdminClient.getListWithQuery(eq("app.profiles"), contains("id=eq." + userId1), eq(ProfileResponse.class)))
-                    .thenReturn(List.of());
-
-            reminderService.sendWeeklyReminders();
-
-            verifyNoInteractions(reminderSmsService);
-            verifyNoInteractions(reminderMailService);
         }
 
         // --- Multiple orgs ---
@@ -660,7 +713,7 @@ class OrganizationDomainServiceTest {
         }
 
         private OrganizationResponse reminderOrgResponse(UUID id, String name) {
-            return new OrganizationResponse(id, name, UUID.randomUUID(), OffsetDateTime.now(), OffsetDateTime.now());
+            return new OrganizationResponse(id, name, UUID.randomUUID(), OffsetDateTime.now(), OffsetDateTime.now(), null, null);
         }
 
         private OrganizationMemberResponse memberResponse(UUID userId, UUID orgId) {
@@ -668,11 +721,7 @@ class OrganizationDomainServiceTest {
         }
 
         private ProfileResponse profileResponse(UUID id, String firstName) {
-            return new ProfileResponse(id, firstName, "Lastname", "+41791234567", OffsetDateTime.now(), OffsetDateTime.now());
-        }
-
-        private ProfileResponse profileResponseNoPhone(UUID id, String firstName) {
-            return new ProfileResponse(id, firstName, "Lastname", null, OffsetDateTime.now(), OffsetDateTime.now());
+            return new ProfileResponse(id, firstName, "Lastname", "+41791234567", OffsetDateTime.now(), OffsetDateTime.now(), "normal", "user");
         }
 
         private ActivityRecordResponse activityRecordResponse(UUID userId, UUID orgId, String entryDate) {

@@ -1,8 +1,16 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {Observable} from 'rxjs';
 import { environment } from '@env/environment';
-import { ActivitySummary, CurriculumOverview, DailyMemberReport, LocationSummary, MemberActivityRecord } from '@app/core/models/report.models';
+import {
+  ActivitySummary,
+  CurriculumOverview,
+  DailyMemberReport,
+  LocationSummary,
+  MemberAbsence,
+  MemberActivityRecord,
+  RatingSummary,
+} from '@app/core/models/report.models';
 import { map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
@@ -16,15 +24,19 @@ export class ReportService {
     );
   }
 
-  getMemberRecordsByDate(organizationId: string, userId: string, date: string): Observable<MemberActivityRecord[]> {
+  getMemberRecordsByDate(organizationId: string, userId: string, date: string, location?: string | null): Observable<MemberActivityRecord[]> {
+    const params = [`date=${date}`];
+    if (location?.trim()) params.push(`location=${encodeURIComponent(location.trim())}`);
     return this.http.get<MemberActivityRecord[]>(
-      `${this.baseUrl}/${organizationId}/reports/members/${userId}/records?date=${date}`
+      `${this.baseUrl}/${organizationId}/reports/members/${userId}/records?${params.join('&')}`
     );
   }
 
-  getMemberRecordsByRange(organizationId: string, userId: string, from: string, to: string): Observable<MemberActivityRecord[]> {
+  getMemberRecordsByRange(organizationId: string, userId: string, from: string, to: string, location?: string | null): Observable<MemberActivityRecord[]> {
+    const params = [`from=${from}`, `to=${to}`];
+    if (location?.trim()) params.push(`location=${encodeURIComponent(location.trim())}`);
     return this.http.get<MemberActivityRecord[]>(
-      `${this.baseUrl}/${organizationId}/reports/members/${userId}/records?from=${from}&to=${to}`
+      `${this.baseUrl}/${organizationId}/reports/members/${userId}/records?${params.join('&')}`
     );
   }
 
@@ -34,7 +46,7 @@ export class ReportService {
     );
   }
 
- getActivitySummary(organizationId: string, userId: string, from?: string, to?: string, semesters?: string[]): Observable<ActivitySummary[]> {
+  getActivitySummary(organizationId: string, userId: string, from?: string, to?: string, semesters?: string[]): Observable<ActivitySummary[]> {
     let url = `${this.baseUrl}/${organizationId}/reports/activities/summary`;
     const params: string[] = [];
     if (userId) params.push(`userId=${userId}`);
@@ -48,7 +60,7 @@ export class ReportService {
     return this.http.get<ActivitySummary[]>(url);
   }
 
- getLocationSummary(organizationId: string, userId?: string | null, from?: string, to?: string, semesters?: string[]): Observable<LocationSummary[]> {
+  getLocationSummary(organizationId: string, userId?: string | null, from?: string, to?: string, semesters?: string[]): Observable<LocationSummary[]> {
     let url = `${this.baseUrl}/${organizationId}/reports/locations/summary`;
     const params: string[] = [];
     if (userId) params.push(`userId=${userId}`);
@@ -62,17 +74,38 @@ export class ReportService {
     return this.http.get<LocationSummary[]>(url);
   }
 
+  getRatingSummary(organizationId: string, userId?: string | null, from?: string, to?: string, semesters?: string[]): Observable<RatingSummary[]> {
+
+    let url = `${this.baseUrl}/${organizationId}/reports/ratings/summary`;
+    const params: string[] = [];
+    if (userId) params.push(`userId=${userId}`);
+    if (semesters && semesters.length > 0) {
+      params.push(`semesters=${semesters!.join(',')}`);
+    } else {
+      if (from) params.push(`from=${from}`);
+      if (to) params.push(`to=${to}`);
+    }
+    if (params.length) url += '?' + params.join('&');
+    return this.http.get<RatingSummary[]>(url);
+  }
+
+  getMemberAbsences(organizationId: string, userId: string): Observable<MemberAbsence[]> {
+    return this.http.get<MemberAbsence[]>(
+      `${this.baseUrl}/${organizationId}/reports/members/${userId}/absences`
+    );
+  }
+
   getAvailableSemesters(organizationId: string, userId: string): Observable<string[]> {
     return this.http.get<string[]>(
       `${this.baseUrl}/${organizationId}/reports/semesters/available?userId=${userId}`
     );
   }
 
- getLastEntryDate(organizationId: string, userId: string): Observable<Date | null> {
-  return this.http.get<string | null>(
-    `${this.baseUrl}/${organizationId}/reports/members/${userId}/last-entry-date`
-  ).pipe(
-    map((date) => (date ? new Date(date) : null))
-  );
-}
+  getLastEntryDate(organizationId: string, userId: string): Observable<Date | null> {
+    return this.http.get<string | null>(
+      `${this.baseUrl}/${organizationId}/reports/members/${userId}/last-entry-date`
+    ).pipe(
+      map((date) => (date ? new Date(date) : null))
+    );
+  }
 }

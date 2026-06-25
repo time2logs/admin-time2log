@@ -30,7 +30,7 @@ public class ReminderService {
     private final ReminderMailService reminderMailService;
     private final ReminderSmsService reminderSmsService;
 
-    @Value("${app.url}")
+    @Value("${app.url.user}")
     private String appUrl;
 
     public ReminderService(SupabaseAdminClient adminClient, ReminderMailService reminderMailService, ReminderSmsService reminderSmsService) {
@@ -121,7 +121,7 @@ public class ReminderService {
                         + "&entry_date=gte." + cutoffDate + "&limit=1",
                 ActivityRecordResponse.class
         );
-        log.info("Checking reminder for user {} in org {}", userId, orgName);
+        log.info("Checking reminder for user {} in org {}", userId, orgId);
         if (!recentRecords.isEmpty()) return;
 
         var lastRecords = adminClient.getListWithQuery(
@@ -146,22 +146,18 @@ public class ReminderService {
         );
         var firstName = profiles.isEmpty() ? "User" : profiles.getFirst().first_name();
 
+        // SMS reminders are disabled. The ReminderSmsService is kept in the codebase
+        // but is no longer invoked; any existing "SMS" channel config falls back to EMAIL.
         if ("SMS".equals(channel)) {
-            var phoneNumber = profiles.isEmpty() ? null : profiles.getFirst().phone_number();
-            if (phoneNumber == null || phoneNumber.isBlank()) {
-                log.warn("No phone number found for user {}, skipping SMS reminder", userId);
-                return;
-            }
-            reminderSmsService.sendReminder(phoneNumber, firstName, orgName, daysInactive);
-            log.info("Sent SMS reminder to {} ({}) - {} days inactive in org {}", phoneNumber, firstName, daysInactive, orgName);
-        } else {
-            var email = adminClient.getUserEmail(userId);
-            if (email == null || email.isBlank()) {
-                log.warn("No email found for user {}, skipping reminder", userId);
-                return;
-            }
-            reminderMailService.sendReminder(email, firstName, orgName, daysInactive, appUrl);
-            log.info("Sent EMAIL reminder to {} ({}) - {} days inactive in org {}", email, firstName, daysInactive, orgName);
+            log.warn("SMS reminders are disabled, falling back to EMAIL for user {} in org {}", userId, orgId);
         }
+
+        var email = adminClient.getUserEmail(userId);
+        if (email == null || email.isBlank()) {
+            log.warn("No email found for user {}, skipping reminder", userId);
+            return;
+        }
+        reminderMailService.sendReminder(email, firstName, orgName, daysInactive, appUrl);
+        log.info("Sent EMAIL reminder to user {} - {} days inactive in org {}", userId, daysInactive, orgId);
     }
 }

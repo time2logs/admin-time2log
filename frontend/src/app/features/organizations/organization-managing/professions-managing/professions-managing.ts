@@ -25,7 +25,7 @@ export class ProfessionsManaging implements OnInit {
   protected readonly imports = signal<CurriculumImport[]>([]);
   protected readonly selectedFileName = signal<string>('');
   protected readonly isUploading = signal(false);
-  protected readonly isApplying = signal(false);
+  protected readonly applyingId = signal<string | null>(null);
   protected readonly importMode = signal<'file' | 'manual'>('file');
   protected readonly manualRows = signal<ManualRow[]>([]);
   protected readonly competencyDescriptions = signal<Record<string, string>>({});
@@ -55,6 +55,15 @@ export class ProfessionsManaging implements OnInit {
   protected readonly history = computed(() =>
     this.imports().filter(i => i.status !== 'pending')
   );
+
+  /** Nächste Versionsnummer: höchste bestehende Zahl + 1 (robust gegen Alt-Werte wie "1.0"). */
+  protected readonly nextVersion = computed(() => {
+    const max = this.imports()
+      .map(i => parseInt(String(i.version).replace(/\D/g, ''), 10))
+      .filter(n => !isNaN(n))
+      .reduce((a, b) => Math.max(a, b), 0);
+    return String(max + 1);
+  });
 
   private organizationId = '';
   private professionId = '';
@@ -256,7 +265,6 @@ private csvRowsToJson(rows: CsvRow[], competencyMap = new Map<string, string>())
 
   return {
     schema_version: 1,
-    version: '1.0',
     competencies: [...competencySet].map(code => ({
       code,
       description: competencyMap.get(code) ?? '',
@@ -269,7 +277,8 @@ private csvRowsToJson(rows: CsvRow[], competencyMap = new Map<string, string>())
     if (!this.selectedPayload) return;
 
     this.isUploading.set(true);
-    this.curriculumImportService.createImport(this.organizationId, this.professionId, this.selectedPayload).subscribe({
+    const payload = { ...this.selectedPayload, version: this.nextVersion() };
+    this.curriculumImportService.createImport(this.organizationId, this.professionId, payload).subscribe({
       next: () => {
         this.isUploading.set(false);
         this.resetFileSelection();
@@ -282,23 +291,25 @@ private csvRowsToJson(rows: CsvRow[], competencyMap = new Map<string, string>())
     });
   }
 
-  protected applyImport(): void {
-    const pending = this.pendingImport();
-    if (!pending) return;
+  protected applyImport(importId: string, isActivation = false): void {
+    if (!importId) return;
 
-    this.isApplying.set(true);
-    this.curriculumImportService.applyImport(this.organizationId, this.professionId, pending.id).subscribe({
+    this.applyingId.set(importId);
+    this.curriculumImportService.applyImport(this.organizationId, this.professionId, importId).subscribe({
       next: (result) => {
-        this.isApplying.set(false);
+        this.applyingId.set(null);
         if (result.status === 'applied') {
-          this.toast.success(this.translate.instant('professionManaging.import.applySuccess'));
+          const key = isActivation
+            ? 'professionManaging.import.activateSuccess'
+            : 'professionManaging.import.applySuccess';
+          this.toast.success(this.translate.instant(key));
         } else if (result.status === 'failed') {
           this.toast.error(result.error ?? this.translate.instant('professionManaging.import.applyFailed'));
         }
         this.loadImports();
       },
       error: () => {
-        this.isApplying.set(false);
+        this.applyingId.set(null);
       },
     });
   }

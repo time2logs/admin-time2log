@@ -15,32 +15,37 @@
       "password": "Password",
       "submit": "Sign In",
       "error": "Invalid email or password.",
-      "google": "Continue with Google",
-      "orDivider": "or",
-      "noAccount": "Don't have an account?",
-      "registerLink": "Sign up now",
       "forgotPassword": "Forgot password?",
       "emailNotConfirmed": {
         "title": "Email confirmation required",
         "message": "Please confirm your email address using the link we sent you."
       }
     },
-    "register": {
-      "title": "Sign Up",
+    "onboarding": {
+      "title": "Set up your account",
+      "subtitle": "You've been invited to {{organization}}. Complete your account to get started.",
+      "email": "Email",
       "firstName": "First Name",
       "lastName": "Last Name",
-      "email": "Email",
       "password": "Password",
-      "submit": "Create Account",
-      "error": "Registration failed. Please try again.",
-      "google": "Continue with Google",
-      "hasAccount": "Already have an account?",
-      "loginLink": "Sign in now",
-      "success": {
-        "title": "Account created",
-        "message": "We've sent you an email. Please confirm your email address to sign in."
-      },
-      "emailExists": "This email address is already registered."
+      "submit": "Set up account",
+      "error": "Your account could not be set up. Please try again.",
+      "invalidTitle": "Invalid invite",
+      "invalidMessage": "This invite is invalid or has expired. Please request a new invite.",
+      "successTitle": "Account set up",
+      "successMessage": "Your account has been set up. Please sign in now."
+    },
+    "acceptInvite": {
+      "successTitle": "Invitation accepted",
+      "successMessage": "You've joined the organization. Redirecting you now…",
+      "invalidTitle": "Invitation invalid",
+      "invalidMessage": "This invitation is invalid or has already been used.",
+      "expiredTitle": "Invitation expired",
+      "expiredMessage": "This invitation has expired. Ask the organization admin to send a new one.",
+      "wrongUserTitle": "Wrong account",
+      "wrongUserMessage": "This invitation was sent to a different email address. Sign out and sign in with the invited email to accept it.",
+      "signOutAndRetry": "Sign out and try again",
+      "toDashboard": "Go to dashboard"
     },
     "validation": {
       "emailInvalid": "Please enter a valid email address.",
@@ -100,6 +105,11 @@
       "locations": {
         "title": "Hours per Location",
         "desc": "Where were the hours worked"
+      },
+      "rating": {
+        "title": "Work rating",
+        "desc": "Average form the ranked work",
+        "yAxis": "Student evaluation"
       }
     },
     "noData": "No data for this period.",
@@ -149,6 +159,7 @@
       "emailPlaceholder": "Email address",
       "roleMember": "Member",
       "roleAdmin": "Admin",
+      "roleModerator": "Moderator",
       "semesterLabel": "Semester",
       "semesterOption": "Semester {{ semester }}",
       "inviteButton": "Send Invite",
@@ -213,7 +224,15 @@
       },
       "NewOrganizationOwner": "New Organization Owner",
       "transferConfirm": "Really transfer? This action is irreversible.",
-      "changeOwner": "Change Owner"
+      "changeOwner": "Change Owner",
+      "semester": {
+        "title": "Semester",
+        "endDate": "End date of the current semester"
+      },
+      "targetHours": {
+        "title": "Target hours",
+        "maxHours": "Target hours for a workday"
+      }
     }
   },
   "teamManaging": {
@@ -248,6 +267,9 @@
       "applying": "Applying...",
       "applySuccess": "Curriculum imported successfully.",
       "applyFailed": "Import failed.",
+      "activate": "Activate",
+      "activating": "Activating...",
+      "activateSuccess": "Curriculum activated.",
       "invalidJson": "Invalid JSON file.",
       "invalidCsv": "Invalid CSV file.",
       "version": "Version",
@@ -316,7 +338,11 @@
     "teamCreated": "Team created.",
     "teamDeleted": "Team deleted.",
     "reminderSaved": "Reminder settings saved.",
-    "ownershipTransferred": "Organization successfully transferred"
+    "semesterSaved": "Semester end date saved.",
+    "targetHoursSaved": "Target hours saved.",
+    "ownershipTransferred": "Organization successfully transferred",
+    "inviteMemberNeedsSemester": "Members must have a semester (1-8) selected.",
+    "inviteAdminNoSemester": "Admins must have \"-\" selected as semester."
   },
   "reports": {
     "title": "Reports",
@@ -331,7 +357,27 @@
     "memberDetail": {
       "noRecordsForDay": "No entries for this day.",
       "progress": "Activity Progress",
-      "competencies": "Competencies"
+      "competencies": "Competencies",
+      "locationFilter": "Location",
+      "allLocations": "All locations",
+      "noLocations": "No locations available",
+      "absences": {
+        "title": "Absences",
+        "semesterFilter": "Semester",
+        "allSemesters": "All semesters",
+        "empty": "No absences recorded.",
+        "daysAxis": "Days",
+        "partialDay": "{{fraction}} day",
+        "recurring": "Recurring",
+        "type": {
+          "sick": "Sick",
+          "vacation": "Vacation",
+          "military": "Military",
+          "uk": "Inter-company course",
+          "berufsschule": "Vocational school",
+          "custom": "Other"
+        }
+      }
     },
     "calendar": {
       "mon": "Mo",
@@ -346,7 +392,8 @@
   "nav": {
     "dashboard": "Dashboard",
     "organizations": "Organization",
-    "reports": "Reports"
+    "reports": "Reports",
+    "systemAdmin": "System Admin"
   },
   "settings": {
     "title": "Settings",
@@ -355,6 +402,13 @@
       "title": "Design",
       "light": "Light",
       "dark": "Dark"
+    },
+    "colorScheme": {
+      "title": "Color Scheme",
+      "default": "Default",
+      "deuteranopia": "Deuteranopia",
+      "protanopia": "Protanopia",
+      "monochrome": "Monochrome"
     },
     "account": "Account",
     "profile": {
@@ -377,6 +431,24 @@
       "description": "Deleting your account is permanent and cannot be undone. All your data will be removed.",
       "deleteAccount": "Delete Account",
       "deleteConfirm": "Are you sure? This will permanently delete your account."
+    },
+    "chartChange": {
+      "title": "Change chart type",
+      "bar": "Bar chart",
+      "column": "Column chart",
+      "pie": "Pie chart"
     }
+  },
+  "systemAdmin": {
+    "title": "System Admin",
+    "admins": "Admins",
+    "noAdmins": "No admins yet",
+    "moderators": "Moderators",
+    "noModerators": "No moderators yet",
+    "pendingInvites": "Pending Invites",
+    "noPendingInvites": "No pending invites",
+    "invite": "Invite Admin",
+    "inviteError":  "Invalid email address. Please enter a valid email address and try again.",
+    "inviteSuccess": "Invitation successfully sent."
   }
 }

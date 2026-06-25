@@ -7,6 +7,7 @@ import ch.time2log.backend.domain.models.Organization;
 import ch.time2log.backend.domain.models.Profile;
 import ch.time2log.backend.infrastructure.mail.InviteMailService;
 import ch.time2log.backend.infrastructure.supabase.SupabaseAdminClient;
+import ch.time2log.backend.infrastructure.supabase.SupabaseApiException;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
 import ch.time2log.backend.infrastructure.supabase.responses.InviteResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.OrganizationMemberResponse;
@@ -31,8 +32,11 @@ public class OrganizationDomainService {
     private final ProfileDomainService profileDomainService;
     private final InviteMailService inviteMailService;
 
-    @Value("${app.url}")
-    private String appUrl;
+    @Value("${app.url.user}")
+    private String userAppUrl;
+
+    @Value("${app.url.admin}")
+    private String adminAppUrl;
 
     public OrganizationDomainService(SupabaseService supabaseService,
                                      SupabaseAdminClient supabaseAdminClient,
@@ -50,8 +54,8 @@ public class OrganizationDomainService {
     }
 
     public Organization createOrganization(String name) {
-        var created = supabaseService.post("admin.organizations", Map.of("name", name), OrganizationResponse[].class);
-        if (created == null || created.length == 0) {
+        var created = supabaseService.post("admin.organizations", Map.of("name", name, "target_hours", 8), OrganizationResponse[].class);
+        if (created == null || created.length == 0) { 
             throw new EntityNotCreatedException("Supabase returned no created organization");
         }
         return Organization.of(created[0]);
@@ -70,15 +74,19 @@ public class OrganizationDomainService {
     }
 
     public Invite createInvite(UUID organizationId, String email, String userRole, String semester, UUID invitedBy) {
+        var targetUrl = "moderator".equals(userRole) ? adminAppUrl : userAppUrl;
+        boolean isExistingUser = profileDomainService.existsByEmail(email);
+
         var body = new HashMap<String, Object>();
         body.put("organization_id", organizationId);
         body.put("email", email);
         body.put("user_role", userRole);
         body.put("invited_by", invitedBy);
         body.put("current_semester", semester);
-        log.info("Creating invite with body={}", body);
+        log.info("Creating invite for org {} (role={}, existingUser={})", organizationId, userRole, isExistingUser);
         var created = supabaseService.post("admin.invites", body, InviteResponse[].class);
-        log.info("Supabase returned invite={}", created == null ? null : (created.length == 0 ? "[]" : created[0]));
+        log.info("Supabase returned invite id={}", created == null ? null
+                : (created.length == 0 ? "[]" : created[0].id()));
         if (created == null || created.length == 0) {
             throw new EntityNotCreatedException("Supabase returned no created invite");
         }
@@ -90,14 +98,22 @@ public class OrganizationDomainService {
                 OrganizationResponse.class
         );
         var orgName = organizations.isEmpty() ? "the organization" : organizations.get(0).name();
-        var redirectTo = appUrl + "/onboarding?invite_token=" + invite.token();
-        var metadata = Map.<String, Object>of(
-                "invite_token", invite.token().toString(),
-                "organization_id", organizationId.toString(),
-                "role", userRole
-        );
-        var actionLink = supabaseAdminClient.generateInviteLink(email, redirectTo, metadata).block();
-        inviteMailService.sendInvite(email, orgName, userRole, actionLink);
+
+        if (isExistingUser) {
+            var acceptUrl = targetUrl + "/auth/accept-invite?invite_token=" + invite.token();
+            inviteMailService.sendOrgJoinInvite(email, orgName, userRole, acceptUrl);
+        } else {
+            var isAdminApp = "admin".equals(userRole) || "moderator".equals(userRole);
+            var onboardingPath = isAdminApp ? "/auth/onboarding" : "/onboarding";
+            var redirectTo = targetUrl + onboardingPath + "?invite_token=" + invite.token();
+            var metadata = Map.<String, Object>of(
+                    "invite_token", invite.token().toString(),
+                    "organization_id", organizationId.toString(),
+                    "role", userRole
+            );
+            var actionLink = supabaseAdminClient.generateInviteLink(email, redirectTo, metadata).block();
+            inviteMailService.sendInvite(email, orgName, userRole, actionLink);
+        }
 
         return invite;
     }
@@ -112,6 +128,12 @@ public class OrganizationDomainService {
     }
 
     public void deleteInvite(UUID organizationId, UUID inviteId) {
+        var existing = supabaseService.getListWithQuery(
+                "admin.invites",
+                "id=eq." + inviteId + "&organization_id=eq." + organizationId,
+                InviteResponse.class
+        );
+
         int deleted = supabaseService.deleteReturningCount(
                 "admin.invites",
                 "id=eq." + inviteId + "&organization_id=eq." + organizationId
@@ -124,12 +146,54 @@ public class OrganizationDomainService {
                     "Invite could not be deleted."
             );
         }
+
+        if (existing != null && !existing.isEmpty()) {
+            var invite = existing.get(0);
+            if ("pending".equalsIgnoreCase(invite.status())) {
+                deleteAuthUserForPendingInvite(invite.email());
+            }
+        }
+    }
+
+    /**
+     * Supabase's generate_link creates a real auth.users row at invite time. If the
+     * admin revokes the invite while it's still pending, that auth user is dangling:
+     * the email link still resolves to a valid Supabase session, which would let the
+     * recipient bypass the deleted invite. Remove the auth user too — but only when
+     * no profile is attached, otherwise we'd be wiping a real existing user that
+     * was just invited to an additional organization.
+     */
+    private void deleteAuthUserForPendingInvite(String email) {
+        if (email == null || email.isBlank()) {
+            return;
+        }
+        try {
+            UUID userId = supabaseAdminClient.getUserIdByEmail(email);
+            if (userId == null) return;
+            if (profileDomainService.existsByEmail(email)) {
+                log.info("Skipping auth user delete for revoked invite: profile exists");
+                return;
+            }
+
+            supabaseAdminClient.deleteUser(userId).block();
+        } catch (Exception ex) {
+            log.warn("Failed to delete dangling auth user for revoked invite: {}", ex.getMessage());
+        }
     }
 
     public void removeOrganizationMember(UUID organizationId, UUID userId) {
+        String memberFilter = "organization_id=eq." + organizationId + "&user_id=eq." + userId;
+
+        var memberships = supabaseService.getListWithQuery(
+                "admin.organization_members",
+                memberFilter,
+                OrganizationMemberResponse.class
+        );
+        String role = memberships.isEmpty() ? null : memberships.getFirst().user_role();
+
         int deleted = supabaseService.deleteReturningCount(
                 "admin.organization_members",
-                "organization_id=eq." + organizationId + "&user_id=eq." + userId
+                memberFilter
         );
         if (deleted == 0) {
             throw new NoRowsAffectedException(
@@ -138,6 +202,24 @@ public class OrganizationDomainService {
                     "Forbidden operation",
                     "Organization member could not be removed."
             );
+        }
+
+        if ("user".equalsIgnoreCase(role)) {
+            try {
+                supabaseAdminClient.deleteUser(userId).block();
+            } catch (SupabaseApiException ex) {
+                if (ex.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
+                    log.info("Auth user {} already absent while removing member; nothing to cascade-delete", userId);
+                } else {
+                    log.error("Removed org membership for {} but failed to cascade-delete auth user: {}",
+                            userId, ex.getMessage());
+                    throw new IllegalStateException("Failed to delete member data for user " + userId, ex);
+                }
+            } catch (Exception ex) {
+                log.error("Removed org membership for {} but failed to cascade-delete auth user: {}",
+                        userId, ex.getMessage());
+                throw new IllegalStateException("Failed to delete member data for user " + userId, ex);
+            }
         }
     }
 
@@ -213,6 +295,42 @@ public class OrganizationDomainService {
                 "admin.organizations",
                 "id=eq." + organizationId,
                 Map.of("created_by", newOwnerId),
+                Object.class
+        );
+    }
+
+    public java.time.LocalDate getSemesterEndDate(UUID organizationId) {
+        var list = supabaseService.getListWithQuery(
+                "admin.organizations",
+                "id=eq." + organizationId + "&select=semester_end_date",
+                OrganizationResponse.class
+        );
+        return list.isEmpty() ? null : list.get(0).semester_end_date();
+    }
+
+    public void saveSemesterEndDate(UUID organizationId, java.time.LocalDate endDate) {
+        supabaseService.patch(
+                "admin.organizations",
+                "id=eq." + organizationId,
+                java.util.Collections.singletonMap("semester_end_date", endDate),
+                Object.class
+        );
+    }
+
+    public Number getTargetHours(UUID organizationId){
+        var list = supabaseService.getListWithQuery(
+                "admin.organizations",
+                "id=eq." + organizationId + "&select=target_hours",
+                OrganizationResponse.class
+        );
+        return list.isEmpty() ? null : list.get(0).target_hours();
+    }
+
+    public void saveTargetHours(UUID organizationId, Number targetHours) {
+        supabaseService.patch(
+                "admin.organizations",
+                "id=eq." + organizationId,
+                java.util.Collections.singletonMap("target_hours", targetHours),
                 Object.class
         );
     }

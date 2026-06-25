@@ -28,12 +28,13 @@ export class OrganizationService {
 
   private static readonly ROLE_MAPPING: Record<string, string> = {
     member: 'user',
-    admin: 'admin',
+    moderator: 'moderator',
   };
 
   createInvite(organizationId: string, email: string, userRole: string, semester: string): Observable<Invite> {
     const backendRole = OrganizationService.ROLE_MAPPING[userRole] ?? userRole;
-    return this.http.post<Invite>(`${this.baseUrl}/${organizationId}/invites`, { email, userRole: backendRole, semester });
+    const semesterValue = semester === '-' ? null : semester;
+    return this.http.post<Invite>(`${this.baseUrl}/${organizationId}/invites`, { email, userRole: backendRole, semester: semesterValue });
   }
 
   listInvites(organizationId: string): Observable<Invite[]> {
@@ -70,5 +71,21 @@ export class OrganizationService {
 
   transferOwnership(organizationId: string, newOwnerId: string): Observable<void> {
     return this.http.patch<void>(`${this.baseUrl}/${organizationId}/owner`, { newOwnerId });
+  }
+
+  getSemesterEndDate(organizationId: string): Observable<{ semesterEndDate: string | null }> {
+    return this.http.get<{ semesterEndDate: string | null }>(`${this.baseUrl}/${organizationId}/semester-end-date`);
+  }
+
+  saveSemesterEndDate(organizationId: string, semesterEndDate: string | null): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${organizationId}/semester-end-date`, { semesterEndDate });
+  }
+
+  getTargetHours(organizationId: string): Observable<{ targetHours: number | null}>{
+    return this.http.get<{ targetHours: number | null }>(`${this.baseUrl}/${organizationId}/targetHours`);
+  }
+
+  saveTargetHours(organizationId: string, targetHours: number | null): Observable<void>{
+    return this.http.put<void>(`${this.baseUrl}/${organizationId}/targetHours`, { targetHours });
   }
 }

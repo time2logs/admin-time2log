@@ -72,7 +72,7 @@
     }
   </div>
 
-    <!-- Pie Chart: Verrichtete Arbeiten -->
+  <!-- Pie Chart: Verrichtete Arbeiten -->
   <div class="mt-6 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-xl p-5">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
       <div>
@@ -166,18 +166,46 @@
       </div>
     } @else {
       <div class="flex justify-center">
-        <ngx-charts-pie-chart
-          [results]="activityChartData()"
-          [scheme]="colorScheme"
-          [legend]="false"
-          [legendTitle]="''"
-          [legendPosition]="legendPosition"
-          [labels]="true"
-          [trimLabels]="trimLabels()"
-          [doughnut]="false"
-          [tooltipDisabled]="false"
-          [view]="chartView()"
-        />
+        @switch (chartTypeService.current()) {
+          @case ('bar') {
+            <ngx-charts-bar-horizontal
+              [results]="activityChartData()"
+              [scheme]="colorScheme()"
+              [legend]="false"
+              [legendTitle]="''"
+              [legendPosition]="legendPosition"
+              [tooltipDisabled]="false"
+              [xAxisLabel]="'verrichtete Arbeit'"
+              [view]="chartView()"
+            />
+          }
+          @case ('column') {
+            <ngx-charts-bar-vertical
+              [results]="activityChartData()"
+              [scheme]="colorScheme()"
+              [xAxis]="true"
+              [yAxis]="true"
+              [legend]="false"
+              [legendTitle]="''"
+              [legendPosition]="legendPosition"
+              [tooltipDisabled]="false"
+              [yAxisLabel]="'verrichtete Arbeit'"
+              [view]="chartView()"
+            />
+          }
+          @case ('pie') {
+            <ngx-charts-pie-chart
+              [results]="activityChartData()"
+              [scheme]="colorScheme()"
+              [legend]="false"
+              [legendTitle]="''"
+              [legendPosition]="legendPosition"
+              [labels]="true"
+              [tooltipDisabled]="false"
+              [view]="chartView()"
+            />
+          }
+        }
       </div>
     }
   </div>
@@ -193,21 +221,109 @@
       <div class="flex items-center justify-center h-48 text-gray-400 dark:text-[hsl(210,15%,45%)] text-sm">
         {{ 'dashboard.noData' | translate }}
       </div>
-    } @else {
+    }  @else {
       <div class="flex justify-center">
-        <ngx-charts-bar-vertical
-          [results]="locationChartData()"
-          [scheme]="colorScheme"
-          [xAxis]="true"
-          [yAxis]="true"
-          [showXAxisLabel]="false"
-          [showYAxisLabel]="true"
-          [yAxisLabel]="'Stunden'"
-          [showDataLabel]="true"
-          [view]="chartView()"
-        />
+        @switch (chartTypeService.current()) {
+          @case ('bar') {
+            <ngx-charts-bar-horizontal
+              [results]="locationChartData()"
+              [scheme]="colorScheme()"
+              [legend]="false"
+              [legendTitle]="''"
+              [legendPosition]="legendPosition"
+              [tooltipDisabled]="false"
+              [xAxisLabel]="'Stunden'"
+              [view]="chartView()"
+            />
+          }
+          @case ('column') {
+            <ngx-charts-bar-vertical
+              [results]="locationChartData()"
+              [scheme]="colorScheme()"
+              [xAxis]="true"
+              [yAxis]="true"
+              [legend]="false"
+              [legendTitle]="''"
+              [legendPosition]="legendPosition"
+              [tooltipDisabled]="false"
+              [yAxisLabel]="'Stunden'"
+              [view]="chartView()"
+            />
+          }
+          @case ('pie') {
+            <ngx-charts-pie-chart
+              [results]="locationChartData()"
+              [scheme]="colorScheme()"
+              [legend]="false"
+              [legendTitle]="''"
+              [legendPosition]="legendPosition"
+              [labels]="true"
+              [tooltipDisabled]="false"
+              [view]="chartView()"
+            />
+          }
+        }
       </div>
     }
   </div>
+
+
+
+<!-- Bar Chart: Bewertung -->
+<div class="mt-6 bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-xl p-5">
+  <div class="mb-5">
+    <p class="text-lg font-semibold dark:text-[hsl(210,15%,90%)]">{{ 'dashboard.charts.rating.title' | translate }}</p>
+    <p class="text-sm text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ 'dashboard.charts.rating.desc' | translate }}</p>
+  </div>
+
+  @if (locationChartData().length === 0) {
+    <div class="flex items-center justify-center h-48 text-gray-400 dark:text-[hsl(210,15%,45%)] text-sm">
+      {{ 'dashboard.noData' | translate }}
+    </div>
+  }  @else {
+    <div class="flex justify-center">
+      @switch (chartTypeService.current()) {
+        @case ('bar') {
+          <ngx-charts-bar-horizontal
+            [results]="ratingChartData()"
+            [scheme]="colorScheme()"
+            [legend]="false"
+            [legendTitle]="''"
+            [legendPosition]="legendPosition"
+            [tooltipDisabled]="false"
+            [xAxisLabel]="'dashboard.charts.rating.yAxis' | translate"
+            [view]="chartView()"
+          />
+        }
+        @case ('column') {
+          <ngx-charts-bar-vertical
+            [results]="ratingChartData()"
+            [scheme]="colorScheme()"
+            [xAxis]="true"
+            [yAxis]="true"
+            [legend]="false"
+            [legendTitle]="''"
+            [legendPosition]="legendPosition"
+            [tooltipDisabled]="false"
+            [yAxisLabel]="'dashboard.charts.rating.yAxis' | translate"
+            [view]="chartView()"
+          />
+        }
+        @case ('pie') {
+          <ngx-charts-pie-chart
+            [results]="ratingChartData()"
+            [scheme]="colorScheme()"
+            [legend]="false"
+            [legendTitle]="''"
+            [legendPosition]="legendPosition"
+            [labels]="true"
+            [tooltipDisabled]="false"
+            [view]="chartView()"
+          />
+        }
+      }
+    </div>
+  }
 </div>
 
+</div>

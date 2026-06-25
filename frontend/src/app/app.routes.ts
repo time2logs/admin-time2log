@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
+import { systemAdminGuard } from './core/guards/system-admin.guard';
 
 export const routes: Routes = [
   {
@@ -11,6 +12,14 @@ export const routes: Routes = [
   {
     path: 'auth/reset-password',
     loadComponent: () => import('./features/auth/reset-password/reset-password').then((m) => m.ResetPassword),
+  },
+  {
+    path: 'auth/onboarding',
+    loadComponent: () => import('./features/auth/onboarding/onboarding').then((m) => m.OnboardingComponent),
+  },
+  {
+    path: 'auth/accept-invite',
+    loadComponent: () => import('./features/auth/accept-invite/accept-invite').then((m) => m.AcceptInviteComponent),
   },
   {
     path: 'auth',
@@ -38,6 +47,11 @@ export const routes: Routes = [
       import('./features/reports/reports.routes').then(
         (m) => m.REPORTS_ROUTES
       )
+  },
+  {
+    path: 'system-admin',
+    canActivate: [authGuard, systemAdminGuard],
+    loadComponent: () => import('./features/system-admin/system-admin').then((m) => m.SystemAdmin),
   },
   {
     path: 'settings',
