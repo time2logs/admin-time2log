@@ -5,6 +5,7 @@ import ch.time2log.backend.api.rest.dto.outbound.DailyMemberReportDto;
 import ch.time2log.backend.api.rest.dto.outbound.LocationSummaryDto;
 import ch.time2log.backend.api.rest.dto.outbound.MemberAbsenceDto;
 import ch.time2log.backend.api.rest.dto.outbound.MemberActivityRecordDto;
+import ch.time2log.backend.api.rest.dto.outbound.ProfileDto;
 import ch.time2log.backend.api.rest.dto.outbound.RatingSummaryDto;
 import ch.time2log.backend.domain.ReportsDomainService;
 import org.springframework.web.bind.annotation.*;
@@ -45,20 +46,29 @@ public class ReportsController {
     public List<ActivitySummaryDto> getActivitySummary(
             @PathVariable UUID organizationId,
             @RequestParam(required = false) UUID userId,
+            @RequestParam(required = false) UUID professionId,
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to,
             @RequestParam(required = false) List<String> semesters) {
-        return ActivitySummaryDto.ofList(reportsDomainService.getActivitySummary(organizationId, userId, from, to, semesters));
+        return ActivitySummaryDto.ofList(reportsDomainService.getActivitySummary(organizationId, userId, professionId, from, to, semesters));
     }
 
     @GetMapping("/locations/summary")
     public List<LocationSummaryDto> getLocationSummary(
             @PathVariable UUID organizationId,
             @RequestParam(required = false) UUID userId,
+            @RequestParam(required = false) UUID professionId,
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to,
             @RequestParam(required = false) List<String> semesters) {
-        return LocationSummaryDto.ofMap(reportsDomainService.getLocationSummary(organizationId, userId, from, to, semesters));
+        return LocationSummaryDto.ofMap(reportsDomainService.getLocationSummary(organizationId, userId, professionId, from, to, semesters));
+    }
+
+    @GetMapping("/professions/{professionId}/members")
+    public List<ProfileDto> getProfessionMembers(
+            @PathVariable UUID organizationId,
+            @PathVariable UUID professionId) {
+        return ProfileDto.ofList(reportsDomainService.getProfessionMembers(organizationId, professionId));
     }
 
     @GetMapping("/members/{userId}/absences")
@@ -87,9 +97,10 @@ public class ReportsController {
     public List<RatingSummaryDto> getRatingSummary(
             @PathVariable UUID organizationId,
             @RequestParam(required = false) UUID userId,
+            @RequestParam(required = false) UUID professionId,
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to,
             @RequestParam(required = false) List<String> semesters) {
-        return RatingSummaryDto.ofList(reportsDomainService.getRatingSummary(organizationId, userId, from, to, semesters));
+        return RatingSummaryDto.ofList(reportsDomainService.getRatingSummary(organizationId, userId, professionId, from, to, semesters));
     }
 }

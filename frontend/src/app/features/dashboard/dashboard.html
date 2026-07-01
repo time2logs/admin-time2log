@@ -80,14 +80,29 @@
         <p class="text-sm text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ 'dashboard.charts.activities.desc' | translate }}</p>
       </div>
       <div class="flex flex-wrap gap-2 items-center">
-        <!-- User selector -->
-        @if (membersWithActivity().length > 0) {
+        <!-- Professions selector -->
+        @if (allProffessions().length > 0) {
           <select
             class="border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-[hsl(215,25%,16%)] dark:text-[hsl(210,15%,90%)] focus:outline-none focus:ring-2 focus:ring-[hsl(199,80%,52%)]"
-            [value]="selectedUserId()"
+            [value]="selectProffessionsId() || ''"
+            (change)="selectProffessions($any($event.target).value)"
+          >
+            <option [value]="''">{{ 'dashboard.filter.allProfessions' | translate }}</option>
+            @for (proffessions of allProffessions(); track proffessions.id) {
+              <option [value]="proffessions.id">{{ proffessions.label }}</option>
+            }
+          </select>
+        }
+
+        <!-- User selector -->
+        @if (userOptions().length > 0) {
+          <select
+            class="border border-gray-300 dark:border-[hsl(215,20%,25%)] rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-[hsl(215,25%,16%)] dark:text-[hsl(210,15%,90%)] focus:outline-none focus:ring-2 focus:ring-[hsl(199,80%,52%)]"
+            [value]="selectedUserId() || ''"
             (change)="selectUser($any($event.target).value)"
           >
-            @for (member of membersWithActivity(); track member.id) {
+            <option [value]="''">{{ 'dashboard.filter.allApprentices' | translate }}</option>
+            @for (member of userOptions(); track member.id) {
               <option [value]="member.id">{{ member.name }}</option>
             }
           </select>
