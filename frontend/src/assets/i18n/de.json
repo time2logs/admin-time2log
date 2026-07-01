@@ -119,7 +119,9 @@
       "semester": "Semester",
       "semesterHint": "Wähle ein oder mehrere Semester aus",
       "semesterPrefix": "Semester",
-      "noSemesters": "Keine Semester verfügbar."
+      "noSemesters": "Keine Semester verfügbar.",
+      "allProfessions": "Alle Berufe",
+      "allApprentices": "Alle Lehrlinge"
     }
   },
   "organizations": {

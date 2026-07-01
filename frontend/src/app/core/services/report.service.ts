@@ -11,6 +11,7 @@ import {
   MemberActivityRecord,
   RatingSummary,
 } from '@app/core/models/report.models';
+import { Profile } from '@app/core/models/profile.models';
 import { map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
@@ -46,10 +47,11 @@ export class ReportService {
     );
   }
 
-  getActivitySummary(organizationId: string, userId: string, from?: string, to?: string, semesters?: string[]): Observable<ActivitySummary[]> {
+  getActivitySummary(organizationId: string, userId?: string | null, professionId?: string | null, from?: string, to?: string, semesters?: string[]): Observable<ActivitySummary[]> {
     let url = `${this.baseUrl}/${organizationId}/reports/activities/summary`;
     const params: string[] = [];
     if (userId) params.push(`userId=${userId}`);
+    if (professionId) params.push(`professionId=${professionId}`);
     if (semesters && semesters.length > 0) {
       params.push(`semesters=${semesters.join(',')}`);
     } else {
@@ -60,10 +62,11 @@ export class ReportService {
     return this.http.get<ActivitySummary[]>(url);
   }
 
-  getLocationSummary(organizationId: string, userId?: string | null, from?: string, to?: string, semesters?: string[]): Observable<LocationSummary[]> {
+  getLocationSummary(organizationId: string, userId?: string | null, professionId?: string | null, from?: string, to?: string, semesters?: string[]): Observable<LocationSummary[]> {
     let url = `${this.baseUrl}/${organizationId}/reports/locations/summary`;
     const params: string[] = [];
     if (userId) params.push(`userId=${userId}`);
+    if (professionId) params.push(`professionId=${professionId}`);
     if (semesters && semesters.length > 0) {
       params.push(`semesters=${semesters.join(',')}`);
     } else {
@@ -74,11 +77,12 @@ export class ReportService {
     return this.http.get<LocationSummary[]>(url);
   }
 
-  getRatingSummary(organizationId: string, userId?: string | null, from?: string, to?: string, semesters?: string[]): Observable<RatingSummary[]> {
+  getRatingSummary(organizationId: string, userId?: string | null, professionId?: string | null, from?: string, to?: string, semesters?: string[]): Observable<RatingSummary[]> {
 
     let url = `${this.baseUrl}/${organizationId}/reports/ratings/summary`;
     const params: string[] = [];
     if (userId) params.push(`userId=${userId}`);
+    if (professionId) params.push(`professionId=${professionId}`);
     if (semesters && semesters.length > 0) {
       params.push(`semesters=${semesters!.join(',')}`);
     } else {
@@ -87,6 +91,12 @@ export class ReportService {
     }
     if (params.length) url += '?' + params.join('&');
     return this.http.get<RatingSummary[]>(url);
+  }
+
+  getProfessionMembers(organizationId: string, professionId: string): Observable<Profile[]> {
+    return this.http.get<Profile[]>(
+      `${this.baseUrl}/${organizationId}/reports/professions/${professionId}/members`
+    );
   }
 
   getMemberAbsences(organizationId: string, userId: string): Observable<MemberAbsence[]> {
