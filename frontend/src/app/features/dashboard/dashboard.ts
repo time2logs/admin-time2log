@@ -5,7 +5,7 @@ import { NgClass } from '@angular/common';
 import { NgxChartsModule, LegendPosition, Color, ScaleType } from '@swimlane/ngx-charts';
 import { OrganizationService } from '@services/organization.service';
 import { Profile } from '@app/core/models/profile.models';
-import { Organization } from '@app/core/models/organizations.models';
+import { Organization, Profession } from '@app/core/models/organizations.models';
 import { ReportService } from '@services/report.service';
 import { NgxChartEntry, LocationSummary, RatingSummary } from '@app/core/models/report.models';
 import { forkJoin } from 'rxjs';
@@ -25,6 +25,15 @@ interface MemberWithActivity {
   daysInactive: number;
 }
 
+interface ProfessionWithOrg extends Profession {
+  organizationId: string;
+}
+
+interface UserOption {
+  id: string;
+  name: string;
+}
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -42,6 +51,9 @@ export class DashboardComponent implements OnInit {
   // Chart state
   protected readonly selectedOrgId = signal<string | null>(null);
   protected readonly selectedUserId = signal<string | null>(null);
+  protected readonly selectProffessionsId = signal<string | null>(null);
+  protected readonly allProffessions = signal<ProfessionWithOrg[]>([]);
+  protected readonly professionMembers = signal<UserOption[]>([]);
   protected readonly range = signal<DateRange>('30d');
   protected readonly filterMode = signal<FilterMode>('range');
   protected readonly allSemesters = ['1', '2', '3', '4', '5', '6', '7', '8'] as const;
@@ -55,6 +67,11 @@ export class DashboardComponent implements OnInit {
     const orgId = this.selectedOrgId();
     if (!orgId) return [];
     return this.membersWithActivity().filter((m) => m.organizationId === orgId);
+  });
+
+  protected readonly userOptions = computed<UserOption[]>(() => {
+    if (this.selectProffessionsId()) return this.professionMembers();
+    return this.membersWithActivity().map((m) => ({ id: m.id, name: m.name }));
   });
 
   protected readonly legendPosition = LegendPosition.Below;
@@ -78,14 +95,21 @@ export class DashboardComponent implements OnInit {
     effect(() => {
       const orgId = this.selectedOrgId();
       const userId = this.selectedUserId();
+      const profId = this.selectProffessionsId();
       // Read all reactive deps so the effect re-runs on any change.
       const range = this.range();
       const mode = this.filterMode();
       const semesters = this.selectedSemesters();
-      if (!orgId || !userId) return;
-      this.loadActivityChart(orgId, userId, range, mode, semesters);
-      this.loadLocationChart(orgId, userId, range, mode, semesters);
-      this.loadRatingChart(orgId, userId, range, mode, semesters);
+
+      if (!orgId || (!userId && !profId)) {
+        this.activityChartData.set([]);
+        this.locationChartData.set([]);
+        this.ratingChartData.set([]);
+        return;
+      }
+      this.loadActivityChart(orgId, userId, profId, range, mode, semesters);
+      this.loadLocationChart(orgId, userId, profId, range, mode, semesters);
+      this.loadRatingChart(orgId, userId, profId, range, mode, semesters);
     });
   }
 
@@ -103,11 +127,37 @@ export class DashboardComponent implements OnInit {
   }
 
   protected selectUser(userId: string): void {
+    // Leere Auswahl ("Alle Lehrlinge") lässt die Organisation unverändert und aggregiert.
     const member = this.membersWithActivity().find((m) => m.id === userId);
     if (member) {
       this.selectedOrgId.set(member.organizationId);
     }
     this.selectedUserId.set(userId || null);
+  }
+
+  protected selectProffessions(profId: string): void {
+    const id = profId || null;
+    this.selectProffessionsId.set(id);
+    // Beruf gewählt: Default kein User (Aggregation über alle Lernenden dieses Berufs).
+    this.selectedUserId.set(null);
+    this.professionMembers.set([]);
+
+    if (!id) return;
+
+    const profession = this.allProffessions().find((p) => p.id === id);
+    if (!profession) return;
+    this.selectedOrgId.set(profession.organizationId);
+
+    this.reportService.getProfessionMembers(profession.organizationId, id).subscribe({
+      next: (members) => {
+        this.professionMembers.set(
+          members.map((m) => ({
+            id: m.id,
+            name: `${m.firstName} ${m.lastName}`.trim() || 'Unbekannt',
+          }))
+        );
+      },
+    });
   }
 
   protected setRange(range: DateRange): void {
@@ -154,10 +204,10 @@ export class DashboardComponent implements OnInit {
     return { from: fmt(from), to };
   }
 
-  private loadLocationChart(orgId: string, userId: string, range: DateRange, mode: FilterMode, semesters: string[]): void {
+  private loadLocationChart(orgId: string, userId: string | null, profId: string | null, range: DateRange, mode: FilterMode, semesters: string[]): void {
     const useSemesters = mode === 'semester' && semesters.length > 0;
     const { from, to } = useSemesters ? {} as { from?: string; to?: string } : this.getDateParams(range);
-    this.reportService.getLocationSummary(orgId, userId, from, to, useSemesters ? semesters : undefined).subscribe({
+    this.reportService.getLocationSummary(orgId, userId, profId, from, to, useSemesters ? semesters : undefined).subscribe({
       next: (data) => {
         this.locationChartData.set(
           data.map((l: LocationSummary) => ({ name: l.location, value: l.totalHours }))
@@ -166,10 +216,10 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  private loadRatingChart(orgId: string, userId: string, range: DateRange, mode: FilterMode, semesters: string[]): void {
+  private loadRatingChart(orgId: string, userId: string | null, profId: string | null, range: DateRange, mode: FilterMode, semesters: string[]): void {
     const useSemesters = mode === 'semester' && semesters.length > 0;
     const { from, to } = useSemesters ? {} as { from?: string; to?: string } : this.getDateParams(range);
-    this.reportService.getRatingSummary(orgId, userId, from, to, useSemesters ? semesters : undefined).subscribe({
+    this.reportService.getRatingSummary(orgId, userId, profId, from, to, useSemesters ? semesters : undefined).subscribe({
       next: (data) => {
         this.ratingChartData.set(
           data.map((r: RatingSummary) => ({
@@ -198,7 +248,7 @@ export class DashboardComponent implements OnInit {
   }
 
 
-  private loadActivityChart(orgId: string, userId: string, range: DateRange, mode: FilterMode, semesters: string[]): void {
+  private loadActivityChart(orgId: string, userId: string | null, profId: string | null, range: DateRange, mode: FilterMode, semesters: string[]): void {
     if (mode === 'semester' && semesters.length === 0) {
       this.activityChartData.set([]);
       this.locationChartData.set([]);
@@ -207,7 +257,7 @@ export class DashboardComponent implements OnInit {
     this.chartLoading.set(true);
     const useSemesters = mode === 'semester' && semesters.length > 0;
     const { from, to } = useSemesters ? {} as { from?: string; to?: string } : this.getDateParams(range);
-    this.reportService.getActivitySummary(orgId, userId, from, to, useSemesters ? semesters : undefined).subscribe({
+    this.reportService.getActivitySummary(orgId, userId, profId, from, to, useSemesters ? semesters : undefined).subscribe({
       next: (data) => {
         this.activityChartData.set(
           data.map((a) => ({ name: `${a.activityName} (${a.totalHours}h)`, value: a.totalHours }))
@@ -226,6 +276,24 @@ export class DashboardComponent implements OnInit {
           this.selectedOrgId.set(orgs[0].id);
         }
         this.loadAllMembersWithActivity(orgs);
+        this.loadAllProffessions(orgs);
+      },
+    });
+  }
+
+  private loadAllProffessions(orgs: Organization[]): void {
+    if (orgs.length === 0) {
+      this.allProffessions.set([]);
+      return;
+    }
+    const requests = orgs.map((org) => this.organizationService.getProfessions(org.id));
+    forkJoin(requests).subscribe({
+      next: (results) => {
+        this.allProffessions.set(
+          results.flatMap((professions, orgIndex) =>
+            professions.map((p) => ({ ...p, organizationId: orgs[orgIndex].id }))
+          )
+        );
       },
     });
   }

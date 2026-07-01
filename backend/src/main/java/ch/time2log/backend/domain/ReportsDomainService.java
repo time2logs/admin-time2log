@@ -4,6 +4,7 @@ import ch.time2log.backend.domain.models.ActivitySummary;
 import ch.time2log.backend.domain.models.DailyMemberReport;
 import ch.time2log.backend.domain.models.MemberAbsence;
 import ch.time2log.backend.domain.models.MemberActivityRecord;
+import ch.time2log.backend.domain.models.Profile;
 import ch.time2log.backend.domain.models.RatingSummary;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
 import ch.time2log.backend.infrastructure.supabase.responses.AbsenceResponse;
@@ -16,6 +17,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -116,21 +118,12 @@ public class ReportsDomainService {
                 r.location()
         )).toList();
     }
-    public List<ActivitySummary> getActivitySummary(UUID organizationId, UUID userId, String from, String to, List<String> semesters) {
-        if (userId == null) {
+    public List<ActivitySummary> getActivitySummary(UUID organizationId, UUID userId, UUID professionId, String from, String to, List<String> semesters) {
+        if (userId == null && professionId == null) {
             return List.of();
         }
 
-        String query = "organization_id=eq." + organizationId + "&user_id=eq." + userId;
-
-        if (semesters != null && !semesters.isEmpty()) {
-            query += "&current_semester=in.(" + semesters.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")) + ")";
-        } else {
-            if (from != null && !from.isBlank()) query += "&entry_date=gte." + from;
-            if (to != null && !to.isBlank()) query += "&entry_date=lte." + to;
-        }
-
-        var records = supabaseService.getListWithQuery("app.activity_records", query, ActivityRecordResponse.class);
+        var records = fetchFilteredRecords(organizationId, userId, professionId, from, to, semesters);
         if (records.isEmpty()) return List.of();
 
         Map<UUID, Integer> hoursByActivity = records.stream()
@@ -164,18 +157,10 @@ public class ReportsDomainService {
                 .toList();
     }
 
-    public Map<String, Integer> getLocationSummary(UUID organizationId, UUID userId, String from, String to, List<String> semesters) {
-        if (userId == null) return Map.of();
+    public Map<String, Integer> getLocationSummary(UUID organizationId, UUID userId, UUID professionId, String from, String to, List<String> semesters) {
+        if (userId == null && professionId == null) return Map.of();
 
-        String query = "organization_id=eq." + organizationId + "&user_id=eq." + userId;
-        if (semesters != null && !semesters.isEmpty()) {
-            query += "&current_semester=in.(" + semesters.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")) + ")";
-        } else {
-            if (from != null && !from.isBlank()) query += "&entry_date=gte." + from;
-            if (to != null && !to.isBlank()) query += "&entry_date=lte." + to;
-        }
-
-        return supabaseService.getListWithQuery("app.activity_records", query, ActivityRecordResponse.class)
+        return fetchFilteredRecords(organizationId, userId, professionId, from, to, semesters)
                 .stream()
                 .filter(r -> r.location() != null && !r.location().isBlank())
                 .collect(Collectors.groupingBy(ActivityRecordResponse::location,
@@ -225,18 +210,10 @@ public class ReportsDomainService {
         return records.getFirst().created_at();
     }
 
-    public List<RatingSummary> getRatingSummary(UUID organizationId, UUID userId, String from, String to, List<String> semesters) {
-        if (userId == null) return List.of();
+    public List<RatingSummary> getRatingSummary(UUID organizationId, UUID userId, UUID professionId, String from, String to, List<String> semesters) {
+        if (userId == null && professionId == null) return List.of();
 
-        String query = "organization_id=eq." + organizationId + "&user_id=eq." + userId;
-        if (semesters != null && !semesters.isEmpty()) {
-            query += "&current_semester=in.(" + semesters.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")) + ")";
-        } else {
-            if (from != null && !from.isBlank()) query += "&entry_date=gte." + from;
-            if (to != null && !to.isBlank()) query += "&entry_date=lte." + to;
-        }
-
-        var records = supabaseService.getListWithQuery("app.activity_records", query, ActivityRecordResponse.class);
+        var records = fetchFilteredRecords(organizationId, userId, professionId, from, to, semesters);
         if (records.isEmpty()) return List.of();
 
         // Gruppiere ratings pro Aktivität und berechne Durchschnitt
@@ -268,6 +245,65 @@ public class ReportsDomainService {
                         e.getValue().stream().mapToInt(Integer::intValue).average().orElse(0)
                 ))
                 .sorted(Comparator.comparingDouble(RatingSummary::averageRating).reversed())
+                .toList();
+    }
+
+    private List<ActivityRecordResponse> fetchFilteredRecords(UUID organizationId, UUID userId, UUID professionId, String from, String to, List<String> semesters) {
+        // Beruf-Filter vorab auflösen (kann leer sein → keine passenden Records).
+        Set<UUID> professionActivityIds = null;
+        if (professionId != null) {
+            professionActivityIds = getProfessionActivityIds(organizationId, professionId);
+            if (professionActivityIds.isEmpty()) return List.of();
+        }
+
+        String query = "organization_id=eq." + organizationId;
+        if (userId != null) query += "&user_id=eq." + userId;
+
+        if (semesters != null && !semesters.isEmpty()) {
+            query += "&current_semester=in.(" + semesters.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")) + ")";
+        } else {
+            if (from != null && !from.isBlank()) query += "&entry_date=gte." + from;
+            if (to != null && !to.isBlank()) query += "&entry_date=lte." + to;
+        }
+
+        var records = supabaseService.getListWithQuery("app.activity_records", query, ActivityRecordResponse.class);
+
+        if (professionActivityIds != null) {
+            // In-Memory nach Beruf filtern: die Knoten-ID-Liste wäre als in.(...) zu lang für die URL.
+            final Set<UUID> ids = professionActivityIds;
+            records = records.stream()
+                    .filter(r -> r.curriculum_activity_id() != null && ids.contains(r.curriculum_activity_id()))
+                    .toList();
+        }
+
+        return records;
+    }
+
+    /** Alle Curriculum-Knoten-IDs (Aktivitäten), die zu diesem Bildungsplan gehören. */
+    private Set<UUID> getProfessionActivityIds(UUID organizationId, UUID professionId) {
+        return supabaseService.getListWithQuery(
+                "admin.curriculum_nodes",
+                "organization_id=eq." + organizationId + "&profession_id=eq." + professionId,
+                CurriculumNodeResponse.class
+        ).stream().map(CurriculumNodeResponse::id).collect(Collectors.toSet());
+    }
+
+    public List<Profile> getProfessionMembers(UUID organizationId, UUID professionId) {
+        var activityIds = getProfessionActivityIds(organizationId, professionId);
+        if (activityIds.isEmpty()) return List.of();
+
+        var userIds = supabaseService.getListWithQuery(
+                "app.activity_records",
+                "organization_id=eq." + organizationId,
+                ActivityRecordResponse.class
+        ).stream()
+                .filter(r -> r.curriculum_activity_id() != null && activityIds.contains(r.curriculum_activity_id()))
+                .map(ActivityRecordResponse::user_id)
+                .collect(Collectors.toSet());
+        if (userIds.isEmpty()) return List.of();
+
+        return organizationDomainService.getOrganizationMemberProfiles(organizationId).stream()
+                .filter(p -> userIds.contains(p.id()))
                 .toList();
     }
 

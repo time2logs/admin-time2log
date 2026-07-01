@@ -119,7 +119,9 @@
       "semester": "Semester",
       "semesterHint": "Select one or more semesters",
       "semesterPrefix": "Semester",
-      "noSemesters": "No semesters available."
+      "noSemesters": "No semesters available.",
+      "allProfessions": "All professions",
+      "allApprentices": "All apprentices"
     }
   },
   "organizations": {
