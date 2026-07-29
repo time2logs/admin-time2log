@@ -205,6 +205,88 @@ describe('MemberDetail computed signals', () => {
       expect(c().teamGroups()).toHaveSize(0);
     });
 
+    it('lists curriculum activities that were never reported as not performed', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculum1]]));
+      c().allRecords.set([makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-1', hours: 4 })]);
+
+      const group = c().teamGroups()[0];
+      expect(group.hasCurriculumActivities).toBeTrue();
+      expect(group.notPerformedActivities.map((a: { id: string }) => a.id)).toEqual(['act-2']);
+      expect(group.notPerformedActivities[0].hours).toBe(0);
+    });
+
+    it('sorts under-threshold activities ascending by hours, not performed first', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculum1]]));
+      c().allRecords.set([makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-1', hours: 4 })]);
+
+      const group = c().teamGroups()[0];
+      expect(group.underThresholdActivities.map((a: { id: string }) => a.id)).toEqual(['act-2', 'act-1']);
+    });
+
+    it('excludes activities that reached the threshold', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculum1]]));
+      c().allRecords.set([
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-1', hours: 10 }),
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-2', hours: 12 }),
+      ]);
+
+      const group = c().teamGroups()[0];
+      expect(group.underThresholdActivities).toHaveSize(0);
+      expect(group.notPerformedActivities).toHaveSize(0);
+    });
+
+    it('keeps a team group whose records carry no curriculum activity id', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculum1]]));
+      c().allRecords.set([makeRecord({ teamId: 'team-1', curriculumActivityId: null, hours: 8 })]);
+
+      const group = c().teamGroups()[0];
+      expect(group.activityProgress).toHaveSize(0);
+      expect(group.notPerformedActivities).toHaveSize(2);
+    });
+
+    it('labels reported activities from the curriculum, not from the record text', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculum1]]));
+      c().allRecords.set([
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-1', activityLabel: 'Freitext', hours: 4 }),
+      ]);
+
+      expect(c().teamGroups()[0].activityProgress[0].label).toBe('Act 1');
+    });
+
+    it('falls back to the record label for activities outside the curriculum', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculum1]]));
+      c().allRecords.set([
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-unknown', activityLabel: 'Freitext', hours: 4 }),
+      ]);
+
+      const progress = c().teamGroups()[0].activityProgress;
+      expect(progress[0].label).toBe('Freitext');
+    });
+
+    it('skips a team group with neither reported nor curriculum activities', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', { nodes: [], competencies: [] }]]));
+      c().allRecords.set([makeRecord({ teamId: 'team-1', curriculumActivityId: null, hours: 8 })]);
+
+      expect(c().teamGroups()).toHaveSize(0);
+    });
+
+    it('reports no curriculum activities when the profession has none', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', { nodes: [], competencies: [] }]]));
+      c().allRecords.set([makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-1', hours: 4 })]);
+
+      const group = c().teamGroups()[0];
+      expect(group.hasCurriculumActivities).toBeFalse();
+      expect(group.underThresholdActivities).toHaveSize(0);
+    });
+
     it('uses fallback profession curriculum for records without team id', () => {
       c().teams.set([]);
       c().fallbackProfessionId.set('prof-1');
