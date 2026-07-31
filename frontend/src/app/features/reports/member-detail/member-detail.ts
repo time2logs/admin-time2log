@@ -135,10 +135,20 @@ export class MemberDetail implements OnInit {
       map[date] = hasBad ? 'bad_rating' : 'reported';
     }
 
-    const today = formatLocalDate(new Date());
     const year = this.currentYear();
     const month = this.currentMonth();
     const lastDay = new Date(year, month + 1, 0).getDate();
+
+    // Abwesenheitstage markieren (haben Vorrang vor "fehlend", aber nicht vor Einträgen).
+    for (let d = 1; d <= lastDay; d++) {
+      const dateStr = formatLocalDate(new Date(year, month, d));
+      if (map[dateStr]) continue;
+      if (this.absences().some(a => this.absenceCoversDate(a, dateStr))) {
+        map[dateStr] = 'absence';
+      }
+    }
+
+    const today = formatLocalDate(new Date());
     for (let d = 1; d <= lastDay; d++) {
       const date = new Date(year, month, d);
       const dateStr = formatLocalDate(date);
@@ -150,6 +160,25 @@ export class MemberDetail implements OnInit {
       }
     }
     return map;
+  });
+
+  /** Abwesenheiten, die auf den aktuell gewählten Tag fallen (Semesterfilter ignoriert). */
+  protected readonly selectedDayAbsences = computed(() => {
+    const date = this.selectedDate();
+    const colorByType = this.absenceTypeColor();
+    return this.absences()
+      .filter(a => this.absenceCoversDate(a, date))
+      .map(a => {
+        const meta = ABSENCE_TYPE_BY_ID.get(a.absenceTypeId);
+        return {
+          id: a.id,
+          typeLabel: meta ? this.translate.instant(meta.labelKey) : a.absenceTypeId,
+          color: colorByType.get(a.absenceTypeId) ?? DEFAULT_ABSENCE_COLOR,
+          dayFraction: a.dayFraction,
+          isRecurring: a.isRecurring,
+          notes: a.notes,
+        };
+      });
   });
 
   protected readonly currentYear = signal(new Date().getFullYear());
@@ -264,6 +293,17 @@ export class MemberDetail implements OnInit {
       count++;
     }
     return count * (a.dayFraction || 1);
+  }
+
+  /**
+   * Ob eine Absenz den gegebenen Tag ('YYYY-MM-DD') abdeckt: innerhalb [start, end]
+   * und – falls eine rrule mit BYDAY vorliegt – am passenden Wochentag.
+   */
+  private absenceCoversDate(a: MemberAbsence, date: string): boolean {
+    if (date < a.startDate || date > a.endDate) return false;
+    const byday = this.parseByDay(a.rrule);
+    if (!byday) return true;
+    return byday.has(new Date(date + 'T00:00:00').getDay());
   }
 
   /** Parst BYDAY (z. B. "MO,WE" oder "2MO") aus einer iCal-rrule zu Wochentagen (0=So). */
