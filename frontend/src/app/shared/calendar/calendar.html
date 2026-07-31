@@ -53,12 +53,13 @@
           {{ day.day }}
 
           <!-- Status dot -->
-          @if (day.isCurrentMonth && !day.isFuture && getStatus(day.date)) {
+          @if (day.isCurrentMonth && (!day.isFuture || getStatus(day.date) === 'absence') && getStatus(day.date)) {
             <span
               class="absolute bottom-1 h-1.5 w-1.5 rounded-full"
               [class.bg-green-500]="getStatus(day.date) === 'reported'"
               [class.bg-yellow-400]="getStatus(day.date) === 'bad_rating'"
               [class.bg-red-400]="getStatus(day.date) === 'missing'"
+              [class.bg-purple-400]="getStatus(day.date) === 'absence'"
               [class.opacity-0]="selectedDate() === day.date"
             ></span>
           }

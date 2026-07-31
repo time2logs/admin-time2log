@@ -10,7 +10,7 @@ import { MemberDetail } from './member-detail';
 import { OrganizationService } from '@services/organization.service';
 import { ReportService } from '@services/report.service';
 import { TeamService } from '@services/team.service';
-import { MemberActivityRecord, CurriculumOverview } from '@app/core/models/report.models';
+import { MemberActivityRecord, CurriculumOverview, MemberAbsence } from '@app/core/models/report.models';
 import { Team } from '@app/core/models/team.models';
 
 function makeRecord(overrides: Partial<MemberActivityRecord> = {}): MemberActivityRecord {
@@ -24,6 +24,21 @@ function makeRecord(overrides: Partial<MemberActivityRecord> = {}): MemberActivi
     rating: null,
     teamId: null,
     location: null,
+    ...overrides,
+  };
+}
+
+function makeAbsence(overrides: Partial<MemberAbsence> = {}): MemberAbsence {
+  return {
+    id: crypto.randomUUID(),
+    absenceTypeId: 'vacation',
+    startDate: '2099-01-10',
+    endDate: '2099-01-10',
+    rrule: null,
+    isRecurring: false,
+    dayFraction: 1,
+    notes: null,
+    currentSemester: null,
     ...overrides,
   };
 }
@@ -116,6 +131,65 @@ describe('MemberDetail computed signals', () => {
         makeRecord({ entryDate: '2099-01-11', rating: 4 }),
       ]);
       expect(Object.keys(c().statusMap())).toHaveSize(2);
+    });
+
+    it('marks an absence day as absence', () => {
+      c().currentYear.set(2099);
+      c().currentMonth.set(0);
+      c().absences.set([makeAbsence({ startDate: '2099-01-10', endDate: '2099-01-10' })]);
+      expect(c().statusMap()['2099-01-10']).toBe('absence');
+    });
+
+    it('lets an activity record take precedence over an absence on the same day', () => {
+      c().currentYear.set(2099);
+      c().currentMonth.set(0);
+      c().monthRecords.set([makeRecord({ entryDate: '2099-01-10', rating: 4 })]);
+      c().absences.set([makeAbsence({ startDate: '2099-01-10', endDate: '2099-01-10' })]);
+      expect(c().statusMap()['2099-01-10']).toBe('reported');
+    });
+
+    it('marks each day within an absence range', () => {
+      c().currentYear.set(2099);
+      c().currentMonth.set(0);
+      c().absences.set([makeAbsence({ startDate: '2099-01-10', endDate: '2099-01-12' })]);
+      const map = c().statusMap();
+      expect(map['2099-01-10']).toBe('absence');
+      expect(map['2099-01-11']).toBe('absence');
+      expect(map['2099-01-12']).toBe('absence');
+    });
+
+    it('only marks matching weekdays for a recurring absence with BYDAY', () => {
+      c().currentYear.set(2099);
+      c().currentMonth.set(0);
+      // 2099-01-12 is a Monday; range spans a full week.
+      c().absences.set([makeAbsence({
+        startDate: '2099-01-12',
+        endDate: '2099-01-18',
+        rrule: 'FREQ=WEEKLY;BYDAY=MO',
+        isRecurring: true,
+      })]);
+      const map = c().statusMap();
+      expect(map['2099-01-12']).toBe('absence');
+      expect(map['2099-01-13']).toBeUndefined();
+    });
+  });
+
+  describe('selectedDayAbsences', () => {
+    it('returns absences covering the selected date', () => {
+      c().selectedDate.set('2099-01-10');
+      c().absences.set([
+        makeAbsence({ startDate: '2099-01-10', endDate: '2099-01-10', absenceTypeId: 'sick' }),
+        makeAbsence({ startDate: '2099-02-01', endDate: '2099-02-01', absenceTypeId: 'vacation' }),
+      ]);
+      const result = c().selectedDayAbsences();
+      expect(result).toHaveSize(1);
+      expect(result[0].typeLabel).toContain('sick');
+    });
+
+    it('returns an empty array when no absence covers the selected date', () => {
+      c().selectedDate.set('2099-03-15');
+      c().absences.set([makeAbsence({ startDate: '2099-01-10', endDate: '2099-01-10' })]);
+      expect(c().selectedDayAbsences()).toHaveSize(0);
     });
   });
 

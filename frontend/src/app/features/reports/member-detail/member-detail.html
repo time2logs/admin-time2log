@@ -35,9 +35,35 @@
       <div class="p-4">
         @if (isLoadingRecords()) {
           <p class="text-gray-500 dark:text-[hsl(210,15%,55%)] text-sm">{{ 'common.loading' | translate }}</p>
-        } @else if (selectedDayRecords().length === 0) {
+        } @else if (selectedDayRecords().length === 0 && selectedDayAbsences().length === 0) {
           <p class="text-gray-500 dark:text-[hsl(210,15%,55%)] text-sm">{{ 'reports.memberDetail.noRecordsForDay' | translate }}</p>
         } @else {
+          @if (selectedDayAbsences().length > 0) {
+            <ul class="space-y-3 mb-3">
+              @for (absence of selectedDayAbsences(); track absence.id) {
+                <li class="border border-gray-100 dark:border-[hsl(215,20%,22%)] rounded-lg p-3 bg-gray-50 dark:bg-[hsl(215,25%,16%)]">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="h-2.5 w-2.5 rounded-full flex-shrink-0" [style.background-color]="absence.color"></span>
+                    <span class="text-sm font-medium text-gray-800 dark:text-[hsl(210,15%,90%)]">{{ absence.typeLabel }}</span>
+                    @if (absence.dayFraction < 1) {
+                      <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-[hsl(215,25%,20%)] text-gray-600 dark:text-[hsl(210,15%,65%)]">
+                        {{ 'reports.memberDetail.absences.partialDay' | translate:{ fraction: absence.dayFraction } }}
+                      </span>
+                    }
+                    @if (absence.isRecurring) {
+                      <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+                        {{ 'reports.memberDetail.absences.recurring' | translate }}
+                      </span>
+                    }
+                  </div>
+                  @if (absence.notes) {
+                    <p class="text-xs text-gray-500 dark:text-[hsl(210,15%,55%)] mt-1">{{ absence.notes }}</p>
+                  }
+                </li>
+              }
+            </ul>
+          }
+          @if (selectedDayRecords().length > 0) {
           <ul class="space-y-3">
             @for (record of selectedDayRecords(); track record.id) {
               <li class="border border-gray-100 dark:border-[hsl(215,20%,22%)] rounded-lg p-3 bg-gray-50 dark:bg-[hsl(215,25%,16%)]">
@@ -68,6 +94,7 @@
               </li>
             }
           </ul>
+          }
         }
       </div>
     </div>
