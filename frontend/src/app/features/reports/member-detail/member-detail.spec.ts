@@ -10,7 +10,7 @@ import { MemberDetail } from './member-detail';
 import { OrganizationService } from '@services/organization.service';
 import { ReportService } from '@services/report.service';
 import { TeamService } from '@services/team.service';
-import { MemberActivityRecord, CurriculumOverview } from '@app/core/models/report.models';
+import { MemberActivityRecord, CurriculumOverview, MemberAbsence } from '@app/core/models/report.models';
 import { Team } from '@app/core/models/team.models';
 
 function makeRecord(overrides: Partial<MemberActivityRecord> = {}): MemberActivityRecord {
@@ -24,6 +24,21 @@ function makeRecord(overrides: Partial<MemberActivityRecord> = {}): MemberActivi
     rating: null,
     teamId: null,
     location: null,
+    ...overrides,
+  };
+}
+
+function makeAbsence(overrides: Partial<MemberAbsence> = {}): MemberAbsence {
+  return {
+    id: crypto.randomUUID(),
+    absenceTypeId: 'vacation',
+    startDate: '2099-01-10',
+    endDate: '2099-01-10',
+    rrule: null,
+    isRecurring: false,
+    dayFraction: 1,
+    notes: null,
+    currentSemester: null,
     ...overrides,
   };
 }
@@ -117,6 +132,65 @@ describe('MemberDetail computed signals', () => {
       ]);
       expect(Object.keys(c().statusMap())).toHaveSize(2);
     });
+
+    it('marks an absence day as absence', () => {
+      c().currentYear.set(2099);
+      c().currentMonth.set(0);
+      c().absences.set([makeAbsence({ startDate: '2099-01-10', endDate: '2099-01-10' })]);
+      expect(c().statusMap()['2099-01-10']).toBe('absence');
+    });
+
+    it('lets an activity record take precedence over an absence on the same day', () => {
+      c().currentYear.set(2099);
+      c().currentMonth.set(0);
+      c().monthRecords.set([makeRecord({ entryDate: '2099-01-10', rating: 4 })]);
+      c().absences.set([makeAbsence({ startDate: '2099-01-10', endDate: '2099-01-10' })]);
+      expect(c().statusMap()['2099-01-10']).toBe('reported');
+    });
+
+    it('marks each day within an absence range', () => {
+      c().currentYear.set(2099);
+      c().currentMonth.set(0);
+      c().absences.set([makeAbsence({ startDate: '2099-01-10', endDate: '2099-01-12' })]);
+      const map = c().statusMap();
+      expect(map['2099-01-10']).toBe('absence');
+      expect(map['2099-01-11']).toBe('absence');
+      expect(map['2099-01-12']).toBe('absence');
+    });
+
+    it('only marks matching weekdays for a recurring absence with BYDAY', () => {
+      c().currentYear.set(2099);
+      c().currentMonth.set(0);
+      // 2099-01-12 is a Monday; range spans a full week.
+      c().absences.set([makeAbsence({
+        startDate: '2099-01-12',
+        endDate: '2099-01-18',
+        rrule: 'FREQ=WEEKLY;BYDAY=MO',
+        isRecurring: true,
+      })]);
+      const map = c().statusMap();
+      expect(map['2099-01-12']).toBe('absence');
+      expect(map['2099-01-13']).toBeUndefined();
+    });
+  });
+
+  describe('selectedDayAbsences', () => {
+    it('returns absences covering the selected date', () => {
+      c().selectedDate.set('2099-01-10');
+      c().absences.set([
+        makeAbsence({ startDate: '2099-01-10', endDate: '2099-01-10', absenceTypeId: 'sick' }),
+        makeAbsence({ startDate: '2099-02-01', endDate: '2099-02-01', absenceTypeId: 'vacation' }),
+      ]);
+      const result = c().selectedDayAbsences();
+      expect(result).toHaveSize(1);
+      expect(result[0].typeLabel).toContain('sick');
+    });
+
+    it('returns an empty array when no absence covers the selected date', () => {
+      c().selectedDate.set('2099-03-15');
+      c().absences.set([makeAbsence({ startDate: '2099-01-10', endDate: '2099-01-10' })]);
+      expect(c().selectedDayAbsences()).toHaveSize(0);
+    });
   });
 
   describe('teamGroups', () => {
@@ -203,6 +277,88 @@ describe('MemberDetail computed signals', () => {
     it('returns empty array when no records exist', () => {
       c().allRecords.set([]);
       expect(c().teamGroups()).toHaveSize(0);
+    });
+
+    it('lists curriculum activities that were never reported as not performed', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculum1]]));
+      c().allRecords.set([makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-1', hours: 4 })]);
+
+      const group = c().teamGroups()[0];
+      expect(group.hasCurriculumActivities).toBeTrue();
+      expect(group.notPerformedActivities.map((a: { id: string }) => a.id)).toEqual(['act-2']);
+      expect(group.notPerformedActivities[0].hours).toBe(0);
+    });
+
+    it('sorts under-threshold activities ascending by hours, not performed first', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculum1]]));
+      c().allRecords.set([makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-1', hours: 4 })]);
+
+      const group = c().teamGroups()[0];
+      expect(group.underThresholdActivities.map((a: { id: string }) => a.id)).toEqual(['act-2', 'act-1']);
+    });
+
+    it('excludes activities that reached the threshold', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculum1]]));
+      c().allRecords.set([
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-1', hours: 10 }),
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-2', hours: 12 }),
+      ]);
+
+      const group = c().teamGroups()[0];
+      expect(group.underThresholdActivities).toHaveSize(0);
+      expect(group.notPerformedActivities).toHaveSize(0);
+    });
+
+    it('keeps a team group whose records carry no curriculum activity id', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculum1]]));
+      c().allRecords.set([makeRecord({ teamId: 'team-1', curriculumActivityId: null, hours: 8 })]);
+
+      const group = c().teamGroups()[0];
+      expect(group.activityProgress).toHaveSize(0);
+      expect(group.notPerformedActivities).toHaveSize(2);
+    });
+
+    it('labels reported activities from the curriculum, not from the record text', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculum1]]));
+      c().allRecords.set([
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-1', activityLabel: 'Freitext', hours: 4 }),
+      ]);
+
+      expect(c().teamGroups()[0].activityProgress[0].label).toBe('Act 1');
+    });
+
+    it('falls back to the record label for activities outside the curriculum', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculum1]]));
+      c().allRecords.set([
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-unknown', activityLabel: 'Freitext', hours: 4 }),
+      ]);
+
+      const progress = c().teamGroups()[0].activityProgress;
+      expect(progress[0].label).toBe('Freitext');
+    });
+
+    it('skips a team group with neither reported nor curriculum activities', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', { nodes: [], competencies: [] }]]));
+      c().allRecords.set([makeRecord({ teamId: 'team-1', curriculumActivityId: null, hours: 8 })]);
+
+      expect(c().teamGroups()).toHaveSize(0);
+    });
+
+    it('reports no curriculum activities when the profession has none', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', { nodes: [], competencies: [] }]]));
+      c().allRecords.set([makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-1', hours: 4 })]);
+
+      const group = c().teamGroups()[0];
+      expect(group.hasCurriculumActivities).toBeFalse();
+      expect(group.underThresholdActivities).toHaveSize(0);
     });
 
     it('uses fallback profession curriculum for records without team id', () => {

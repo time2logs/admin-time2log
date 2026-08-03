@@ -363,6 +363,13 @@
       "noRecordsForDay": "Keine Einträge für diesen Tag.",
       "progress": "Aktivitätsfortschritt",
       "competencies": "Kompetenzen",
+      "openActivities": {
+        "title": "Offene Arbeiten",
+        "filterNotPerformed": "Nicht ausgeführt",
+        "filterUnderThreshold": "Unter {{hours}} h",
+        "empty": "Keine offenen Arbeiten.",
+        "locationHint": "Nur Standort: {{location}}"
+      },
       "locationFilter": "Standort",
       "allLocations": "Alle Standorte",
       "noLocations": "Keine Standorte verfügbar",

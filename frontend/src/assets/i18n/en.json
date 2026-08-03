@@ -360,6 +360,13 @@
       "noRecordsForDay": "No entries for this day.",
       "progress": "Activity Progress",
       "competencies": "Competencies",
+      "openActivities": {
+        "title": "Open Activities",
+        "filterNotPerformed": "Not performed",
+        "filterUnderThreshold": "Under {{hours}} h",
+        "empty": "No open activities.",
+        "locationHint": "Location only: {{location}}"
+      },
       "locationFilter": "Location",
       "allLocations": "All locations",
       "noLocations": "No locations available",
