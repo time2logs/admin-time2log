@@ -198,30 +198,107 @@
   @for (group of teamGroups(); track group.teamId) {
     <div class="space-y-4">
       <!-- Activity progress per team -->
-      <div class="bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm overflow-hidden">
-        <div class="px-5 py-3 bg-gray-50 dark:bg-[hsl(215,25%,16%)] border-b border-gray-200 dark:border-[hsl(215,20%,22%)]">
-          <h2 class="text-lg font-medium text-gray-800 dark:text-[hsl(210,15%,90%)]">
-            {{ 'reports.memberDetail.progress' | translate }}
-            <span class="text-gray-500 dark:text-[hsl(210,15%,55%)]">– {{ group.teamName }}</span>
-          </h2>
+      @if (group.activityProgress.length > 0) {
+        <div class="bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm overflow-hidden">
+          <div class="px-5 py-3 bg-gray-50 dark:bg-[hsl(215,25%,16%)] border-b border-gray-200 dark:border-[hsl(215,20%,22%)]">
+            <h2 class="text-lg font-medium text-gray-800 dark:text-[hsl(210,15%,90%)]">
+              {{ 'reports.memberDetail.progress' | translate }}
+              <span class="text-gray-500 dark:text-[hsl(210,15%,55%)]">– {{ group.teamName }}</span>
+            </h2>
+          </div>
+          <div class="p-4 space-y-3">
+            @for (activity of group.activityProgress; track activity.id) {
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-sm text-gray-700 dark:text-[hsl(210,15%,70%)] truncate">{{ activity.label }}</span>
+                  <span class="text-sm font-medium text-gray-800 dark:text-[hsl(210,15%,90%)] ml-2 flex-shrink-0">{{ activity.hours }}h</span>
+                </div>
+                <div class="h-1.5 bg-gray-100 dark:bg-[hsl(215,20%,22%)] rounded-full overflow-hidden">
+                  <div
+                    class="h-full bg-green-500 rounded-full transition-all"
+                    [style.width.%]="(activity.hours / group.maxActivityHours) * 100"
+                  ></div>
+                </div>
+              </div>
+            }
+          </div>
         </div>
-        <div class="p-4 space-y-3">
-          @for (activity of group.activityProgress; track activity.id) {
-            <div>
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-sm text-gray-700 dark:text-[hsl(210,15%,70%)] truncate">{{ activity.label }}</span>
-                <span class="text-sm font-medium text-gray-800 dark:text-[hsl(210,15%,90%)] ml-2 flex-shrink-0">{{ activity.hours }}h</span>
-              </div>
-              <div class="h-1.5 bg-gray-100 dark:bg-[hsl(215,20%,22%)] rounded-full overflow-hidden">
-                <div
-                  class="h-full bg-green-500 rounded-full transition-all"
-                  [style.width.%]="(activity.hours / group.maxActivityHours) * 100"
-                ></div>
-              </div>
+      }
+
+      <!-- Open activities per team -->
+      @if (group.hasCurriculumActivities) {
+        <div class="bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm overflow-hidden">
+          <div class="px-5 py-3 bg-gray-50 dark:bg-[hsl(215,25%,16%)] border-b border-gray-200 dark:border-[hsl(215,20%,22%)] flex items-center justify-between gap-3 flex-wrap">
+            <h2 class="text-lg font-medium text-gray-800 dark:text-[hsl(210,15%,90%)]">
+              {{ 'reports.memberDetail.openActivities.title' | translate }}
+              <span class="text-gray-500 dark:text-[hsl(210,15%,55%)]">– {{ group.teamName }}</span>
+            </h2>
+            <div
+              class="inline-flex rounded-lg border border-gray-300 dark:border-[hsl(215,20%,25%)] overflow-hidden text-sm"
+              role="group"
+              [attr.aria-label]="'reports.memberDetail.openActivities.title' | translate"
+            >
+              <button
+                type="button"
+                class="px-3 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[hsl(199,80%,52%)]"
+                [class]="openActivityFilter() === 'notPerformed'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-600 dark:text-[hsl(210,15%,70%)] hover:bg-gray-100 dark:hover:bg-[hsl(215,25%,20%)]'"
+                [attr.aria-pressed]="openActivityFilter() === 'notPerformed'"
+                (click)="onOpenActivityFilterSelected('notPerformed')"
+              >
+                {{ 'reports.memberDetail.openActivities.filterNotPerformed' | translate }} ({{ group.notPerformedActivities.length }})
+              </button>
+              <button
+                type="button"
+                class="px-3 py-1.5 border-l border-gray-300 dark:border-[hsl(215,20%,25%)] transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[hsl(199,80%,52%)]"
+                [class]="openActivityFilter() === 'underThreshold'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-600 dark:text-[hsl(210,15%,70%)] hover:bg-gray-100 dark:hover:bg-[hsl(215,25%,20%)]'"
+                [attr.aria-pressed]="openActivityFilter() === 'underThreshold'"
+                (click)="onOpenActivityFilterSelected('underThreshold')"
+              >
+                {{ 'reports.memberDetail.openActivities.filterUnderThreshold' | translate:{ hours: openActivityThreshold } }} ({{ group.underThresholdActivities.length }})
+              </button>
             </div>
+          </div>
+          @if (selectedLocation()) {
+            <p class="px-5 pt-2 text-xs text-gray-400 dark:text-[hsl(210,15%,45%)]">
+              {{ 'reports.memberDetail.openActivities.locationHint' | translate:{ location: selectedLocation() } }}
+            </p>
           }
+          @let openActivities = openActivityFilter() === 'notPerformed'
+            ? group.notPerformedActivities
+            : group.underThresholdActivities;
+          <div class="p-4 max-h-80 overflow-y-auto">
+            @if (openActivities.length === 0) {
+              <p class="text-gray-500 dark:text-[hsl(210,15%,55%)] text-sm">{{ 'reports.memberDetail.openActivities.empty' | translate }}</p>
+            } @else {
+              <ul class="space-y-3">
+                @for (activity of openActivities; track activity.id) {
+                  <li>
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="text-sm text-gray-700 dark:text-[hsl(210,15%,70%)] truncate">{{ activity.label }}</span>
+                      <span
+                        class="text-sm font-medium ml-2 flex-shrink-0"
+                        [class]="activity.hours > 0
+                          ? 'text-gray-800 dark:text-[hsl(210,15%,90%)]'
+                          : 'text-gray-400 dark:text-[hsl(210,15%,45%)]'"
+                      >{{ activity.hours }}h</span>
+                    </div>
+                    <div class="h-1.5 bg-gray-100 dark:bg-[hsl(215,20%,22%)] rounded-full overflow-hidden">
+                      <div
+                        class="h-full bg-amber-500 rounded-full transition-all"
+                        [style.width.%]="(activity.hours / openActivityThreshold) * 100"
+                      ></div>
+                    </div>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
         </div>
-      </div>
+      }
 
       <!-- Competency progress per team -->
       @if (group.curriculum && group.curriculum.competencies.length > 0) {

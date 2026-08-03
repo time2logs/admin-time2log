@@ -13,14 +13,27 @@ import { ABSENCE_TYPES, ABSENCE_TYPE_BY_ID, CurriculumOverview, DEFAULT_ABSENCE_
 import { Calendar } from '@app/shared/calendar/calendar';
 import { formatLocalDate } from '@app/shared/utils/date.utils';
 
+const OPEN_ACTIVITY_HOURS_THRESHOLD = 10;
+
+type OpenActivityFilter = 'notPerformed' | 'underThreshold';
+
+interface ActivityHours {
+  id: string;
+  label: string;
+  hours: number;
+}
+
 interface TeamCompetencyGroup {
   teamId: string | null;
   teamName: string;
   curriculum: CurriculumOverview | null;
-  activityProgress: { id: string; label: string; hours: number }[];
+  activityProgress: ActivityHours[];
   maxActivityHours: number;
   competencyHours: Map<string, number>;
   maxCompetencyHours: number;
+  underThresholdActivities: ActivityHours[];
+  notPerformedActivities: ActivityHours[];
+  hasCurriculumActivities: boolean;
 }
 
 @Component({
@@ -50,6 +63,9 @@ export class MemberDetail implements OnInit {
   protected readonly selectedLocation = signal('');
   protected readonly availableLocations = signal<string[]>([]);
   protected readonly hasLocationOptions = computed(() => this.availableLocations().length > 0);
+
+  protected readonly openActivityFilter = signal<OpenActivityFilter>('notPerformed');
+  protected readonly openActivityThreshold = OPEN_ACTIVITY_HOURS_THRESHOLD;
 
   /** Alle Absenzen des Members (ungefiltert); Filterung erfolgt clientseitig. */
   protected readonly absences = signal<MemberAbsence[]>([]);
@@ -210,20 +226,32 @@ export class MemberDetail implements OnInit {
           activityMap.set(r.curriculumActivityId, { label: r.activityLabel || '—', hours: r.hours });
         }
       }
-      const activityProgress = Array.from(activityMap.entries())
-        .map(([id, { label, hours }]) => ({ id, label, hours }))
-        .sort((a, b) => b.hours - a.hours);
-
-      if (activityProgress.length === 0) continue;
-
       const team = teamId ? teams.find(t => t.id === teamId) : null;
       const curriculum = team
         ? curricula.get(team.professionId) ?? null
         : fallbackProfessionId ? curricula.get(fallbackProfessionId) ?? null : null;
 
+      const hoursById = new Map(Array.from(activityMap, ([id, entry]) => [id, entry.hours] as const));
+
+      const curriculumActivities: ActivityHours[] = (curriculum?.nodes ?? [])
+        .filter(node => node.nodeType === 'activity')
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+        .map(node => ({ id: node.id, label: node.label, hours: hoursById.get(node.id) ?? 0 }));
+
+      const labelById = new Map(curriculumActivities.map(a => [a.id, a.label]));
+
+      const activityProgress = Array.from(activityMap.entries())
+        .map(([id, { label, hours }]) => ({ id, label: labelById.get(id) ?? label, hours }))
+        .sort((a, b) => b.hours - a.hours);
+
+      if (activityProgress.length === 0 && curriculumActivities.length === 0) continue;
+
+      const underThresholdActivities = curriculumActivities
+        .filter(a => a.hours < OPEN_ACTIVITY_HOURS_THRESHOLD)
+        .sort((a, b) => a.hours - b.hours);
+
       const competencyHours = new Map<string, number>();
       if (curriculum) {
-        const hoursById = new Map(activityProgress.map(a => [a.id, a.hours]));
         for (const node of curriculum.nodes) {
           if (node.nodeType !== 'activity') continue;
           const h = hoursById.get(node.id) ?? 0;
@@ -245,6 +273,9 @@ export class MemberDetail implements OnInit {
           1,
           ...(curriculum?.competencies.map(c => competencyHours.get(c.id) ?? 0) ?? [])
         ),
+        underThresholdActivities,
+        notPerformedActivities: underThresholdActivities.filter(a => a.hours === 0),
+        hasCurriculumActivities: curriculumActivities.length > 0,
       });
     }
 
@@ -335,6 +366,10 @@ export class MemberDetail implements OnInit {
     const lastDay = new Date(event.year, event.month, 0).getDate();
     const to = `${event.year}-${String(event.month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
     this.loadMonthRecords(from, to);
+  }
+
+  protected onOpenActivityFilterSelected(filter: OpenActivityFilter): void {
+    this.openActivityFilter.set(filter);
   }
 
   protected onLocationSelected(location: string): void {
