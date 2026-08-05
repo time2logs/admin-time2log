@@ -12,6 +12,8 @@ import ch.time2log.backend.infrastructure.supabase.responses.ActivityRecordRespo
 import ch.time2log.backend.infrastructure.supabase.responses.CurriculumNodeResponse;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -47,13 +49,16 @@ public class ReportsDomainService {
         return profiles.stream().map(profile -> {
             var userRecords = byUser.getOrDefault(profile.id(), List.of());
             String status;
-            int totalHours = 0;
+            BigDecimal totalHours = BigDecimal.ZERO.setScale(2);
             Integer minRating = null;
 
             if (userRecords.isEmpty()) {
                 status = "missing";
             } else {
-                totalHours = userRecords.stream().mapToInt(ActivityRecordResponse::hours).sum();
+                totalHours = userRecords.stream()
+                        .map(ActivityRecordResponse::hours)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add)
+                        .setScale(2, RoundingMode.HALF_UP);
                 var ratings = userRecords.stream()
                         .filter(r -> r.rating() != null)
                         .mapToInt(ActivityRecordResponse::rating)
@@ -126,11 +131,11 @@ public class ReportsDomainService {
         var records = fetchFilteredRecords(organizationId, userId, professionId, from, to, semesters);
         if (records.isEmpty()) return List.of();
 
-        Map<UUID, Integer> hoursByActivity = records.stream()
+        Map<UUID, BigDecimal> hoursByActivity = records.stream()
                 .filter(r -> r.curriculum_activity_id() != null)
                 .collect(Collectors.groupingBy(
                         ActivityRecordResponse::curriculum_activity_id,
-                        Collectors.summingInt(ActivityRecordResponse::hours)
+                        Collectors.reducing(BigDecimal.ZERO, ActivityRecordResponse::hours, BigDecimal::add)
                 ));
 
         if (hoursByActivity.isEmpty()) return List.of();
@@ -151,20 +156,25 @@ public class ReportsDomainService {
                 .map(e -> new ActivitySummary(
                         e.getKey(),
                         displayLabels.getOrDefault(e.getKey(), "Unbekannt"),
-                        e.getValue()
+                        e.getValue().setScale(2, RoundingMode.HALF_UP)
                 ))
-                .sorted(Comparator.comparingInt(ActivitySummary::totalHours).reversed())
+                .sorted(Comparator.comparing(ActivitySummary::totalHours).reversed())
                 .toList();
     }
 
-    public Map<String, Integer> getLocationSummary(UUID organizationId, UUID userId, UUID professionId, String from, String to, List<String> semesters) {
+    public Map<String, BigDecimal> getLocationSummary(UUID organizationId, UUID userId, UUID professionId, String from, String to, List<String> semesters) {
         if (userId == null && professionId == null) return Map.of();
 
         return fetchFilteredRecords(organizationId, userId, professionId, from, to, semesters)
                 .stream()
                 .filter(r -> r.location() != null && !r.location().isBlank())
                 .collect(Collectors.groupingBy(ActivityRecordResponse::location,
-                        Collectors.summingInt(ActivityRecordResponse::hours)));
+                        Collectors.reducing(BigDecimal.ZERO, ActivityRecordResponse::hours, BigDecimal::add)))
+                .entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> e.getValue().setScale(2, RoundingMode.HALF_UP)
+                ));
     }
 
     public List<String> getAvailableSemesters(UUID organizationId, UUID userId) {

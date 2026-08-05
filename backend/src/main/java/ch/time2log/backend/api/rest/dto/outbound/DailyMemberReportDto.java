@@ -2,6 +2,7 @@ package ch.time2log.backend.api.rest.dto.outbound;
 
 import ch.time2log.backend.domain.models.DailyMemberReport;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -10,7 +11,7 @@ public record DailyMemberReportDto(
         String firstName,
         String lastName,
         String status,
-        int totalHours,
+        BigDecimal totalHours,
         int recordCount,
         Integer minRating
 ) {

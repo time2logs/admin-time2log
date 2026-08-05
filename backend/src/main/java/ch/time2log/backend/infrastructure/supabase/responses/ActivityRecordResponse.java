@@ -1,5 +1,6 @@
 package ch.time2log.backend.infrastructure.supabase.responses;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -10,7 +11,7 @@ public record ActivityRecordResponse(
    UUID team_id,
    UUID curriculum_activity_id,
    String entry_date,
-   int hours,
+   BigDecimal hours,
    String notes,
    Integer rating,
    String location,

@@ -12,6 +12,7 @@ import { forkJoin } from 'rxjs';
 import { PaletteService } from '@services/palette.service';
 import { HostListener } from '@angular/core';
 import { ChartTypeService } from '@services/chart-type.service';
+import { formatHours, roundHours } from '@app/shared/utils/format-hours.utils';
 
 
 type DateRange = '30d' | '90d' | '1y' | 'all';
@@ -210,7 +211,7 @@ export class DashboardComponent implements OnInit {
     this.reportService.getLocationSummary(orgId, userId, profId, from, to, useSemesters ? semesters : undefined).subscribe({
       next: (data) => {
         this.locationChartData.set(
-          data.map((l: LocationSummary) => ({ name: l.location, value: l.totalHours }))
+          data.map((l: LocationSummary) => ({ name: l.location, value: roundHours(l.totalHours) }))
         );
       },
     });
@@ -260,7 +261,7 @@ export class DashboardComponent implements OnInit {
     this.reportService.getActivitySummary(orgId, userId, profId, from, to, useSemesters ? semesters : undefined).subscribe({
       next: (data) => {
         this.activityChartData.set(
-          data.map((a) => ({ name: `${a.activityName} (${a.totalHours}h)`, value: a.totalHours }))
+          data.map((a) => ({ name: `${a.activityName} (${formatHours(a.totalHours)})`, value: roundHours(a.totalHours) }))
         );
         this.chartLoading.set(false);
       },
