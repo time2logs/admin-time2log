@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -727,7 +728,7 @@ class OrganizationDomainServiceTest {
         private ActivityRecordResponse activityRecordResponse(UUID userId, UUID orgId, String entryDate) {
             return new ActivityRecordResponse(
                     UUID.randomUUID(), orgId, userId, UUID.randomUUID(), UUID.randomUUID(),
-                    entryDate, 8, "notes", 3, "office", "HS24",
+                    entryDate, BigDecimal.valueOf(8), "notes", 3, "office", "HS24",
                     OffsetDateTime.now(), OffsetDateTime.now()
             );
         }

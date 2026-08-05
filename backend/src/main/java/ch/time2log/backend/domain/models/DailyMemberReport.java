@@ -1,5 +1,6 @@
 package ch.time2log.backend.domain.models;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 public record DailyMemberReport(
@@ -7,7 +8,7 @@ public record DailyMemberReport(
         String firstName,
         String lastName,
         String status,
-        int totalHours,
+        BigDecimal totalHours,
         int recordCount,
         Integer minRating
 ) {}

@@ -30,7 +30,7 @@
                 <div>
                   <p class="font-medium text-gray-800 dark:text-[hsl(210,15%,90%)] text-sm">{{ entry.firstName }} {{ entry.lastName }}</p>
                   @if (entry.status !== 'missing') {
-                    <p class="text-xs text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ entry.totalHours }}h &middot; {{ entry.recordCount }} {{ 'reports.entries' | translate }}</p>
+                    <p class="text-xs text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ entry.totalHours | formatHours }} &middot; {{ entry.recordCount }} {{ 'reports.entries' | translate }}</p>
                   }
                 </div>
               </div>

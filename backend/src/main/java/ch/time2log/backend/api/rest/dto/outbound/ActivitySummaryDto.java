@@ -2,13 +2,14 @@ package ch.time2log.backend.api.rest.dto.outbound;
 
 import ch.time2log.backend.domain.models.ActivitySummary;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
 public record ActivitySummaryDto(
         UUID activityId,
         String activityName,
-        int totalHours
+        BigDecimal totalHours
 ) {
     public static ActivitySummaryDto of(ActivitySummary a) {
         return new ActivitySummaryDto(a.activityId(), a.activityName(), a.totalHours());

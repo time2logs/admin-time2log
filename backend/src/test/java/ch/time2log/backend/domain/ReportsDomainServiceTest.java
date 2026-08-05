@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -58,7 +59,7 @@ class ReportsDomainServiceTest {
         assertThat(result).hasSize(1);
         DailyMemberReport report = result.getFirst();
         assertThat(report.status()).isEqualTo("missing");
-        assertThat(report.totalHours()).isZero();
+        assertThat(report.totalHours()).isEqualTo(BigDecimal.ZERO.setScale(2));
         assertThat(report.recordCount()).isZero();
         assertThat(report.minRating()).isNull();
     }
@@ -71,7 +72,7 @@ class ReportsDomainServiceTest {
         DailyMemberReport report = reportsDomainService.getDailyReport(orgId, date).getFirst();
 
         assertThat(report.status()).isEqualTo("reported");
-        assertThat(report.totalHours()).isEqualTo(BigDecimal.valueOf(8).setScale(2));
+        assertThat(report.totalHours()).isEqualTo(BigDecimal.valueOf(6).setScale(2));
         assertThat(report.recordCount()).isEqualTo(2);
         assertThat(report.minRating()).isEqualTo(3);
     }
@@ -79,7 +80,7 @@ class ReportsDomainServiceTest {
     @Test
     void getDailyReport_whenAnyRatingIsOne_statusIsBadRating() {
         when(supabaseService.getListWithQuery(eq("app.activity_records"), anyString(), eq(ActivityRecordResponse.class)))
-                .thenReturn(List.of(record(userId, BigDecimal.valueOf(6), 4), record(userId, BigDecimal.valueOf(3), 1)));
+                .thenReturn(List.of(record(userId, BigDecimal.valueOf(3), 4), record(userId, BigDecimal.valueOf(2), 1)));
 
         assertThat(reportsDomainService.getDailyReport(orgId, date).getFirst().status())
                 .isEqualTo("bad_rating");
@@ -117,7 +118,7 @@ class ReportsDomainServiceTest {
     void getDailyReport_recordsOfOtherUserDoNotAffectStatus() {
         UUID otherId = UUID.randomUUID();
         when(supabaseService.getListWithQuery(eq("app.activity_records"), anyString(), eq(ActivityRecordResponse.class)))
-                .thenReturn(List.of(record(otherId, 4, 3)));
+                .thenReturn(List.of(record(otherId, BigDecimal.valueOf(4), 3)));
 
         DailyMemberReport report = reportsDomainService.getDailyReport(orgId, date).getFirst();
         assertThat(report.status()).isEqualTo("missing");
@@ -140,9 +141,9 @@ class ReportsDomainServiceTest {
         UUID activityB = UUID.randomUUID();
         when(supabaseService.getListWithQuery(eq("app.activity_records"), anyString(), eq(ActivityRecordResponse.class)))
                 .thenReturn(List.of(
-                        recordWithLocation(userId, activityA, " Ward A ", 2),
-                        recordWithLocation(userId, activityA, "ward a", 3),
-                        recordWithLocation(userId, activityB, "Ward B", 4)
+                        recordWithLocation(userId, activityA, " Ward A ", BigDecimal.valueOf(2)),
+                        recordWithLocation(userId, activityA, "ward a", BigDecimal.valueOf(3)),
+                        recordWithLocation(userId, activityB, "Ward B", BigDecimal.valueOf(4))
                 ));
         when(supabaseService.getListWithQuery(eq("admin.curriculum_nodes"), anyString(), eq(CurriculumNodeResponse.class)))
                 .thenReturn(List.of(node(activityA, "Activity A")));
@@ -150,7 +151,7 @@ class ReportsDomainServiceTest {
         List<MemberActivityRecord> result = reportsDomainService.getMemberRecords(orgId, userId, null, "2024-01-01", "2024-01-31", " ward A ");
 
         assertThat(result).hasSize(2);
-        assertThat(result).extracting(MemberActivityRecord::hours).containsExactly(2, 3);
+        assertThat(result).extracting(MemberActivityRecord::hours).containsExactly(BigDecimal.valueOf(2), BigDecimal.valueOf(3));
         assertThat(result).extracting(MemberActivityRecord::activityLabel).containsExactly("Activity A", "Activity A");
         assertThat(result).extracting(MemberActivityRecord::location).containsExactly(" Ward A ", "ward a");
     }
@@ -159,8 +160,8 @@ class ReportsDomainServiceTest {
     void getMemberRecords_blankLocationBehavesLikeNoLocationFilter() {
         when(supabaseService.getListWithQuery(eq("app.activity_records"), anyString(), eq(ActivityRecordResponse.class)))
                 .thenReturn(List.of(
-                        recordWithLocation(userId, null, "Ward A", 2),
-                        recordWithLocation(userId, null, "Ward B", 4)
+                        recordWithLocation(userId, null, "Ward A", BigDecimal.valueOf(2)),
+                        recordWithLocation(userId, null, "Ward B", BigDecimal.valueOf(4))
                 ));
 
         List<MemberActivityRecord> result = reportsDomainService.getMemberRecords(orgId, userId, null, "2024-01-01", "2024-01-31", "   ");
@@ -222,11 +223,11 @@ class ReportsDomainServiceTest {
         return new ActivityRecordResponse(UUID.randomUUID(), orgId, uid, null, null, date, hours, null, rating, null, null, null, null);
     }
 
-    private ActivityRecordResponse recordNoRating(UUID uid, int hours) {
+    private ActivityRecordResponse recordNoRating(UUID uid, BigDecimal hours) {
         return new ActivityRecordResponse(UUID.randomUUID(), orgId, uid, null, null, date, hours, null, null, null, null, null, null);
     }
 
-    private ActivityRecordResponse recordWithLocation(UUID uid, UUID activityId, String location, int hours) {
+    private ActivityRecordResponse recordWithLocation(UUID uid, UUID activityId, String location, BigDecimal hours) {
         return new ActivityRecordResponse(UUID.randomUUID(), orgId, uid, null, activityId, date, hours, null, null, location, null, null, null);
     }
 

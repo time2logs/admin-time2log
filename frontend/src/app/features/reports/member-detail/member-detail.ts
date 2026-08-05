@@ -11,7 +11,9 @@ import { Profile } from '@app/core/models/profile.models';
 import { Team } from '@app/core/models/team.models';
 import { ABSENCE_TYPES, ABSENCE_TYPE_BY_ID, CurriculumOverview, DEFAULT_ABSENCE_COLOR, LocationSummary, MemberAbsence, MemberActivityRecord, NgxChartEntry, ReportStatus } from '@app/core/models/report.models';
 import { Calendar } from '@app/shared/calendar/calendar';
+import { FormatHoursPipe } from '@app/shared/pipes/format-hours.pipe';
 import { formatLocalDate } from '@app/shared/utils/date.utils';
+import { roundHours } from '@app/shared/utils/format-hours.utils';
 
 const OPEN_ACTIVITY_HOURS_THRESHOLD = 10;
 
@@ -39,7 +41,7 @@ interface TeamCompetencyGroup {
 @Component({
   selector: 'app-member-detail',
   standalone: true,
-  imports: [TranslateModule, Calendar, NgxChartsModule, DatePipe],
+  imports: [TranslateModule, Calendar, NgxChartsModule, DatePipe, FormatHoursPipe],
   templateUrl: './member-detail.html',
 })
 export class MemberDetail implements OnInit {
@@ -221,9 +223,9 @@ export class MemberDetail implements OnInit {
         if (!r.curriculumActivityId) continue;
         const entry = activityMap.get(r.curriculumActivityId);
         if (entry) {
-          entry.hours += r.hours;
+          entry.hours = roundHours(entry.hours + r.hours);
         } else {
-          activityMap.set(r.curriculumActivityId, { label: r.activityLabel || '—', hours: r.hours });
+          activityMap.set(r.curriculumActivityId, { label: r.activityLabel || '—', hours: roundHours(r.hours) });
         }
       }
       const team = teamId ? teams.find(t => t.id === teamId) : null;
@@ -255,9 +257,9 @@ export class MemberDetail implements OnInit {
         for (const node of curriculum.nodes) {
           if (node.nodeType !== 'activity') continue;
           const h = hoursById.get(node.id) ?? 0;
-          if (h === 0) continue;
+          if (Math.abs(h) < 0.0001) continue;
           for (const cid of node.competencyIds) {
-            competencyHours.set(cid, (competencyHours.get(cid) ?? 0) + h);
+            competencyHours.set(cid, roundHours((competencyHours.get(cid) ?? 0) + h));
           }
         }
       }
@@ -274,7 +276,7 @@ export class MemberDetail implements OnInit {
           ...(curriculum?.competencies.map(c => competencyHours.get(c.id) ?? 0) ?? [])
         ),
         underThresholdActivities,
-        notPerformedActivities: underThresholdActivities.filter(a => a.hours === 0),
+        notPerformedActivities: underThresholdActivities.filter(a => Math.abs(a.hours) < 0.0001),
         hasCurriculumActivities: curriculumActivities.length > 0,
       });
     }
