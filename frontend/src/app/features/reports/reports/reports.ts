@@ -5,11 +5,12 @@ import { ReportService } from '@services/report.service';
 import { Profile } from '@app/core/models/profile.models';
 import { DailyMemberReport } from '@app/core/models/report.models';
 import { Calendar } from '@app/shared/calendar/calendar';
+import { FormatHoursPipe } from '@app/shared/pipes/format-hours.pipe';
 
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [TranslateModule, Calendar],
+  imports: [TranslateModule, Calendar, FormatHoursPipe],
   templateUrl: './reports.html',
 })
 export class Reports {
