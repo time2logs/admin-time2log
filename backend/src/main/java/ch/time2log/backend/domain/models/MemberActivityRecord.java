@@ -1,5 +1,6 @@
 package ch.time2log.backend.domain.models;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 public record MemberActivityRecord(
@@ -7,7 +8,7 @@ public record MemberActivityRecord(
         String entryDate,
         UUID curriculumActivityId,
         String activityLabel,
-        int hours,
+        BigDecimal hours,
         String notes,
         Integer rating,
         UUID teamId,
