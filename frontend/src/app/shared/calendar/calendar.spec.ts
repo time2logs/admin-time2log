@@ -101,4 +101,53 @@ describe('Calendar', () => {
     expect(nextMonthDays.length).toBeGreaterThan(0);
     expect(nextMonthDays.every(d => d.date.startsWith('2024-02'))).toBeTrue();
   });
+
+  it('renders a yellow dot for under_target days', () => {
+    setMonth(2024, 0);
+    fixture.componentRef.setInput('statusMap', { '2024-01-10': 'under_target' });
+    fixture.detectChanges();
+    const button = fixture.nativeElement.querySelectorAll('button');
+    const dayButton = Array.from<HTMLElement>(button).find(b => b.textContent?.trim() === '10');
+    expect(dayButton).toBeTruthy();
+    const dot = dayButton!.querySelector('span');
+    expect(dot?.classList.contains('bg-yellow-400')).toBeTrue();
+  });
+
+  it('renders a green dot and a warning icon for bad_rating days', () => {
+    setMonth(2024, 0);
+    fixture.componentRef.setInput('statusMap', { '2024-01-11': 'bad_rating' });
+    fixture.detectChanges();
+    const button = fixture.nativeElement.querySelectorAll('button');
+    const dayButton = Array.from<HTMLElement>(button).find(b => b.textContent?.trim() === '11');
+    expect(dayButton).toBeTruthy();
+    const dot = dayButton!.querySelector('span');
+    expect(dot?.classList.contains('bg-green-500')).toBeTrue();
+    expect(dayButton!.querySelector('svg')).toBeTruthy();
+  });
+
+  it('renders a yellow dot and a warning icon for bad_rating_under_target days', () => {
+    setMonth(2024, 0);
+    fixture.componentRef.setInput('statusMap', { '2024-01-12': 'bad_rating_under_target' });
+    fixture.detectChanges();
+    const button = fixture.nativeElement.querySelectorAll('button');
+    const dayButton = Array.from<HTMLElement>(button).find(b => b.textContent?.trim() === '12');
+    expect(dayButton).toBeTruthy();
+    const dot = dayButton!.querySelector('span');
+    expect(dot?.classList.contains('bg-yellow-400')).toBeTrue();
+    expect(dayButton!.querySelector('svg')).toBeTruthy();
+  });
+
+  it('keeps the dot and warning icon visible when a bad_rating day is selected', () => {
+    setMonth(2024, 0);
+    fixture.componentRef.setInput('statusMap', { '2024-01-11': 'bad_rating' });
+    fixture.componentRef.setInput('selectedDate', '2024-01-11');
+    fixture.detectChanges();
+    const button = fixture.nativeElement.querySelectorAll('button');
+    const dayButton = Array.from<HTMLElement>(button).find(b => b.textContent?.trim() === '11');
+    expect(dayButton).toBeTruthy();
+    const dot = dayButton!.querySelector('span');
+    expect(dot?.classList.contains('opacity-0')).toBeFalse();
+    expect(dot?.classList.contains('bg-green-500')).toBeTrue();
+    expect(dayButton!.querySelector('svg')).toBeTruthy();
+  });
 });

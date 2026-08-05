@@ -149,8 +149,18 @@ export class MemberDetail implements OnInit {
       byDate.set(r.entryDate, arr);
     }
     for (const [date, records] of byDate) {
+      const totalHours = roundHours(records.reduce((sum, r) => sum + r.hours, 0));
       const hasBad = records.some(r => r.rating !== null && r.rating <= 2);
-      map[date] = hasBad ? 'bad_rating' : 'reported';
+      const underTarget = totalHours < this.targetHours();
+      if (hasBad && underTarget) {
+        map[date] = 'bad_rating_under_target';
+      } else if (hasBad) {
+        map[date] = 'bad_rating';
+      } else if (underTarget) {
+        map[date] = 'under_target';
+      } else {
+        map[date] = 'reported';
+      }
     }
 
     const year = this.currentYear();
@@ -201,6 +211,7 @@ export class MemberDetail implements OnInit {
 
   protected readonly currentYear = signal(new Date().getFullYear());
   protected readonly currentMonth = signal(new Date().getMonth());
+  protected readonly targetHours = signal(8);
 
   protected readonly teamGroups = computed<TeamCompetencyGroup[]>(() => {
     const records = this.allRecords();
@@ -291,6 +302,7 @@ export class MemberDetail implements OnInit {
     this.userId = this.route.snapshot.params['userId'];
     this.organizationId = this.route.snapshot.queryParams['organizationId'] ?? '';
 
+    this.loadTargetHours();
     this.loadMember();
     this.loadTeamsAndCurricula();
     this.loadLocationOptions();
@@ -302,6 +314,13 @@ export class MemberDetail implements OnInit {
 
   protected onAbsenceSemesterSelected(semester: string): void {
     this.selectedAbsenceSemester.set(semester);
+  }
+
+  private loadTargetHours(): void {
+    if (!this.organizationId) return;
+    this.organizationService.getTargetHours(this.organizationId).subscribe({
+      next: (res) => this.targetHours.set(res.targetHours ?? 8),
+    });
   }
 
   private loadAbsences(): void {

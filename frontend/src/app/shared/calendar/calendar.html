@@ -40,27 +40,37 @@
           [class.text-gray-700]="day.isCurrentMonth && !day.isWeekend && !day.isToday && selectedDate() !== day.date"
           [class.dark:text-[hsl(210,15%,70%)]]="day.isCurrentMonth && !day.isWeekend && !day.isToday && selectedDate() !== day.date"
           [class.font-semibold]="day.isToday"
-          [class.ring-2]="day.isToday && selectedDate() !== day.date"
-          [class.ring-blue-400]="day.isToday && selectedDate() !== day.date"
           [class.bg-blue-500]="selectedDate() === day.date"
           [class.text-white]="selectedDate() === day.date"
           [class.hover:bg-gray-100]="day.isCurrentMonth && selectedDate() !== day.date"
           [class.dark:hover:bg-[hsl(215,25%,16%)]]="day.isCurrentMonth && selectedDate() !== day.date"
           [class.cursor-default]="!day.isCurrentMonth"
           [class.cursor-pointer]="day.isCurrentMonth"
+          [class.ring-2]="day.isToday && selectedDate() !== day.date"
+          [class.ring-blue-400]="day.isToday && selectedDate() !== day.date"
           (click)="selectDate(day)"
         >
           {{ day.day }}
+
+          @if (isBadRating(day.date)) {
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="absolute top-1 right-1 h-4 w-4"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path d="M10 5a1 1 0 0 1 1 1v5a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1Zm0 8a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z" />
+            </svg>
+          }
 
           <!-- Status dot -->
           @if (day.isCurrentMonth && (!day.isFuture || getStatus(day.date) === 'absence') && getStatus(day.date)) {
             <span
               class="absolute bottom-1 h-1.5 w-1.5 rounded-full"
-              [class.bg-green-500]="getStatus(day.date) === 'reported'"
-              [class.bg-yellow-400]="getStatus(day.date) === 'bad_rating'"
+              [class.bg-green-500]="getStatus(day.date) === 'reported' || getStatus(day.date) === 'bad_rating'"
+              [class.bg-yellow-400]="getStatus(day.date) === 'under_target' || getStatus(day.date) === 'bad_rating_under_target'"
               [class.bg-red-400]="getStatus(day.date) === 'missing'"
               [class.bg-purple-400]="getStatus(day.date) === 'absence'"
-              [class.opacity-0]="selectedDate() === day.date"
             ></span>
           }
         </button>

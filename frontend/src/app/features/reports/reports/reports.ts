@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { ReportService } from '@services/report.service';
 import { Profile } from '@app/core/models/profile.models';
-import { DailyMemberReport } from '@app/core/models/report.models';
+import { DailyMemberReport, ReportStatus } from '@app/core/models/report.models';
 import { Calendar } from '@app/shared/calendar/calendar';
 import { FormatHoursPipe } from '@app/shared/pipes/format-hours.pipe';
 
@@ -53,5 +53,20 @@ protected readonly filteredReport = computed(() => {
     this.router.navigate(['/reports/members', report.userId], {
       queryParams: { organizationId: this.organizationId() },
     });
+  }
+
+  protected badgeClasses(status: ReportStatus): string {
+    switch (status) {
+      case 'reported':
+        return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400';
+      case 'under_target':
+        return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400';
+      case 'bad_rating':
+      case 'bad_rating_under_target':
+      case 'missing':
+        return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400';
+      default:
+        return 'bg-gray-100 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400';
+    }
   }
 }

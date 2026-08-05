@@ -45,6 +45,8 @@ class ReportsDomainServiceTest {
         Profile profile = new Profile(userId, "John", "Doe", OffsetDateTime.now(), OffsetDateTime.now(), "admin", "normal");
         lenient().when(organizationDomainService.getOrganizationMemberProfiles(orgId))
                 .thenReturn(List.of(profile));
+        lenient().when(organizationDomainService.getTargetHours(orgId))
+                .thenReturn(8);
     }
 
     @Test
@@ -65,18 +67,19 @@ class ReportsDomainServiceTest {
     @Test
     void getDailyReport_whenRecordsWithRatingsAboveOne_statusIsReported() {
         when(supabaseService.getListWithQuery(eq("app.activity_records"), anyString(), eq(ActivityRecordResponse.class)))
-                .thenReturn(List.of(record(userId, BigDecimal.valueOf(4), 3), record(userId, BigDecimal.valueOf(2), 4)));
+                .thenReturn(List.of(record(userId, BigDecimal.valueOf(5), 3), record(userId, BigDecimal.valueOf(3), 4)));
 
         DailyMemberReport report = reportsDomainService.getDailyReport(orgId, date).getFirst();
 
         assertThat(report.status()).isEqualTo("reported");
-        assertThat(report.totalHours()).isEqualTo(BigDecimal.valueOf(6).setScale(2));
+        assertThat(report.totalHours()).isEqualTo(BigDecimal.valueOf(8).setScale(2));
         assertThat(report.recordCount()).isEqualTo(2);
         assertThat(report.minRating()).isEqualTo(3);
     }
 
     @Test
     void getDailyReport_whenAnyRatingIsOne_statusIsBadRating() {
+        when(organizationDomainService.getTargetHours(orgId)).thenReturn(2);
         when(supabaseService.getListWithQuery(eq("app.activity_records"), anyString(), eq(ActivityRecordResponse.class)))
                 .thenReturn(List.of(record(userId, BigDecimal.valueOf(3), 4), record(userId, BigDecimal.valueOf(2), 1)));
 
@@ -87,7 +90,16 @@ class ReportsDomainServiceTest {
     @Test
     void getDailyReport_whenAnyRatingIsZero_statusIsBadRating() {
         when(supabaseService.getListWithQuery(eq("app.activity_records"), anyString(), eq(ActivityRecordResponse.class)))
-                .thenReturn(List.of(record(userId, BigDecimal.valueOf(2), 0)));
+                .thenReturn(List.of(record(userId, BigDecimal.valueOf(10), 0)));
+
+        assertThat(reportsDomainService.getDailyReport(orgId, date).getFirst().status())
+                .isEqualTo("bad_rating");
+    }
+
+    @Test
+    void getDailyReport_whenAnyRatingIsTwo_statusIsBadRating() {
+        when(supabaseService.getListWithQuery(eq("app.activity_records"), anyString(), eq(ActivityRecordResponse.class)))
+                .thenReturn(List.of(record(userId, BigDecimal.valueOf(10), 2)));
 
         assertThat(reportsDomainService.getDailyReport(orgId, date).getFirst().status())
                 .isEqualTo("bad_rating");
@@ -96,7 +108,7 @@ class ReportsDomainServiceTest {
     @Test
     void getDailyReport_whenRecordsHaveNoRating_statusIsReported() {
         when(supabaseService.getListWithQuery(eq("app.activity_records"), anyString(), eq(ActivityRecordResponse.class)))
-                .thenReturn(List.of(recordNoRating(userId, BigDecimal.valueOf(4))));
+                .thenReturn(List.of(recordNoRating(userId, BigDecimal.valueOf(8))));
 
         DailyMemberReport report = reportsDomainService.getDailyReport(orgId, date).getFirst();
         assertThat(report.status()).isEqualTo("reported");
@@ -163,15 +175,49 @@ class ReportsDomainServiceTest {
     void getDailyReport_whenRecordsHaveDecimalHours_totalIsRoundedToTwoDecimals() {
         when(supabaseService.getListWithQuery(eq("app.activity_records"), anyString(), eq(ActivityRecordResponse.class)))
                 .thenReturn(List.of(
-                        record(userId, BigDecimal.valueOf(2.5), 3),
-                        record(userId, BigDecimal.valueOf(1.75), 4)
+                        record(userId, BigDecimal.valueOf(4.5), 3),
+                        record(userId, BigDecimal.valueOf(4.25), 4)
                 ));
 
         DailyMemberReport report = reportsDomainService.getDailyReport(orgId, date).getFirst();
 
         assertThat(report.status()).isEqualTo("reported");
-        assertThat(report.totalHours()).isEqualTo(BigDecimal.valueOf(4.25).setScale(2));
+        assertThat(report.totalHours()).isEqualTo(BigDecimal.valueOf(8.75).setScale(2));
         assertThat(report.recordCount()).isEqualTo(2);
+    }
+
+    @Test
+    void getDailyReport_whenHoursBelowTarget_statusIsUnderTarget() {
+        when(supabaseService.getListWithQuery(eq("app.activity_records"), anyString(), eq(ActivityRecordResponse.class)))
+                .thenReturn(List.of(record(userId, BigDecimal.valueOf(4), 3), record(userId, BigDecimal.valueOf(2), 4)));
+
+        DailyMemberReport report = reportsDomainService.getDailyReport(orgId, date).getFirst();
+
+        assertThat(report.status()).isEqualTo("under_target");
+        assertThat(report.totalHours()).isEqualTo(BigDecimal.valueOf(6).setScale(2));
+    }
+
+    @Test
+    void getDailyReport_whenBadRatingAndUnderTarget_statusIsBadRatingUnderTarget() {
+        when(supabaseService.getListWithQuery(eq("app.activity_records"), anyString(), eq(ActivityRecordResponse.class)))
+                .thenReturn(List.of(record(userId, BigDecimal.valueOf(3), 4), record(userId, BigDecimal.valueOf(2), 1)));
+
+        DailyMemberReport report = reportsDomainService.getDailyReport(orgId, date).getFirst();
+
+        assertThat(report.status()).isEqualTo("bad_rating_under_target");
+        assertThat(report.totalHours()).isEqualTo(BigDecimal.valueOf(5).setScale(2));
+    }
+
+    @Test
+    void getDailyReport_whenCustomTargetHoursBelowTotal_statusIsReported() {
+        when(organizationDomainService.getTargetHours(orgId)).thenReturn(6);
+        when(supabaseService.getListWithQuery(eq("app.activity_records"), anyString(), eq(ActivityRecordResponse.class)))
+                .thenReturn(List.of(record(userId, BigDecimal.valueOf(4), 3), record(userId, BigDecimal.valueOf(2), 4)));
+
+        DailyMemberReport report = reportsDomainService.getDailyReport(orgId, date).getFirst();
+
+        assertThat(report.status()).isEqualTo("reported");
+        assertThat(report.totalHours()).isEqualTo(BigDecimal.valueOf(6).setScale(2));
     }
 
     private ActivityRecordResponse record(UUID uid, BigDecimal hours, int rating) {
