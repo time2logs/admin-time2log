@@ -97,6 +97,10 @@ describe('MemberDetail computed signals', () => {
   const c = () => component as any;
 
   describe('statusMap', () => {
+    beforeEach(() => {
+      c().targetHours.set(0);
+    });
+
     it('marks a date as reported when all ratings are above 2', () => {
       c().monthRecords.set([
         makeRecord({ entryDate: '2024-01-10', rating: 3 }),
@@ -171,6 +175,18 @@ describe('MemberDetail computed signals', () => {
       const map = c().statusMap();
       expect(map['2099-01-12']).toBe('absence');
       expect(map['2099-01-13']).toBeUndefined();
+    });
+
+    it('marks a date as under_target when total hours are below the target', () => {
+      c().targetHours.set(8);
+      c().monthRecords.set([makeRecord({ entryDate: '2024-01-10', hours: 5, rating: 3 })]);
+      expect(c().statusMap()['2024-01-10']).toBe('under_target');
+    });
+
+    it('marks a date as bad_rating_under_target when it is both under target and has a bad rating', () => {
+      c().targetHours.set(8);
+      c().monthRecords.set([makeRecord({ entryDate: '2024-01-10', hours: 5, rating: 2 })]);
+      expect(c().statusMap()['2024-01-10']).toBe('bad_rating_under_target');
     });
   });
 

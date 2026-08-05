@@ -121,6 +121,11 @@ export class Calendar implements OnInit {
     return this.statusMap()[date] ?? null;
   }
 
+  protected isBadRating(date: string): boolean {
+    const status = this.getStatus(date);
+    return status === 'bad_rating' || status === 'bad_rating_under_target';
+  }
+
  private buildDay(d: Date, isCurrentMonth: boolean, today: string): CalendarDay {
     const date = formatLocalDate(d);
 

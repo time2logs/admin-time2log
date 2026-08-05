@@ -1,4 +1,4 @@
-export type ReportStatus = 'reported' | 'bad_rating' | 'missing' | 'absence';
+export type ReportStatus = 'reported' | 'under_target' | 'bad_rating' | 'bad_rating_under_target' | 'missing' | 'absence';
 
 export interface DailyMemberReport {
   userId: string;
