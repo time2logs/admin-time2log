@@ -356,9 +356,9 @@
     "entries": "Einträge",
     "status": {
       "reported": "Gemeldet",
-      "under_target": "Unter Soll",
+      "under_target": "Unter Soll-Stunden",
       "bad_rating": "Auffällig",
-      "bad_rating_under_target": "Auffällig",
+      "bad_rating_under_target": "Auffällig & Unter Soll-Stunden",
       "missing": "Fehlend"
     },
     "memberDetail": {

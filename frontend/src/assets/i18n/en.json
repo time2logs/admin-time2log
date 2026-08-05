@@ -353,9 +353,9 @@
     "entries": "entries",
     "status": {
       "reported": "Reported",
-      "under_target": "Under target",
+      "under_target": "Under target-hours",
       "bad_rating": "Flagged",
-      "bad_rating_under_target": "Flagged",
+      "bad_rating_under_target": "Flagged & Under target-hours",
       "missing": "Missing"
     },
     "memberDetail": {

@@ -72,13 +72,14 @@ class ReportsDomainServiceTest {
         DailyMemberReport report = reportsDomainService.getDailyReport(orgId, date).getFirst();
 
         assertThat(report.status()).isEqualTo("reported");
-        assertThat(report.totalHours()).isEqualTo(BigDecimal.valueOf(6).setScale(2));
+        assertThat(report.totalHours()).isEqualTo(BigDecimal.valueOf(8).setScale(2));
         assertThat(report.recordCount()).isEqualTo(2);
         assertThat(report.minRating()).isEqualTo(3);
     }
 
     @Test
     void getDailyReport_whenAnyRatingIsOne_statusIsBadRating() {
+        when(organizationDomainService.getTargetHours(orgId)).thenReturn(2);
         when(supabaseService.getListWithQuery(eq("app.activity_records"), anyString(), eq(ActivityRecordResponse.class)))
                 .thenReturn(List.of(record(userId, BigDecimal.valueOf(3), 4), record(userId, BigDecimal.valueOf(2), 1)));
 
