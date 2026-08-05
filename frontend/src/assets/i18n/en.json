@@ -353,7 +353,9 @@
     "entries": "entries",
     "status": {
       "reported": "Reported",
+      "under_target": "Under target",
       "bad_rating": "Flagged",
+      "bad_rating_under_target": "Flagged",
       "missing": "Missing"
     },
     "memberDetail": {

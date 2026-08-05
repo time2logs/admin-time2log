@@ -356,7 +356,9 @@
     "entries": "Einträge",
     "status": {
       "reported": "Gemeldet",
+      "under_target": "Unter Soll",
       "bad_rating": "Auffällig",
+      "bad_rating_under_target": "Auffällig",
       "missing": "Fehlend"
     },
     "memberDetail": {

@@ -36,6 +36,8 @@ public class ReportsDomainService {
 
     public List<DailyMemberReport> getDailyReport(UUID organizationId, String date) {
         var profiles = organizationDomainService.getOrganizationMemberProfiles(organizationId);
+        Number targetHoursNumber = organizationDomainService.getTargetHours(organizationId);
+        BigDecimal targetHours = BigDecimal.valueOf(targetHoursNumber == null ? 8 : targetHoursNumber.doubleValue());
 
         var records = supabaseService.getListWithQuery(
                 "app.activity_records",
@@ -67,8 +69,17 @@ public class ReportsDomainService {
                 if (!ratings.isEmpty()) {
                     minRating = ratings.stream().mapToInt(Integer::intValue).min().orElse(0);
                 }
-                boolean hasBadRating = ratings.stream().anyMatch(r -> r <= 1);
-                status = hasBadRating ? "bad_rating" : "reported";
+                boolean hasBadRating = ratings.stream().anyMatch(r -> r <= 2);
+                boolean underTarget = totalHours.compareTo(targetHours) < 0;
+                if (hasBadRating && underTarget) {
+                    status = "bad_rating_under_target";
+                } else if (hasBadRating) {
+                    status = "bad_rating";
+                } else if (underTarget) {
+                    status = "under_target";
+                } else {
+                    status = "reported";
+                }
             }
 
             return new DailyMemberReport(profile.id(), profile.firstName(), profile.lastName(), status, totalHours, userRecords.size(), minRating);
