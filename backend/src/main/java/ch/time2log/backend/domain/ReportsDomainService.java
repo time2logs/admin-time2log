@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -219,7 +219,16 @@ public class ReportsDomainService {
         return MemberAbsence.ofList(responses);
     }
 
-    public OffsetDateTime getLastEntryDate(UUID organizationId, UUID userId) {
+    public LocalDate getLastEntryDate(UUID organizationId, UUID userId) {
+        LocalDate lastActivity = getLastActivityDate(organizationId, userId);
+        LocalDate lastAbsence = getLastAbsenceDate(organizationId, userId);
+
+        if (lastActivity == null) return lastAbsence;
+        if (lastAbsence == null) return lastActivity;
+        return lastActivity.isAfter(lastAbsence) ? lastActivity : lastAbsence;
+    }
+
+    private LocalDate getLastActivityDate(UUID organizationId, UUID userId) {
         var records = supabaseService.getListWithQuery(
                 "app.activity_records",
                 "organization_id=eq." + organizationId + "&user_id=eq." + userId + "&order=entry_date.desc&limit=1",
@@ -228,7 +237,30 @@ public class ReportsDomainService {
 
         if (records.isEmpty()) return null;
 
-        return records.getFirst().created_at();
+        return parseDate(records.getFirst().entry_date());
+    }
+
+    private LocalDate getLastAbsenceDate(UUID organizationId, UUID userId) {
+        LocalDate today = LocalDate.now();
+
+        var absences = supabaseService.getListWithQuery(
+                "app.absences",
+                "organization_id=eq." + organizationId + "&user_id=eq." + userId
+                        + "&start_date=lte." + today + "&order=end_date.desc&limit=1",
+                AbsenceResponse.class
+        );
+
+        if (absences.isEmpty()) return null;
+
+        LocalDate endDate = parseDate(absences.getFirst().end_date());
+        if (endDate == null) return null;
+
+        return endDate.isAfter(today) ? today : endDate;
+    }
+
+    private LocalDate parseDate(String value) {
+        if (value == null || value.isBlank()) return null;
+        return LocalDate.parse(value);
     }
 
     public List<RatingSummary> getRatingSummary(UUID organizationId, UUID userId, UUID professionId, String from, String to, List<String> semesters) {

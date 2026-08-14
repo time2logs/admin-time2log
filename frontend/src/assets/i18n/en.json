@@ -88,7 +88,7 @@
     "welcome": "Welcome!",
     "members": "All Members",
     "inactive_members": "Inactive Members",
-    "inactive_members_desc": "Members who have not been active in the last few days",
+    "inactive_members_desc": "Members with neither an entry nor an absence in the last few days",
     "days": "Days",
     "members_label": "Members",
     "inactive": "Inactive",
