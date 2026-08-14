@@ -14,6 +14,11 @@ import {
 import { Profile } from '@app/core/models/profile.models';
 import { map } from 'rxjs/operators';
 
+function parseIsoDateLocal(date: string): Date {
+  const [year, month, day] = date.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
 @Injectable({ providedIn: 'root' })
 export class ReportService {
   private readonly http = inject(HttpClient);
@@ -115,7 +120,7 @@ export class ReportService {
     return this.http.get<string | null>(
       `${this.baseUrl}/${organizationId}/reports/members/${userId}/last-entry-date`
     ).pipe(
-      map((date) => (date ? new Date(date) : null))
+      map((date) => (date ? parseIsoDateLocal(date) : null))
     );
   }
 }
