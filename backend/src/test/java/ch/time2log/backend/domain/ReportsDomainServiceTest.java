@@ -3,9 +3,11 @@ package ch.time2log.backend.domain;
 import ch.time2log.backend.domain.models.DailyMemberReport;
 import ch.time2log.backend.domain.models.MemberActivityRecord;
 import ch.time2log.backend.domain.models.Profile;
+import ch.time2log.backend.api.rest.dto.outbound.DashboardSummaryDto;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
 import ch.time2log.backend.infrastructure.supabase.responses.ActivityRecordResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.CurriculumNodeResponse;
+import ch.time2log.backend.infrastructure.supabase.responses.LastEntryDateResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +22,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
@@ -218,6 +221,44 @@ class ReportsDomainServiceTest {
 
         assertThat(report.status()).isEqualTo("reported");
         assertThat(report.totalHours()).isEqualTo(BigDecimal.valueOf(6).setScale(2));
+    }
+
+    @Test
+    void getLastEntryDates_returnsNewestEntryPerUser() {
+        UUID otherUserId = UUID.randomUUID();
+        OffsetDateTime newest = OffsetDateTime.parse("2024-01-16T08:00:00Z");
+        OffsetDateTime otherNewest = OffsetDateTime.parse("2024-01-14T08:00:00Z");
+        when(supabaseService.rpc(eq("app.get_last_entry_dates"), any(), eq(LastEntryDateResponse[].class)))
+                .thenReturn(new LastEntryDateResponse[]{
+                        new LastEntryDateResponse(userId, newest),
+                        new LastEntryDateResponse(otherUserId, otherNewest)
+                });
+
+        var result = reportsDomainService.getLastEntryDates(orgId);
+
+        assertThat(result).containsEntry(userId, newest).containsEntry(otherUserId, otherNewest);
+        assertThat(result).hasSize(2);
+    }
+
+    @Test
+    void getLastEntryDates_whenNoRecords_returnsEmptyMap() {
+        when(supabaseService.rpc(eq("app.get_last_entry_dates"), any(), eq(LastEntryDateResponse[].class)))
+                .thenReturn(new LastEntryDateResponse[0]);
+
+        assertThat(reportsDomainService.getLastEntryDates(orgId)).isEmpty();
+    }
+
+    @Test
+    void getDashboardSummary_delegatesToDashboardRpc() {
+        var expected = new DashboardSummaryDto(List.of(), List.of(), List.of());
+        when(supabaseService.rpc(eq("app.get_dashboard_summary"), any(), eq(DashboardSummaryDto.class)))
+                .thenReturn(expected);
+
+        var result = reportsDomainService.getDashboardSummary(
+                orgId, userId, null, "2024-01-01", "2024-01-31", List.of()
+        );
+
+        assertThat(result).isSameAs(expected);
     }
 
     private ActivityRecordResponse record(UUID uid, BigDecimal hours, int rating) {

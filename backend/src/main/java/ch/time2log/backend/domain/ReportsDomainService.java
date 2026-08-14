@@ -6,10 +6,12 @@ import ch.time2log.backend.domain.models.MemberAbsence;
 import ch.time2log.backend.domain.models.MemberActivityRecord;
 import ch.time2log.backend.domain.models.Profile;
 import ch.time2log.backend.domain.models.RatingSummary;
+import ch.time2log.backend.api.rest.dto.outbound.DashboardSummaryDto;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
 import ch.time2log.backend.infrastructure.supabase.responses.AbsenceResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.ActivityRecordResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.CurriculumNodeResponse;
+import ch.time2log.backend.infrastructure.supabase.responses.LastEntryDateResponse;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -229,6 +231,35 @@ public class ReportsDomainService {
         if (records.isEmpty()) return null;
 
         return records.getFirst().created_at();
+    }
+
+    public Map<UUID, OffsetDateTime> getLastEntryDates(UUID organizationId) {
+        var records = supabaseService.rpc(
+                "app.get_last_entry_dates",
+                Map.of("p_organization_id", organizationId),
+                LastEntryDateResponse[].class
+        );
+
+        return java.util.Arrays.stream(records)
+                .collect(Collectors.toMap(LastEntryDateResponse::user_id, LastEntryDateResponse::last_entry_date));
+    }
+
+    public DashboardSummaryDto getDashboardSummary(UUID organizationId, UUID userId, UUID professionId,
+                                                   String from, String to, List<String> semesters) {
+        var params = new java.util.HashMap<String, Object>();
+        params.put("p_organization_id", organizationId);
+        params.put("p_user_id", userId);
+        params.put("p_profession_id", professionId);
+        params.put("p_from", from == null || from.isBlank() ? null : from);
+        params.put("p_to", to == null || to.isBlank() ? null : to);
+        params.put("p_semesters", semesters == null || semesters.isEmpty() ? null : semesters);
+
+        var summary = supabaseService.rpc(
+                "app.get_dashboard_summary",
+                params,
+                DashboardSummaryDto.class
+        );
+        return summary == null ? new DashboardSummaryDto(List.of(), List.of(), List.of()) : summary;
     }
 
     public List<RatingSummary> getRatingSummary(UUID organizationId, UUID userId, UUID professionId, String from, String to, List<String> semesters) {

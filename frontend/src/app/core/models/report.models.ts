@@ -60,6 +60,12 @@ export interface RatingSummary {
   averageRating: number;
 }
 
+export interface DashboardSummary {
+  activities: ActivitySummary[];
+  locations: LocationSummary[];
+  ratings: RatingSummary[];
+}
+
 export interface NgxChartEntry {
   name: string;
   value: number;

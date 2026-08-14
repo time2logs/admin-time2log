@@ -10,6 +10,7 @@ import {
   MemberAbsence,
   MemberActivityRecord,
   RatingSummary,
+  DashboardSummary,
 } from '@app/core/models/report.models';
 import { Profile } from '@app/core/models/profile.models';
 import { map } from 'rxjs/operators';
@@ -116,6 +117,26 @@ export class ReportService {
       `${this.baseUrl}/${organizationId}/reports/members/${userId}/last-entry-date`
     ).pipe(
       map((date) => (date ? new Date(date) : null))
+    );
+  }
+
+  getDashboardSummary(organizationId: string, userId?: string | null, professionId?: string | null, from?: string, to?: string, semesters?: string[]): Observable<DashboardSummary> {
+    const params: string[] = [];
+    if (userId) params.push(`userId=${userId}`);
+    if (professionId) params.push(`professionId=${professionId}`);
+    if (semesters && semesters.length > 0) {
+      params.push(`semesters=${semesters.join(',')}`);
+    } else {
+      if (from) params.push(`from=${from}`);
+      if (to) params.push(`to=${to}`);
+    }
+    const query = params.length ? `?${params.join('&')}` : '';
+    return this.http.get<DashboardSummary>(`${this.baseUrl}/${organizationId}/reports/dashboard-summary${query}`);
+  }
+
+  getLastEntryDates(organizationId: string): Observable<Record<string, string>> {
+    return this.http.get<Record<string, string>>(
+      `${this.baseUrl}/${organizationId}/reports/members/last-entry-dates`
     );
   }
 }
