@@ -25,6 +25,20 @@ interface ActivityHours {
   hours: number;
 }
 
+function mergeActivitiesByLabel(activities: ActivityHours[]): ActivityHours[] {
+  const byLabel = new Map<string, ActivityHours>();
+  for (const activity of activities) {
+    const key = activity.label.trim().toLocaleLowerCase();
+    const merged = byLabel.get(key);
+    if (merged) {
+      merged.hours = roundHours(merged.hours + activity.hours);
+    } else {
+      byLabel.set(key, { ...activity });
+    }
+  }
+  return Array.from(byLabel.values());
+}
+
 interface TeamCompetencyGroup {
   teamId: string | null;
   teamName: string;
@@ -259,7 +273,7 @@ export class MemberDetail implements OnInit {
 
       if (activityProgress.length === 0 && curriculumActivities.length === 0) continue;
 
-      const underThresholdActivities = curriculumActivities
+      const underThresholdActivities = mergeActivitiesByLabel(curriculumActivities)
         .filter(a => a.hours < OPEN_ACTIVITY_HOURS_THRESHOLD)
         .sort((a, b) => a.hours - b.hours);
 
