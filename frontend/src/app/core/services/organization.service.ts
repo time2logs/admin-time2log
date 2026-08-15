@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, shareReplay, tap } from 'rxjs';
 import { environment } from '@env/environment';
 import { Invite, Organization, Profession, Reminder } from '@app/core/models/organizations.models';
 import { Profile } from '@app/core/models/profile.models';
@@ -9,21 +9,38 @@ import { Profile } from '@app/core/models/profile.models';
 export class OrganizationService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiBaseUrl}/organizations`;
+  private organizations$?: Observable<Organization[]>;
+  private readonly professions = new Map<string, Observable<Profession[]>>();
+  private readonly members = new Map<string, Observable<Profile[]>>();
+  private readonly onlyMembers = new Map<string, Observable<Profile[]>>();
 
   getOrganizations(): Observable<Organization[]> {
-    return this.http.get<Organization[]>(this.baseUrl);
+    this.organizations$ ??= this.http.get<Organization[]>(this.baseUrl).pipe(shareReplay({ bufferSize: 1, refCount: true }));
+    return this.organizations$;
   }
 
   getOrganizationMembers(id: string): Observable<Profile[]> {
-    return this.http.get<Profile[]>(`${this.baseUrl}/${id}/members`);
+    const cached = this.members.get(id);
+    if (cached) return cached;
+    const request$ = this.http.get<Profile[]>(`${this.baseUrl}/${id}/members`).pipe(shareReplay({ bufferSize: 1, refCount: true }));
+    this.members.set(id, request$);
+    return request$;
   }
 
   createOrganization(name: string): Observable<Organization> {
-    return this.http.post<Organization>(this.baseUrl, { name });
+    return this.http.post<Organization>(this.baseUrl, { name }).pipe(
+      tap(() => this.invalidateOrganizations()),
+    );
   }
 
   deleteOrganization(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+    return this.http.delete<void>(`${this.baseUrl}/${id}`).pipe(
+      tap(() => {
+        this.invalidateOrganizations();
+        this.invalidateMembers(id);
+        this.invalidateProfessions(id);
+      }),
+    );
   }
 
   private static readonly ROLE_MAPPING: Record<string, string> = {
@@ -46,19 +63,31 @@ export class OrganizationService {
   }
 
   removeOrganizationMember(organizationId: string, userId: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${organizationId}/members/${userId}`);
+    return this.http.delete<void>(`${this.baseUrl}/${organizationId}/members/${userId}`).pipe(
+      tap(() => this.invalidateMembers(organizationId)),
+    );
   }
 
   getProfessions(organizationId: string): Observable<Profession[]> {
-    return this.http.get<Profession[]>(`${this.baseUrl}/${organizationId}/professions`);
+    const cached = this.professions.get(organizationId);
+    if (cached) return cached;
+    const request$ = this.http.get<Profession[]>(`${this.baseUrl}/${organizationId}/professions`).pipe(shareReplay({ bufferSize: 1, refCount: true }));
+    this.professions.set(organizationId, request$);
+    return request$;
   }
 
   createProfession(organizationId: string, key: string, label: string): Observable<Profession> {
-    return this.http.post<Profession>(`${this.baseUrl}/${organizationId}/professions`, { key, label });
+    return this.http.post<Profession>(`${this.baseUrl}/${organizationId}/professions`, { key, label }).pipe(
+      tap(() => this.invalidateProfessions(organizationId)),
+    );
   }
 
   getOnlyOrganizationMembers(id: string): Observable<Profile[]> {
-    return this.http.get<Profile[]>(`${this.baseUrl}/${id}/onlyMembers`);
+    const cached = this.onlyMembers.get(id);
+    if (cached) return cached;
+    const request$ = this.http.get<Profile[]>(`${this.baseUrl}/${id}/onlyMembers`).pipe(shareReplay({ bufferSize: 1, refCount: true }));
+    this.onlyMembers.set(id, request$);
+    return request$;
   }
 
   getReminder(organizationId: string): Observable<Reminder | null> {
@@ -87,5 +116,18 @@ export class OrganizationService {
 
   saveTargetHours(organizationId: string, targetHours: number | null): Observable<void>{
     return this.http.put<void>(`${this.baseUrl}/${organizationId}/targetHours`, { targetHours });
+  }
+
+  invalidateOrganizations(): void {
+    this.organizations$ = undefined;
+  }
+
+  invalidateMembers(organizationId: string): void {
+    this.members.delete(organizationId);
+    this.onlyMembers.delete(organizationId);
+  }
+
+  invalidateProfessions(organizationId: string): void {
+    this.professions.delete(organizationId);
   }
 }

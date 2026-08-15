@@ -9,7 +9,7 @@ import {
 } from '@supabase/supabase-js';
 import { navigatorLock } from '@supabase/auth-js/dist/module/lib/locks';
 import { environment } from '@env/environment';
-import { BehaviorSubject, from, Observable } from 'rxjs';
+import { BehaviorSubject, from, Observable, Subscription } from 'rxjs';
 import {Profile} from '@app/core/models/profile.models';
 import {HttpClient} from '@angular/common/http';
 
@@ -26,6 +26,9 @@ export class AuthService implements OnDestroy {
 
   private currentProfileSubject = new BehaviorSubject<Profile | null>(null);
   readonly currentProfile$ = this.currentProfileSubject.asObservable();
+  private profileLoadedForUserId: string | null = null;
+  private profileLoadingForUserId: string | null = null;
+  private profileSubscription?: Subscription;
 
   private authSubscription?: { unsubscribe: () => void };
 
@@ -38,13 +41,12 @@ export class AuthService implements OnDestroy {
         lock: (name, _acquireTimeout, fn) => navigatorLock(name, 5000, fn),
       },
     });
-    this.currentProfileSubject = new BehaviorSubject<Profile | null>(null);
-    this.currentProfile$ = this.currentProfileSubject.asObservable();
     this.initializeAuth();
   }
 
   ngOnDestroy(): void {
     this.authSubscription?.unsubscribe();
+    this.profileSubscription?.unsubscribe();
   }
 
   private async initializeAuth() {
@@ -60,8 +62,10 @@ export class AuthService implements OnDestroy {
     this.authSubscription = this.supabase.auth.onAuthStateChange(
       (event: AuthChangeEvent, session: Session | null) => {
         this.currentUserSubject.next(session?.user ?? null);
-        if (this.currentUserSubject.value !== null) {
-          this.loadProfile();
+        if (session?.user) {
+          this.loadProfile(session.user.id);
+        } else {
+          this.clearProfile();
         }
       }
     ).data.subscription;
@@ -126,6 +130,7 @@ export class AuthService implements OnDestroy {
 
   logout(): Observable<void> {
     this.currentUserSubject.next(null);
+    this.clearProfile();
     return from(this.supabase.auth.signOut().then(() => undefined));
   }
 
@@ -133,12 +138,33 @@ export class AuthService implements OnDestroy {
     return this.http.delete<void>(`${environment.apiBaseUrl}/profile`);
   }
 
-  loadProfile() {
-    this.http.get<Profile>(`${environment.apiBaseUrl}/profile`).subscribe({
+  loadProfile(userId = this.currentUserSubject.value?.id ?? null): void {
+    if (!userId || this.profileLoadedForUserId === userId || this.profileLoadingForUserId === userId) {
+      return;
+    }
+
+    if (this.profileLoadedForUserId && this.profileLoadedForUserId !== userId) {
+      this.currentProfileSubject.next(null);
+    }
+    this.profileSubscription?.unsubscribe();
+    this.profileLoadingForUserId = userId;
+    this.profileSubscription = this.http.get<Profile>(`${environment.apiBaseUrl}/profile`).subscribe({
       next: (profile) => {
+        this.profileLoadedForUserId = userId;
+        this.profileLoadingForUserId = null;
         this.currentProfileSubject.next(profile);
       },
-      error: (err) => console.error('Failed to load profile:', err)
+      error: (err) => {
+        this.profileLoadingForUserId = null;
+        console.error('Failed to load profile:', err);
+      },
     });
+  }
+
+  private clearProfile(): void {
+    this.profileSubscription?.unsubscribe();
+    this.profileLoadedForUserId = null;
+    this.profileLoadingForUserId = null;
+    this.currentProfileSubject.next(null);
   }
 }
