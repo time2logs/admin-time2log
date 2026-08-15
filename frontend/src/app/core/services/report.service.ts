@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {Observable, shareReplay} from 'rxjs';
 import { environment } from '@env/environment';
 import {
   ActivitySummary,
@@ -24,6 +24,7 @@ function parseIsoDateLocal(date: string): Date {
 export class ReportService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiBaseUrl}/organizations`;
+  private readonly lastEntryDates = new Map<string, Observable<Record<string, string>>>();
 
   getDailyReport(organizationId: string, date: string): Observable<DailyMemberReport[]> {
     return this.http.get<DailyMemberReport[]>(
@@ -140,8 +141,16 @@ export class ReportService {
   }
 
   getLastEntryDates(organizationId: string): Observable<Record<string, string>> {
-    return this.http.get<Record<string, string>>(
+    const cached = this.lastEntryDates.get(organizationId);
+    if (cached) return cached;
+    const request$ = this.http.get<Record<string, string>>(
       `${this.baseUrl}/${organizationId}/reports/members/last-entry-dates`
-    );
+    ).pipe(shareReplay({ bufferSize: 1, refCount: true }));
+    this.lastEntryDates.set(organizationId, request$);
+    return request$;
+  }
+
+  invalidateLastEntryDates(organizationId: string): void {
+    this.lastEntryDates.delete(organizationId);
   }
 }

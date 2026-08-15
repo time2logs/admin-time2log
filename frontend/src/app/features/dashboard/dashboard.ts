@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed, effect } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal, computed, effect } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
@@ -8,7 +8,7 @@ import { Profile } from '@app/core/models/profile.models';
 import { Organization, Profession } from '@app/core/models/organizations.models';
 import { ReportService } from '@services/report.service';
 import { NgxChartEntry } from '@app/core/models/report.models';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
 import { PaletteService } from '@services/palette.service';
 import { HostListener } from '@angular/core';
 import { ChartTypeService } from '@services/chart-type.service';
@@ -41,7 +41,7 @@ interface UserOption {
   imports: [TranslateModule, FormsModule, NgClass, NgxChartsModule],
   templateUrl: './dashboard.html',
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   private readonly organizationService = inject(OrganizationService);
   private readonly reportService = inject(ReportService);
 
@@ -63,6 +63,7 @@ export class DashboardComponent implements OnInit {
   protected readonly locationChartData = signal<NgxChartEntry[]>([]);
   protected readonly ratingChartData = signal<NgxChartEntry[]>([]);
   protected readonly chartLoading = signal(false);
+  private dashboardRequest?: Subscription;
 
   protected readonly orgMembers = computed(() => {
     const orgId = this.selectedOrgId();
@@ -114,6 +115,10 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadOrganizations();
+  }
+
+  ngOnDestroy(): void {
+    this.dashboardRequest?.unsubscribe();
   }
 
   protected onDaysChange(days: number): void {
@@ -221,6 +226,7 @@ export class DashboardComponent implements OnInit {
 
 
   private loadDashboardSummary(orgId: string, userId: string | null, profId: string | null, range: DateRange, mode: FilterMode, semesters: string[]): void {
+    this.dashboardRequest?.unsubscribe();
     if (mode === 'semester' && semesters.length === 0) {
       this.activityChartData.set([]);
       this.locationChartData.set([]);
@@ -229,7 +235,7 @@ export class DashboardComponent implements OnInit {
     this.chartLoading.set(true);
     const useSemesters = mode === 'semester' && semesters.length > 0;
     const { from, to } = useSemesters ? {} as { from?: string; to?: string } : this.getDateParams(range);
-    this.reportService.getDashboardSummary(orgId, userId, profId, from, to, useSemesters ? semesters : undefined).subscribe({
+    this.dashboardRequest = this.reportService.getDashboardSummary(orgId, userId, profId, from, to, useSemesters ? semesters : undefined).subscribe({
       next: (data) => {
         this.activityChartData.set(
           data.activities.map((a) => ({ name: `${a.activityName} (${formatHours(a.totalHours)})`, value: roundHours(a.totalHours) }))

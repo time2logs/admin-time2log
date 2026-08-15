@@ -9,7 +9,7 @@ import { ReportService } from '@services/report.service';
 import { TeamService } from '@services/team.service';
 import { Profile } from '@app/core/models/profile.models';
 import { Team } from '@app/core/models/team.models';
-import { ABSENCE_TYPES, ABSENCE_TYPE_BY_ID, CurriculumOverview, DEFAULT_ABSENCE_COLOR, LocationSummary, MemberAbsence, MemberActivityRecord, NgxChartEntry, ReportStatus } from '@app/core/models/report.models';
+import { ABSENCE_TYPES, ABSENCE_TYPE_BY_ID, CurriculumOverview, DEFAULT_ABSENCE_COLOR, MemberAbsence, MemberActivityRecord, NgxChartEntry, ReportStatus } from '@app/core/models/report.models';
 import { Calendar } from '@app/shared/calendar/calendar';
 import { FormatHoursPipe } from '@app/shared/pipes/format-hours.pipe';
 import { formatLocalDate } from '@app/shared/utils/date.utils';
@@ -319,10 +319,8 @@ export class MemberDetail implements OnInit {
     this.loadTargetHours();
     this.loadMember();
     this.loadTeamsAndCurricula();
-    this.loadLocationOptions();
     this.loadMonthRecords(this.selectedDate());
     this.loadAllRecords();
-    this.loadDayRecords(this.selectedDate());
     this.loadAbsences();
   }
 
@@ -455,20 +453,17 @@ export class MemberDetail implements OnInit {
     const toDate = to ?? `${year}-${String(month).padStart(2, '0')}-${new Date(year, month, 0).getDate()}`;
 
     this.reportService.getMemberRecordsByRange(this.organizationId, this.userId, from, toDate).subscribe({
-      next: (records) => this.monthRecords.set(records),
+      next: (records) => {
+        this.monthRecords.set(records);
+        if (!to) this.setSelectedDayFromMonth(records, this.selectedDate());
+      },
     });
   }
 
-  private loadLocationOptions(): void {
-    this.reportService.getLocationSummary(this.organizationId, this.userId).subscribe({
-      next: (locations) => this.availableLocations.set(this.normalizeLocationOptions(locations)),
-    });
-  }
-
-  private normalizeLocationOptions(locations: LocationSummary[]): string[] {
+  private normalizeLocationOptions(records: MemberActivityRecord[]): string[] {
     const byNormalized = new Map<string, string>();
-    for (const entry of locations) {
-      const label = entry.location?.trim();
+    for (const record of records) {
+      const label = record.location?.trim();
       if (!label) continue;
       const key = label.toLocaleLowerCase();
       if (!byNormalized.has(key)) {
@@ -480,11 +475,22 @@ export class MemberDetail implements OnInit {
 
   private loadAllRecords(): void {
     this.reportService.getMemberRecordsByRange(this.organizationId, this.userId, '2020-01-01', '2099-12-31', this.selectedLocation()).subscribe({
-      next: (records) => this.allRecords.set(records),
+      next: (records) => {
+        this.allRecords.set(records);
+        if (!this.selectedLocation()) {
+          this.availableLocations.set(this.normalizeLocationOptions(records));
+        }
+      },
     });
   }
 
   private loadDayRecords(date: string): void {
+    const selectedMonth = date.slice(0, 7);
+    if (this.monthRecords().some((record) => record.entryDate.startsWith(selectedMonth))) {
+      this.setSelectedDayFromMonth(this.monthRecords(), date);
+      return;
+    }
+
     this.isLoadingRecords.set(true);
     this.reportService.getMemberRecordsByDate(this.organizationId, this.userId, date).subscribe({
       next: (records) => {
@@ -493,5 +499,10 @@ export class MemberDetail implements OnInit {
       },
       error: () => this.isLoadingRecords.set(false),
     });
+  }
+
+  private setSelectedDayFromMonth(records: MemberActivityRecord[], date: string): void {
+    this.selectedDayRecords.set(records.filter((record) => record.entryDate === date));
+    this.isLoadingRecords.set(false);
   }
 }
