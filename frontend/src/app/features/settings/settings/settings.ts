@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '@services/auth.service';
 import { LanguageService } from '@services/language.service';
 import { ThemeService } from '@services/theme.service';
@@ -12,7 +12,7 @@ import { ChartTypeService, type ChartTypeServiceEnum } from '@services/chart-typ
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [TranslateModule, AsyncPipe, ReactiveFormsModule],
+  imports: [TranslatePipe, AsyncPipe, ReactiveFormsModule],
   templateUrl: './settings.html',
 })
 export class Settings {

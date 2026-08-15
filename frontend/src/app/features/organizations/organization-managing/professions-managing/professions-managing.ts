@@ -1,7 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import Papa from 'papaparse';
 import { Profession } from '@app/core/models/organizations.models';
 import { CurriculumImport } from '@app/core/models/curriculum-import.models';
@@ -11,7 +11,7 @@ import { ToastService } from '@services/toast.service';
 @Component({
   selector: 'app-professions-managing',
   standalone: true,
-  imports: [TranslateModule, DatePipe],
+  imports: [TranslatePipe, DatePipe],
   templateUrl: './professions-managing.html',
 })
 export class ProfessionsManaging implements OnInit {

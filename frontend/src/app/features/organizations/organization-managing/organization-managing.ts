@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal, HostListener } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { OrganizationService } from '@services/organization.service';
 import { TeamService } from '@services/team.service';
 import { ToastService } from '@services/toast.service';
@@ -15,7 +15,7 @@ type Tab = 'members' | 'curriculums' | 'teams' | 'settings';
 @Component({
   selector: 'app-organization-managing',
   standalone: true,
-  imports: [TranslateModule, FormsModule],
+  imports: [TranslatePipe, FormsModule],
   templateUrl: './organization-managing.html',
 })
 export class OrganizationManaging implements OnInit {

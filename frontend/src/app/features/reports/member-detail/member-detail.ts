@@ -1,7 +1,7 @@
 import { DatePipe, Location } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
 import { OrganizationService } from '@services/organization.service';
 import { PaletteService } from '@services/palette.service';
@@ -55,7 +55,7 @@ interface TeamCompetencyGroup {
 @Component({
   selector: 'app-member-detail',
   standalone: true,
-  imports: [TranslateModule, Calendar, NgxChartsModule, DatePipe, FormatHoursPipe],
+  imports: [TranslatePipe, Calendar, NgxChartsModule, DatePipe, FormatHoursPipe],
   templateUrl: './member-detail.html',
 })
 export class MemberDetail implements OnInit {

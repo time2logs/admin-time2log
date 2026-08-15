@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ReportService } from '@services/report.service';
 import { Profile } from '@app/core/models/profile.models';
 import { DailyMemberReport, ReportStatus } from '@app/core/models/report.models';
@@ -10,7 +10,7 @@ import { FormatHoursPipe } from '@app/shared/pipes/format-hours.pipe';
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [TranslateModule, Calendar, FormatHoursPipe],
+  imports: [TranslatePipe, Calendar, FormatHoursPipe],
   templateUrl: './reports.html',
 })
 export class Reports {

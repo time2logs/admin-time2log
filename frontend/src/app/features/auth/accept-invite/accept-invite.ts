@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '@services/auth.service';
 import { OnboardingService } from '@services/onboarding.service';
 import { combineLatest, filter, firstValueFrom, take } from 'rxjs';
@@ -10,7 +10,7 @@ type State = 'loading' | 'invalid' | 'expired' | 'wrong_user' | 'success';
 @Component({
   selector: 'app-accept-invite',
   standalone: true,
-  imports: [RouterLink, TranslateModule],
+  imports: [RouterLink, TranslatePipe],
   templateUrl: './accept-invite.html',
 })
 export class AcceptInviteComponent implements OnInit {
