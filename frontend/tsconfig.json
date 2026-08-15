@@ -15,6 +15,7 @@
     "target": "ES2022",
     "module": "preserve",
     "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "paths": {
       "@app/*": ["src/app/*"],
       "@env/*": ["src/environments/*"],

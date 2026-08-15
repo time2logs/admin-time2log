@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { OrganizationService } from '@services/organization.service';
 import { Organization } from '@app/core/models/organizations.models';
 import { Profile } from '@app/core/models/profile.models';
@@ -8,7 +8,7 @@ import { Reports } from '@app/features/reports/reports/reports';
 @Component({
   selector: 'app-reports-page',
   standalone: true,
-  imports: [TranslateModule, Reports],
+  imports: [TranslatePipe, Reports],
   templateUrl: './reports-page.html',
 })
 export class ReportsPage implements OnInit {

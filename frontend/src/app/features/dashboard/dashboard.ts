@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy, OnInit, signal, computed, effect } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { NgxChartsModule, LegendPosition, Color, ScaleType } from '@swimlane/ngx-charts';
@@ -38,7 +38,7 @@ interface UserOption {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [TranslateModule, FormsModule, NgClass, NgxChartsModule],
+  imports: [TranslatePipe, FormsModule, NgClass, NgxChartsModule],
   templateUrl: './dashboard.html',
 })
 export class DashboardComponent implements OnInit, OnDestroy {
