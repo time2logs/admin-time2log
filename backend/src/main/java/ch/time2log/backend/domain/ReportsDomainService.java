@@ -6,14 +6,17 @@ import ch.time2log.backend.domain.models.MemberAbsence;
 import ch.time2log.backend.domain.models.MemberActivityRecord;
 import ch.time2log.backend.domain.models.Profile;
 import ch.time2log.backend.domain.models.RatingSummary;
+import ch.time2log.backend.api.rest.dto.outbound.DashboardSummaryDto;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
 import ch.time2log.backend.infrastructure.supabase.responses.AbsenceResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.ActivityRecordResponse;
 import ch.time2log.backend.infrastructure.supabase.responses.CurriculumNodeResponse;
+import ch.time2log.backend.infrastructure.supabase.responses.LastEntryDateResponse;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -219,7 +222,16 @@ public class ReportsDomainService {
         return MemberAbsence.ofList(responses);
     }
 
-    public OffsetDateTime getLastEntryDate(UUID organizationId, UUID userId) {
+    public LocalDate getLastEntryDate(UUID organizationId, UUID userId) {
+        LocalDate lastActivity = getLastActivityDate(organizationId, userId);
+        LocalDate lastAbsence = getLastAbsenceDate(organizationId, userId);
+
+        if (lastActivity == null) return lastAbsence;
+        if (lastAbsence == null) return lastActivity;
+        return lastActivity.isAfter(lastAbsence) ? lastActivity : lastAbsence;
+    }
+
+    private LocalDate getLastActivityDate(UUID organizationId, UUID userId) {
         var records = supabaseService.getListWithQuery(
                 "app.activity_records",
                 "organization_id=eq." + organizationId + "&user_id=eq." + userId + "&order=entry_date.desc&limit=1",
@@ -228,7 +240,59 @@ public class ReportsDomainService {
 
         if (records.isEmpty()) return null;
 
-        return records.getFirst().created_at();
+        return parseDate(records.getFirst().entry_date());
+    }
+
+    private LocalDate getLastAbsenceDate(UUID organizationId, UUID userId) {
+        LocalDate today = LocalDate.now();
+
+        var absences = supabaseService.getListWithQuery(
+                "app.absences",
+                "organization_id=eq." + organizationId + "&user_id=eq." + userId
+                        + "&start_date=lte." + today + "&order=end_date.desc&limit=1",
+                AbsenceResponse.class
+        );
+
+        if (absences.isEmpty()) return null;
+
+        LocalDate endDate = parseDate(absences.getFirst().end_date());
+        if (endDate == null) return null;
+
+        return endDate.isAfter(today) ? today : endDate;
+    }
+
+    private LocalDate parseDate(String value) {
+        if (value == null || value.isBlank()) return null;
+        return LocalDate.parse(value);
+    }
+
+    public Map<UUID, OffsetDateTime> getLastEntryDates(UUID organizationId) {
+        var records = supabaseService.rpc(
+                "app.get_last_entry_dates",
+                Map.of("p_organization_id", organizationId),
+                LastEntryDateResponse[].class
+        );
+
+        return java.util.Arrays.stream(records)
+                .collect(Collectors.toMap(LastEntryDateResponse::user_id, LastEntryDateResponse::last_entry_date));
+    }
+
+    public DashboardSummaryDto getDashboardSummary(UUID organizationId, UUID userId, UUID professionId,
+                                                   String from, String to, List<String> semesters) {
+        var params = new java.util.HashMap<String, Object>();
+        params.put("p_organization_id", organizationId);
+        params.put("p_user_id", userId);
+        params.put("p_profession_id", professionId);
+        params.put("p_from", from == null || from.isBlank() ? null : from);
+        params.put("p_to", to == null || to.isBlank() ? null : to);
+        params.put("p_semesters", semesters == null || semesters.isEmpty() ? null : semesters);
+
+        var summary = supabaseService.rpc(
+                "app.get_dashboard_summary",
+                params,
+                DashboardSummaryDto.class
+        );
+        return summary == null ? new DashboardSummaryDto(List.of(), List.of(), List.of()) : summary;
     }
 
     public List<RatingSummary> getRatingSummary(UUID organizationId, UUID userId, UUID professionId, String from, String to, List<String> semesters) {

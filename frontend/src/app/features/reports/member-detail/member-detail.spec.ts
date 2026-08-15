@@ -328,6 +328,61 @@ describe('MemberDetail computed signals', () => {
       expect(group.notPerformedActivities).toHaveSize(0);
     });
 
+    const curriculumWithDuplicateLabels: CurriculumOverview = {
+      nodes: [
+        { id: 'act-1', parentId: null, nodeType: 'activity', key: 'a1', label: 'Planstudium', sortOrder: 0, competencyIds: [] },
+        { id: 'act-2', parentId: null, nodeType: 'activity', key: 'a2', label: 'Planstudium', sortOrder: 1, competencyIds: [] },
+        { id: 'act-3', parentId: null, nodeType: 'activity', key: 'a3', label: ' planstudium ', sortOrder: 2, competencyIds: [] },
+        { id: 'act-4', parentId: null, nodeType: 'activity', key: 'a4', label: 'Montage', sortOrder: 3, competencyIds: [] },
+      ],
+      competencies: [],
+    };
+
+    it('merges open activities that share a label into a single entry', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculumWithDuplicateLabels]]));
+      c().allRecords.set([makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-1', hours: 1 })]);
+
+      const group = c().teamGroups()[0];
+      expect(group.underThresholdActivities.map((a: { label: string }) => a.label))
+        .toEqual(['Montage', 'Planstudium']);
+    });
+
+    it('sums the hours of all activities sharing a label', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculumWithDuplicateLabels]]));
+      c().allRecords.set([
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-1', hours: 2 }),
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-3', hours: 1.5 }),
+      ]);
+
+      const merged = c().teamGroups()[0].underThresholdActivities
+        .find((a: { label: string }) => a.label === 'Planstudium');
+      expect(merged.hours).toBe(3.5);
+    });
+
+    it('drops a merged label from the open activities once the summed hours reach the threshold', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculumWithDuplicateLabels]]));
+      c().allRecords.set([
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-1', hours: 4 }),
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-2', hours: 4 }),
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-3', hours: 2 }),
+      ]);
+
+      const group = c().teamGroups()[0];
+      expect(group.underThresholdActivities.map((a: { label: string }) => a.label)).toEqual(['Montage']);
+    });
+
+    it('counts a merged label as performed when any of its activities has hours', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', curriculumWithDuplicateLabels]]));
+      c().allRecords.set([makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-2', hours: 1 })]);
+
+      const group = c().teamGroups()[0];
+      expect(group.notPerformedActivities.map((a: { label: string }) => a.label)).toEqual(['Montage']);
+    });
+
     it('keeps a team group whose records carry no curriculum activity id', () => {
       c().teams.set([team1]);
       c().curriculaByProfession.set(new Map([['prof-1', curriculum1]]));

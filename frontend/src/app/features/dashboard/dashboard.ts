@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed, effect } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal, computed, effect } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
@@ -7,8 +7,8 @@ import { OrganizationService } from '@services/organization.service';
 import { Profile } from '@app/core/models/profile.models';
 import { Organization, Profession } from '@app/core/models/organizations.models';
 import { ReportService } from '@services/report.service';
-import { NgxChartEntry, LocationSummary, RatingSummary } from '@app/core/models/report.models';
-import { forkJoin } from 'rxjs';
+import { NgxChartEntry } from '@app/core/models/report.models';
+import { forkJoin, Subscription } from 'rxjs';
 import { PaletteService } from '@services/palette.service';
 import { HostListener } from '@angular/core';
 import { ChartTypeService } from '@services/chart-type.service';
@@ -41,7 +41,7 @@ interface UserOption {
   imports: [TranslateModule, FormsModule, NgClass, NgxChartsModule],
   templateUrl: './dashboard.html',
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   private readonly organizationService = inject(OrganizationService);
   private readonly reportService = inject(ReportService);
 
@@ -63,6 +63,7 @@ export class DashboardComponent implements OnInit {
   protected readonly locationChartData = signal<NgxChartEntry[]>([]);
   protected readonly ratingChartData = signal<NgxChartEntry[]>([]);
   protected readonly chartLoading = signal(false);
+  private dashboardRequest?: Subscription;
 
   protected readonly orgMembers = computed(() => {
     const orgId = this.selectedOrgId();
@@ -108,14 +109,16 @@ export class DashboardComponent implements OnInit {
         this.ratingChartData.set([]);
         return;
       }
-      this.loadActivityChart(orgId, userId, profId, range, mode, semesters);
-      this.loadLocationChart(orgId, userId, profId, range, mode, semesters);
-      this.loadRatingChart(orgId, userId, profId, range, mode, semesters);
+      this.loadDashboardSummary(orgId, userId, profId, range, mode, semesters);
     });
   }
 
   ngOnInit(): void {
     this.loadOrganizations();
+  }
+
+  ngOnDestroy(): void {
+    this.dashboardRequest?.unsubscribe();
   }
 
   protected onDaysChange(days: number): void {
@@ -205,33 +208,6 @@ export class DashboardComponent implements OnInit {
     return { from: fmt(from), to };
   }
 
-  private loadLocationChart(orgId: string, userId: string | null, profId: string | null, range: DateRange, mode: FilterMode, semesters: string[]): void {
-    const useSemesters = mode === 'semester' && semesters.length > 0;
-    const { from, to } = useSemesters ? {} as { from?: string; to?: string } : this.getDateParams(range);
-    this.reportService.getLocationSummary(orgId, userId, profId, from, to, useSemesters ? semesters : undefined).subscribe({
-      next: (data) => {
-        this.locationChartData.set(
-          data.map((l: LocationSummary) => ({ name: l.location, value: roundHours(l.totalHours) }))
-        );
-      },
-    });
-  }
-
-  private loadRatingChart(orgId: string, userId: string | null, profId: string | null, range: DateRange, mode: FilterMode, semesters: string[]): void {
-    const useSemesters = mode === 'semester' && semesters.length > 0;
-    const { from, to } = useSemesters ? {} as { from?: string; to?: string } : this.getDateParams(range);
-    this.reportService.getRatingSummary(orgId, userId, profId, from, to, useSemesters ? semesters : undefined).subscribe({
-      next: (data) => {
-        this.ratingChartData.set(
-          data.map((r: RatingSummary) => ({
-            name: r.activityName,
-            value: Math.round(r.averageRating * 10) / 10,
-          }))
-        );
-      },
-    });
-  }
-
   chartView = signal<[number, number]>(this.getChartSize());
   trimLabels = signal(window.innerWidth < 640);
 
@@ -249,7 +225,8 @@ export class DashboardComponent implements OnInit {
   }
 
 
-  private loadActivityChart(orgId: string, userId: string | null, profId: string | null, range: DateRange, mode: FilterMode, semesters: string[]): void {
+  private loadDashboardSummary(orgId: string, userId: string | null, profId: string | null, range: DateRange, mode: FilterMode, semesters: string[]): void {
+    this.dashboardRequest?.unsubscribe();
     if (mode === 'semester' && semesters.length === 0) {
       this.activityChartData.set([]);
       this.locationChartData.set([]);
@@ -258,10 +235,16 @@ export class DashboardComponent implements OnInit {
     this.chartLoading.set(true);
     const useSemesters = mode === 'semester' && semesters.length > 0;
     const { from, to } = useSemesters ? {} as { from?: string; to?: string } : this.getDateParams(range);
-    this.reportService.getActivitySummary(orgId, userId, profId, from, to, useSemesters ? semesters : undefined).subscribe({
+    this.dashboardRequest = this.reportService.getDashboardSummary(orgId, userId, profId, from, to, useSemesters ? semesters : undefined).subscribe({
       next: (data) => {
         this.activityChartData.set(
-          data.map((a) => ({ name: `${a.activityName} (${formatHours(a.totalHours)})`, value: roundHours(a.totalHours) }))
+          data.activities.map((a) => ({ name: `${a.activityName} (${formatHours(a.totalHours)})`, value: roundHours(a.totalHours) }))
+        );
+        this.locationChartData.set(
+          data.locations.map((l) => ({ name: l.location, value: roundHours(l.totalHours) }))
+        );
+        this.ratingChartData.set(
+          data.ratings.map((r) => ({ name: r.activityName, value: Math.round(r.averageRating * 10) / 10 }))
         );
         this.chartLoading.set(false);
       },
@@ -330,15 +313,19 @@ export class DashboardComponent implements OnInit {
           return;
         }
 
-        const lastEntryRequests = allMembers.map((m) =>
-          this.reportService.getLastEntryDate(m.organizationId, m.id)
+        const lastEntryRequests = orgs.map((org) =>
+          this.reportService.getLastEntryDates(org.id)
         );
 
         forkJoin(lastEntryRequests).subscribe({
-          next: (dates) => {
+          next: (datesByOrganization) => {
+            const datesByOrganizationId = new Map(
+              orgs.map((org, index) => [org.id, datesByOrganization[index]])
+            );
             const now = new Date();
-            const membersWithActivity: MemberWithActivity[] = allMembers.map((m, i) => {
-              const lastEntry = dates[i];
+            const membersWithActivity: MemberWithActivity[] = allMembers.map((m) => {
+              const lastEntryValue = datesByOrganizationId.get(m.organizationId)?.[m.id];
+              const lastEntry = lastEntryValue ? new Date(lastEntryValue) : null;
               const daysInactive = lastEntry
                 ? Math.floor((now.getTime() - lastEntry.getTime()) / (1000 * 60 * 60 * 24))
                 : Infinity;

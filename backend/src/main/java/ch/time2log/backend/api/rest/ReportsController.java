@@ -7,11 +7,14 @@ import ch.time2log.backend.api.rest.dto.outbound.MemberAbsenceDto;
 import ch.time2log.backend.api.rest.dto.outbound.MemberActivityRecordDto;
 import ch.time2log.backend.api.rest.dto.outbound.ProfileDto;
 import ch.time2log.backend.api.rest.dto.outbound.RatingSummaryDto;
+import ch.time2log.backend.api.rest.dto.outbound.DashboardSummaryDto;
 import ch.time2log.backend.domain.ReportsDomainService;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RequestMapping("api/organizations/{organizationId}/reports")
@@ -87,10 +90,27 @@ public class ReportsController {
     }
 
     @GetMapping("/members/{userId}/last-entry-date")
-    public OffsetDateTime getLastEntryDate(
+    public LocalDate getLastEntryDate(
             @PathVariable UUID organizationId,
             @PathVariable UUID userId){
         return reportsDomainService.getLastEntryDate(organizationId, userId);
+    }
+
+    @GetMapping("/members/last-entry-dates")
+    public Map<UUID, OffsetDateTime> getLastEntryDates(
+            @PathVariable UUID organizationId) {
+        return reportsDomainService.getLastEntryDates(organizationId);
+    }
+
+    @GetMapping("/dashboard-summary")
+    public DashboardSummaryDto getDashboardSummary(
+            @PathVariable UUID organizationId,
+            @RequestParam(required = false) UUID userId,
+            @RequestParam(required = false) UUID professionId,
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to,
+            @RequestParam(required = false) List<String> semesters) {
+        return reportsDomainService.getDashboardSummary(organizationId, userId, professionId, from, to, semesters);
     }
 
     @GetMapping("/ratings/summary")
