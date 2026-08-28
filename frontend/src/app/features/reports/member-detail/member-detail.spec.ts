@@ -140,41 +140,57 @@ describe('MemberDetail computed signals', () => {
     it('marks an absence day as absence', () => {
       c().currentYear.set(2099);
       c().currentMonth.set(0);
-      c().absences.set([makeAbsence({ startDate: '2099-01-10', endDate: '2099-01-10' })]);
-      expect(c().statusMap()['2099-01-10']).toBe('absence');
+      c().absences.set([makeAbsence({ startDate: '2099-01-12', endDate: '2099-01-12' })]);
+      expect(c().statusMap()['2099-01-12']).toBe('absence');
     });
 
     it('lets an activity record take precedence over an absence on the same day', () => {
       c().currentYear.set(2099);
       c().currentMonth.set(0);
-      c().monthRecords.set([makeRecord({ entryDate: '2099-01-10', rating: 4 })]);
-      c().absences.set([makeAbsence({ startDate: '2099-01-10', endDate: '2099-01-10' })]);
-      expect(c().statusMap()['2099-01-10']).toBe('reported');
+      c().monthRecords.set([makeRecord({ entryDate: '2099-01-12', rating: 4 })]);
+      c().absences.set([makeAbsence({ startDate: '2099-01-12', endDate: '2099-01-12' })]);
+      expect(c().statusMap()['2099-01-12']).toBe('reported');
     });
 
-    it('marks each day within an absence range', () => {
+    it('marks each weekday within an absence range but skips weekends', () => {
       c().currentYear.set(2099);
       c().currentMonth.set(0);
+      // 2099-01-10 = Sa, 11 = So, 12 = Mo.
       c().absences.set([makeAbsence({ startDate: '2099-01-10', endDate: '2099-01-12' })]);
       const map = c().statusMap();
-      expect(map['2099-01-10']).toBe('absence');
-      expect(map['2099-01-11']).toBe('absence');
+      expect(map['2099-01-10']).toBeUndefined();
+      expect(map['2099-01-11']).toBeUndefined();
       expect(map['2099-01-12']).toBe('absence');
     });
 
     it('only marks matching weekdays for a recurring absence with BYDAY', () => {
       c().currentYear.set(2099);
       c().currentMonth.set(0);
-      // 2099-01-12 is a Monday; range spans a full week.
+      // 2099-01-12 is a Monday; UNTIL covers the whole week.
       c().absences.set([makeAbsence({
         startDate: '2099-01-12',
-        endDate: '2099-01-18',
-        rrule: 'FREQ=WEEKLY;BYDAY=MO',
+        endDate: '2099-01-12',
+        rrule: 'DTSTART:20990112T000000Z;FREQ=WEEKLY;BYDAY=MO;UNTIL=20990118T235959Z',
         isRecurring: true,
       })]);
       const map = c().statusMap();
       expect(map['2099-01-12']).toBe('absence');
       expect(map['2099-01-13']).toBeUndefined();
+    });
+
+    it('marks later occurrences of a recurring absence beyond its stored end date', () => {
+      c().currentYear.set(2099);
+      c().currentMonth.set(0);
+      c().absences.set([makeAbsence({
+        startDate: '2099-01-12',
+        endDate: '2099-01-12',
+        rrule: 'DTSTART:20990112T000000Z;FREQ=WEEKLY;BYDAY=MO;UNTIL=20990126T235959Z',
+        isRecurring: true,
+      })]);
+      const map = c().statusMap();
+      expect(map['2099-01-12']).toBe('absence');
+      expect(map['2099-01-19']).toBe('absence');
+      expect(map['2099-01-26']).toBe('absence');
     });
 
     it('marks a date as under_target when total hours are below the target', () => {
@@ -192,10 +208,10 @@ describe('MemberDetail computed signals', () => {
 
   describe('selectedDayAbsences', () => {
     it('returns absences covering the selected date', () => {
-      c().selectedDate.set('2099-01-10');
+      c().selectedDate.set('2099-01-12');
       c().absences.set([
-        makeAbsence({ startDate: '2099-01-10', endDate: '2099-01-10', absenceTypeId: 'sick' }),
-        makeAbsence({ startDate: '2099-02-01', endDate: '2099-02-01', absenceTypeId: 'vacation' }),
+        makeAbsence({ startDate: '2099-01-12', endDate: '2099-01-12', absenceTypeId: 'sick' }),
+        makeAbsence({ startDate: '2099-02-02', endDate: '2099-02-02', absenceTypeId: 'vacation' }),
       ]);
       const result = c().selectedDayAbsences();
       expect(result).toHaveSize(1);
@@ -204,8 +220,53 @@ describe('MemberDetail computed signals', () => {
 
     it('returns an empty array when no absence covers the selected date', () => {
       c().selectedDate.set('2099-03-15');
-      c().absences.set([makeAbsence({ startDate: '2099-01-10', endDate: '2099-01-10' })]);
+      c().absences.set([makeAbsence({ startDate: '2099-01-12', endDate: '2099-01-12' })]);
       expect(c().selectedDayAbsences()).toHaveSize(0);
+    });
+  });
+
+  describe('absence day totals', () => {
+    it('derives available semesters from the counted dates, not the stored column', () => {
+      c().absences.set([makeAbsence({ startDate: '2024-07-31', endDate: '2024-08-02', currentSemester: null })]);
+      expect(c().availableSemesters()).toEqual(['2023/S2', '2024/S1']);
+    });
+
+    it('splits a semester-boundary range per date across semesters', () => {
+      // 29.–31.7.2024 = Mo–Mi → 2023/S2; 1./2.8.2024 = Do/Fr → 2024/S1.
+      c().absences.set([makeAbsence({ startDate: '2024-07-29', endDate: '2024-08-02' })]);
+      const vacationDays = () =>
+        c().absenceTotals().find((e: { meta: { id: string } }) => e.meta.id === 'vacation')?.days;
+      expect(vacationDays()).toBe(5);
+      c().selectedAbsenceSemester.set('2023/S2');
+      expect(vacationDays()).toBe(3);
+      c().selectedAbsenceSemester.set('2024/S1');
+      expect(vacationDays()).toBe(2);
+    });
+
+    it('rounds half days only once on the final total', () => {
+      // Mo–Fr 15.–19.7.2024, je 0.5 Tage → 2.5 → gerundet 3.
+      c().absences.set([makeAbsence({ startDate: '2024-07-15', endDate: '2024-07-19', dayFraction: 0.5 })]);
+      const total = c().absenceTotals().find((e: { meta: { id: string } }) => e.meta.id === 'vacation');
+      expect(total?.days).toBe(3);
+    });
+
+    it('counts every occurrence of a recurring rule instead of the stored single-day range', () => {
+      c().absences.set([makeAbsence({
+        startDate: '2024-08-05',
+        endDate: '2024-08-05',
+        rrule: 'DTSTART:20240805T000000Z;FREQ=WEEKLY;BYDAY=MO;UNTIL=20241231T235959Z',
+        isRecurring: true,
+      })]);
+      const total = c().absenceTotals().find((e: { meta: { id: string } }) => e.meta.id === 'vacation');
+      expect(total?.days).toBe(22);
+    });
+
+    it('keeps weekend-only absences visible with zero counted days', () => {
+      c().absences.set([makeAbsence({ startDate: '2024-07-20', endDate: '2024-07-21' })]);
+      expect(c().absenceEntries().length).toBe(1);
+      expect(c().absenceEntries()[0].weekendOnly).toBeTrue();
+      expect(c().absenceEntries()[0].workingDays).toBe(0);
+      expect(c().absenceTotals()).toEqual([]);
     });
   });
 
