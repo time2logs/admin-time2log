@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { OrganizationService } from '@services/organization.service';
 import { Organization } from '@app/core/models/organizations.models';
 import { Profile } from '@app/core/models/profile.models';
@@ -9,7 +9,7 @@ import { Profile } from '@app/core/models/profile.models';
 @Component({
   selector: 'app-organization-detail',
   standalone: true,
-  imports: [TranslateModule, FormsModule],
+  imports: [TranslatePipe, FormsModule],
   templateUrl: './organization-detail.html',
 })
 export class OrganizationDetailComponent implements OnInit {

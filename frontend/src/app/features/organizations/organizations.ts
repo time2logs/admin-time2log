@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { OrganizationService } from '@services/organization.service';
 import { ToastService } from '@services/toast.service';
 import { Organization } from '@app/core/models/organizations.models';
@@ -10,7 +10,7 @@ import { AuthService } from '@services/auth.service';
 @Component({
   selector: 'app-organizations',
   standalone: true,
-  imports: [TranslateModule, FormsModule],
+  imports: [TranslatePipe, FormsModule],
   templateUrl: './organizations.html',
 })
 export class OrganizationsComponent implements OnInit {

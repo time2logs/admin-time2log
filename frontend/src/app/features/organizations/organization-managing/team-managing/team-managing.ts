@@ -1,6 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { OrganizationService } from '@services/organization.service';
 import { TeamService } from '@services/team.service';
 import { ToastService } from '@services/toast.service';
@@ -11,7 +11,7 @@ import {Reports} from '@app/features/reports/reports/reports';
 @Component({
   selector: 'app-team-managing',
   standalone: true,
-  imports: [TranslateModule, Reports],
+  imports: [TranslatePipe, Reports],
   templateUrl: './team-managing.html',
 })
 export class TeamManaging implements OnInit {

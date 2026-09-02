@@ -1,7 +1,7 @@
 import { DatePipe, Location } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
 import { OrganizationService } from '@services/organization.service';
 import { PaletteService } from '@services/palette.service';
@@ -13,6 +13,7 @@ import { ABSENCE_TYPES, ABSENCE_TYPE_BY_ID, CurriculumOverview, DEFAULT_ABSENCE_
 import { Calendar } from '@app/shared/calendar/calendar';
 import { FormatHoursPipe } from '@app/shared/pipes/format-hours.pipe';
 import { formatLocalDate } from '@app/shared/utils/date.utils';
+import { expandAbsence, ExpandedAbsence, RecurringMeta } from '@app/shared/utils/absence.utils';
 import { roundHours } from '@app/shared/utils/format-hours.utils';
 
 const OPEN_ACTIVITY_HOURS_THRESHOLD = 10;
@@ -55,7 +56,7 @@ interface TeamCompetencyGroup {
 @Component({
   selector: 'app-member-detail',
   standalone: true,
-  imports: [TranslateModule, Calendar, NgxChartsModule, DatePipe, FormatHoursPipe],
+  imports: [TranslatePipe, Calendar, NgxChartsModule, DatePipe, FormatHoursPipe],
   templateUrl: './member-detail.html',
 })
 export class MemberDetail implements OnInit {
@@ -87,30 +88,47 @@ export class MemberDetail implements OnInit {
   protected readonly absences = signal<MemberAbsence[]>([]);
   protected readonly selectedAbsenceSemester = signal('');
 
-  /** Auswählbare Semester aus den vorhandenen Absenzen (nicht aus activity_records). */
-  protected readonly availableSemesters = computed(() =>
-    [...new Set(
-      this.absences()
-        .map(a => a.currentSemester)
-        .filter((s): s is string => s !== null && s !== '')
-    )].sort()
-  );
+  /** Expansion je Absenz: gezählte Werktage, Semester-Zuordnung pro Datum, Wiederholungs-Metadaten. */
+  private readonly expandedAbsences = computed(() => {
+    const map = new Map<string, ExpandedAbsence>();
+    for (const a of this.absences()) map.set(a.id, expandAbsence(a));
+    return map;
+  });
+
+  /** Auswählbare Semester aus den gezählten Tagen (Zuordnung pro Datum, nicht pro Zeile). */
+  protected readonly availableSemesters = computed(() => {
+    const keys = new Set<string>();
+    for (const exp of this.expandedAbsences().values()) {
+      for (const key of exp.daysBySemester.keys()) keys.add(key);
+    }
+    return [...keys].sort();
+  });
 
   /** Nach gewähltem Semester gefilterte Absenzen ('' = alle). */
   private readonly filteredAbsences = computed(() => {
     const semester = this.selectedAbsenceSemester();
+    const expanded = this.expandedAbsences();
     const all = this.absences();
-    return semester ? all.filter(a => a.currentSemester === semester) : all;
+    return semester
+      ? all.filter(a => expanded.get(a.id)?.daysBySemester.has(semester))
+      : all;
   });
 
-  /** Tage je Absenz-Typ (nur belegte Typen), Basis für Diagramm und Farbschema. */
+  /** Tage je Absenz-Typ (nur belegte Typen), Basis für Diagramm und Farbschema. Gerundet wird nur die Summe. */
   private readonly absenceTotals = computed(() => {
+    const semester = this.selectedAbsenceSemester();
+    const expanded = this.expandedAbsences();
     const days = new Map<string, number>();
     for (const a of this.filteredAbsences()) {
-      days.set(a.absenceTypeId, (days.get(a.absenceTypeId) ?? 0) + this.absenceDays(a));
+      const exp = expanded.get(a.id);
+      if (!exp) continue;
+      for (const [key, value] of exp.daysBySemester) {
+        if (semester && key !== semester) continue;
+        days.set(a.absenceTypeId, (days.get(a.absenceTypeId) ?? 0) + value);
+      }
     }
     return ABSENCE_TYPES
-      .map(meta => ({ meta, days: Math.round((days.get(meta.id) ?? 0) * 100) / 100 }))
+      .map(meta => ({ meta, days: Math.round(days.get(meta.id) ?? 0) }))
       .filter(e => e.days > 0);
   });
 
@@ -138,8 +156,11 @@ export class MemberDetail implements OnInit {
 
   protected readonly absenceEntries = computed(() => {
     const colorByType = this.absenceTypeColor();
+    const expanded = this.expandedAbsences();
+    const semester = this.selectedAbsenceSemester();
     return this.filteredAbsences().map(a => {
       const meta = ABSENCE_TYPE_BY_ID.get(a.absenceTypeId);
+      const exp = expanded.get(a.id);
       return {
         id: a.id,
         typeLabel: meta ? this.translate.instant(meta.labelKey) : a.absenceTypeId,
@@ -150,6 +171,10 @@ export class MemberDetail implements OnInit {
         isRecurring: a.isRecurring,
         dayFraction: a.dayFraction,
         notes: a.notes,
+        workingDays: exp ? (semester ? exp.daysBySemester.get(semester) ?? 0 : exp.totalDays) : 0,
+        weekendOnly: exp?.weekendOnly ?? false,
+        invalidRrule: exp?.invalid ?? false,
+        recurringLabel: this.buildRecurringLabel(exp?.recurring ?? null),
       };
     });
   });
@@ -182,10 +207,14 @@ export class MemberDetail implements OnInit {
     const lastDay = new Date(year, month + 1, 0).getDate();
 
     // Abwesenheitstage markieren (haben Vorrang vor "fehlend", aber nicht vor Einträgen).
+    const absenceDates = new Set<string>();
+    for (const exp of this.expandedAbsences().values()) {
+      for (const date of exp.dates) absenceDates.add(date);
+    }
     for (let d = 1; d <= lastDay; d++) {
       const dateStr = formatLocalDate(new Date(year, month, d));
       if (map[dateStr]) continue;
-      if (this.absences().some(a => this.absenceCoversDate(a, dateStr))) {
+      if (absenceDates.has(dateStr)) {
         map[dateStr] = 'absence';
       }
     }
@@ -208,8 +237,9 @@ export class MemberDetail implements OnInit {
   protected readonly selectedDayAbsences = computed(() => {
     const date = this.selectedDate();
     const colorByType = this.absenceTypeColor();
+    const expanded = this.expandedAbsences();
     return this.absences()
-      .filter(a => this.absenceCoversDate(a, date))
+      .filter(a => expanded.get(a.id)?.dateSet.has(date))
       .map(a => {
         const meta = ABSENCE_TYPE_BY_ID.get(a.absenceTypeId);
         return {
@@ -341,46 +371,25 @@ export class MemberDetail implements OnInit {
     });
   }
 
-  /**
-   * Anzahl abwesender Tage einer Absenz × Tagesbruchteil. Ohne rrule zählt der
-   * volle Bereich [start, end]; mit rrule nur die passenden Wochentage (BYDAY).
-   */
-  private absenceDays(a: MemberAbsence): number {
-    const start = new Date(a.startDate + 'T00:00:00');
-    const end = new Date(a.endDate + 'T00:00:00');
-    if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) return 0;
+  private formatDisplayDate(isoDate: string | null): string {
+    if (!isoDate) return '';
+    return `${isoDate.slice(8, 10)}.${isoDate.slice(5, 7)}.${isoDate.slice(0, 4)}`;
+  }
 
-    const byday = this.parseByDay(a.rrule);
-    let count = 0;
-    for (const d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      if (byday && !byday.has(d.getDay())) continue;
-      count++;
+  private buildRecurringLabel(recurring: RecurringMeta | null): string | null {
+    if (!recurring) return null;
+    if (recurring.isOngoing) {
+      return this.translate.instant('reports.memberDetail.absences.recurringOngoing', {
+        date: this.formatDisplayDate(recurring.capDate),
+      });
     }
-    return count * (a.dayFraction || 1);
-  }
-
-  /**
-   * Ob eine Absenz den gegebenen Tag ('YYYY-MM-DD') abdeckt: innerhalb [start, end]
-   * und – falls eine rrule mit BYDAY vorliegt – am passenden Wochentag.
-   */
-  private absenceCoversDate(a: MemberAbsence, date: string): boolean {
-    if (date < a.startDate || date > a.endDate) return false;
-    const byday = this.parseByDay(a.rrule);
-    if (!byday) return true;
-    return byday.has(new Date(date + 'T00:00:00').getDay());
-  }
-
-  /** Parst BYDAY (z. B. "MO,WE" oder "2MO") aus einer iCal-rrule zu Wochentagen (0=So). */
-  private parseByDay(rrule: string | null): Set<number> | null {
-    if (!rrule) return null;
-    const match = /BYDAY=([^;]+)/i.exec(rrule);
-    if (!match) return null;
-    const map: Record<string, number> = { SU: 0, MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6 };
-    const days = match[1]
-      .split(',')
-      .map(token => map[token.trim().toUpperCase().slice(-2)])
-      .filter((n): n is number => n !== undefined);
-    return days.length ? new Set(days) : null;
+    const key = recurring.occurrenceCount === 1
+      ? 'reports.memberDetail.absences.recurringCountSingular'
+      : 'reports.memberDetail.absences.recurringCount';
+    return this.translate.instant(key, {
+      count: recurring.occurrenceCount,
+      date: this.formatDisplayDate(recurring.untilDate),
+    });
   }
 
   protected goBack(): void {

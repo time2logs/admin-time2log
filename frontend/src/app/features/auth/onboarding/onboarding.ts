@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '@services/auth.service';
 import { OnboardingService } from '@services/onboarding.service';
 import { firstValueFrom } from 'rxjs';
@@ -12,7 +12,7 @@ type ErrorType = 'generic' | null;
 @Component({
   selector: 'app-onboarding',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, TranslateModule],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe],
   templateUrl: './onboarding.html',
 })
 export class OnboardingComponent implements OnInit {

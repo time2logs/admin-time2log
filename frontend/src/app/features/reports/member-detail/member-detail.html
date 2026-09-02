@@ -154,6 +154,16 @@
                       {{ 'reports.memberDetail.absences.recurring' | translate }}
                     </span>
                   }
+                  @if (entry.weekendOnly) {
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+                      {{ 'reports.memberDetail.absences.weekendOnly' | translate }}
+                    </span>
+                  }
+                  @if (entry.invalidRrule) {
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
+                      {{ 'reports.memberDetail.absences.invalidRrule' | translate }}
+                    </span>
+                  }
                 </div>
                 <p class="text-xs text-gray-500 dark:text-[hsl(210,15%,55%)]">
                   @if (entry.isRange) {
@@ -162,6 +172,18 @@
                     {{ entry.startDate | date:'dd.MM.yyyy' }}
                   }
                 </p>
+                @if (!entry.weekendOnly && !entry.invalidRrule) {
+                  <p class="text-xs text-gray-500 dark:text-[hsl(210,15%,55%)] mt-0.5">
+                    @if (entry.workingDays === 1) {
+                      {{ 'reports.memberDetail.absences.workingDay' | translate:{ days: entry.workingDays } }}
+                    } @else {
+                      {{ 'reports.memberDetail.absences.workingDays' | translate:{ days: entry.workingDays } }}
+                    }
+                  </p>
+                }
+                @if (entry.recurringLabel) {
+                  <p class="text-xs text-purple-600 dark:text-purple-400 mt-0.5">{{ entry.recurringLabel }}</p>
+                }
                 @if (entry.notes) {
                   <p class="text-xs text-gray-400 dark:text-[hsl(210,15%,45%)] mt-0.5">{{ entry.notes }}</p>
                 }

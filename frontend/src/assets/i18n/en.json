@@ -380,6 +380,13 @@
         "daysAxis": "Days",
         "partialDay": "{{fraction}} day",
         "recurring": "Recurring",
+        "workingDay": "{{days}} working day",
+        "workingDays": "{{days}} working days",
+        "weekendOnly": "0 working days (weekend)",
+        "invalidRrule": "Unreadable repeat rule — counted as 0 days",
+        "recurringCountSingular": "1 occurrence until {{date}}",
+        "recurringCount": "{{count}} occurrences until {{date}}",
+        "recurringOngoing": "Ongoing — shown up to {{date}}",
         "type": {
           "sick": "Sick",
           "vacation": "Vacation",

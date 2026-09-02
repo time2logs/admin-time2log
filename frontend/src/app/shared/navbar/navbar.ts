@@ -1,14 +1,14 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '@services/auth.service';
 import { LanguageService } from '@services/language.service';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, TranslateModule],
+  imports: [RouterLink, RouterLinkActive, TranslatePipe],
   templateUrl: './navbar.html',
   styles: [`
     span.svg-active svg g {
@@ -45,9 +45,10 @@ export class HeaderComponent {
   }
 
   protected showNav(): boolean {
-    return this.authService.isAuthenticated() && !this.router.url.startsWith('/auth');
+    return this.currentUser() !== null && !this.router.url.startsWith('/auth');
   }
 
+  private readonly currentUser = toSignal(this.authService.currentUser$, { initialValue: null });
   private readonly currentProfile = toSignal(this.authService.currentProfile$, { initialValue: null });
   protected readonly isSystemAdmin = computed(() => this.currentProfile()?.role === 'system_admin');
 
