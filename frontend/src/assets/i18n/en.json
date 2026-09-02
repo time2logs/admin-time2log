@@ -361,6 +361,7 @@
     "memberDetail": {
       "noRecordsForDay": "No entries for this day.",
       "progress": "Activity Progress",
+      "mergeSameActivities": "Combine activities with the same name",
       "competencies": "Competencies",
       "openActivities": {
         "title": "Open Activities",

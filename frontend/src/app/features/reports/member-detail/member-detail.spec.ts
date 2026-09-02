@@ -321,6 +321,47 @@ describe('MemberDetail computed signals', () => {
       expect(progress[1].hours).toBe(5);
     });
 
+    it('combines equally named activities in progress by default', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', {
+        ...curriculum1,
+        nodes: [
+          { id: 'act-1', parentId: 'cat-1', nodeType: 'activity', key: 'a1', label: 'Sondagen', sortOrder: 0, competencyIds: [] },
+          { id: 'act-2', parentId: 'cat-2', nodeType: 'activity', key: 'a2', label: ' sondagen ', sortOrder: 1, competencyIds: [] },
+        ],
+      }]]));
+      c().allRecords.set([
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-1', hours: 3 }),
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-2', hours: 5 }),
+      ]);
+
+      const progress = c().teamGroups()[0].activityProgress;
+      expect(progress).toHaveSize(1);
+      expect(progress[0].label).toBe('Sondagen');
+      expect(progress[0].hours).toBe(8);
+    });
+
+    it('shows equally named activities separately when combining is disabled', () => {
+      c().teams.set([team1]);
+      c().curriculaByProfession.set(new Map([['prof-1', {
+        ...curriculum1,
+        nodes: [
+          { id: 'act-1', parentId: 'cat-1', nodeType: 'activity', key: 'a1', label: 'Sondagen', sortOrder: 0, competencyIds: [] },
+          { id: 'act-2', parentId: 'cat-2', nodeType: 'activity', key: 'a2', label: 'Sondagen', sortOrder: 1, competencyIds: [] },
+        ],
+      }]]));
+      c().allRecords.set([
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-1', hours: 3 }),
+        makeRecord({ teamId: 'team-1', curriculumActivityId: 'act-2', hours: 5 }),
+      ]);
+
+      c().onMergeSameActivitiesChanged(false);
+
+      const progress = c().teamGroups()[0].activityProgress;
+      expect(progress).toHaveSize(2);
+      expect(progress.map((activity: { hours: number }) => activity.hours)).toEqual([5, 3]);
+    });
+
     it('sums competency hours across activities within a team', () => {
       c().teams.set([team1]);
       c().curriculaByProfession.set(new Map([['prof-1', curriculum1]]));
