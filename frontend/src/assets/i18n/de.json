@@ -364,6 +364,7 @@
     "memberDetail": {
       "noRecordsForDay": "Keine Einträge für diesen Tag.",
       "progress": "Aktivitätsfortschritt",
+      "mergeSameActivities": "Gleichnamige Arbeiten zusammenführen",
       "competencies": "Kompetenzen",
       "openActivities": {
         "title": "Offene Arbeiten",

@@ -174,7 +174,16 @@
   </div>
 
   <!-- Progress section -->
-  <div class="flex justify-end">
+  <div class="flex justify-end items-center gap-4 flex-wrap">
+    <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-[hsl(210,15%,70%)] cursor-pointer">
+      <input
+        type="checkbox"
+        class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-[hsl(199,80%,52%)]"
+        [checked]="mergeSameActivities()"
+        (change)="onMergeSameActivitiesChanged($any($event.target).checked)"
+      />
+      <span>{{ 'reports.memberDetail.mergeSameActivities' | translate }}</span>
+    </label>
     <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-[hsl(210,15%,70%)]">
       <span>{{ 'reports.memberDetail.locationFilter' | translate }}</span>
       <select
