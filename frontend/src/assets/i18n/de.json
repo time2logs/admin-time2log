@@ -383,6 +383,13 @@
         "daysAxis": "Tage",
         "partialDay": "{{fraction}} Tag",
         "recurring": "Wiederkehrend",
+        "workingDay": "{{days}} Arbeitstag",
+        "workingDays": "{{days}} Arbeitstage",
+        "weekendOnly": "0 Arbeitstage (Wochenende)",
+        "invalidRrule": "Wiederholungsregel nicht lesbar – zählt als 0 Tage",
+        "recurringCountSingular": "1 Termin bis {{date}}",
+        "recurringCount": "{{count}} Termine bis {{date}}",
+        "recurringOngoing": "Laufend – angezeigt bis {{date}}",
         "type": {
           "sick": "Krank",
           "vacation": "Ferien",
