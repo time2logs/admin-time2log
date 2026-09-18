@@ -363,6 +363,7 @@
     },
     "memberDetail": {
       "noRecordsForDay": "Keine Einträge für diesen Tag.",
+      "workLocation": "Baustelle",
       "progress": "Aktivitätsfortschritt",
       "competencies": "Kompetenzen",
       "openActivities": {

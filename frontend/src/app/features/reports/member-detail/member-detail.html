@@ -31,6 +31,15 @@
     <div class="bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm overflow-hidden">
       <div class="px-5 py-3 bg-gray-50 dark:bg-[hsl(215,25%,16%)] border-b border-gray-200 dark:border-[hsl(215,20%,22%)]">
         <h2 class="text-lg font-medium text-gray-800 dark:text-[hsl(210,15%,90%)]">{{ selectedDate() }}</h2>
+        @if (selectedDayLocations().length > 0) {
+          <div class="flex flex-wrap gap-1.5 mt-2" data-testid="selected-day-locations">
+            @for (location of selectedDayLocations(); track location) {
+              <span class="inline-flex items-center rounded-full bg-sky-100 dark:bg-sky-900/40 px-2 py-0.5 text-xs font-medium text-sky-700 dark:text-sky-300">
+                {{ location }}
+              </span>
+            }
+          </div>
+        }
       </div>
       <div class="p-4">
         @if (isLoadingRecords()) {
@@ -87,6 +96,12 @@
                       </svg>
                     }
                   </div>
+                }
+                @if (record.location) {
+                  <p class="text-xs text-gray-600 dark:text-[hsl(210,15%,65%)] mb-1">
+                    <span class="font-medium">{{ 'reports.memberDetail.workLocation' | translate }}:</span>
+                    {{ record.location }}
+                  </p>
                 }
                 @if (record.notes) {
                   <p class="text-xs text-gray-500 dark:text-[hsl(210,15%,55%)]">{{ record.notes }}</p>
