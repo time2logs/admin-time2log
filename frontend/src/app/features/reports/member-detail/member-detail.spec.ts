@@ -206,6 +206,19 @@ describe('MemberDetail computed signals', () => {
     });
   });
 
+  describe('selectedDayLocations', () => {
+    it('returns unique, trimmed work locations for the selected day', () => {
+      c().selectedDayRecords.set([
+        makeRecord({ entryDate: '2024-01-10', location: ' Baustelle Nord ' }),
+        makeRecord({ entryDate: '2024-01-10', location: 'baustelle nord' }),
+        makeRecord({ entryDate: '2024-01-10', location: 'Baustelle Süd' }),
+        makeRecord({ entryDate: '2024-01-11', location: '   ' }),
+      ]);
+
+      expect(c().selectedDayLocations()).toEqual(['Baustelle Nord', 'Baustelle Süd']);
+    });
+  });
+
   describe('selectedDayAbsences', () => {
     it('returns absences covering the selected date', () => {
       c().selectedDate.set('2099-01-12');

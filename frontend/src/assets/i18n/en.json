@@ -360,6 +360,7 @@
     },
     "memberDetail": {
       "noRecordsForDay": "No entries for this day.",
+      "workLocation": "Work site",
       "progress": "Activity Progress",
       "competencies": "Competencies",
       "openActivities": {

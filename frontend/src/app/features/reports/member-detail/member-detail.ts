@@ -233,6 +233,19 @@ export class MemberDetail implements OnInit {
     return map;
   });
 
+  protected readonly selectedDayLocations = computed<string[]>(() => {
+    const locationsByNormalizedName = new Map<string, string>();
+    for (const record of this.selectedDayRecords()) {
+      const location = record.location?.trim();
+      if (!location) continue;
+      const normalizedLocation = location.toLocaleLowerCase();
+      if (!locationsByNormalizedName.has(normalizedLocation)) {
+        locationsByNormalizedName.set(normalizedLocation, location);
+      }
+    }
+    return Array.from(locationsByNormalizedName.values()).sort((a, b) => a.localeCompare(b));
+  });
+
   /** Abwesenheiten, die auf den aktuell gewählten Tag fallen (Semesterfilter ignoriert). */
   protected readonly selectedDayAbsences = computed(() => {
     const date = this.selectedDate();

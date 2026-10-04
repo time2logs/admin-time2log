@@ -89,7 +89,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 24.19.0
+          node-version: 26.8.1
           cache: npm
           cache-dependency-path: e2e/package-lock.json
 

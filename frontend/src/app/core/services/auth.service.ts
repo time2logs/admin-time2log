@@ -7,7 +7,6 @@ import {
   SupabaseClient,
   User
 } from '@supabase/supabase-js';
-import { navigatorLock } from '@supabase/auth-js/dist/module/lib/locks';
 import { environment } from '@env/environment';
 import { BehaviorSubject, from, Observable, Subscription } from 'rxjs';
 import {Profile} from '@app/core/models/profile.models';
@@ -38,7 +37,6 @@ export class AuthService implements OnDestroy {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
-        lock: (name, _acquireTimeout, fn) => navigatorLock(name, 5000, fn),
       },
     });
     this.initializeAuth();
