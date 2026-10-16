@@ -53,6 +53,7 @@ public class InviteMailService {
 
         var isAdmin = "admin".equalsIgnoreCase(role);
         var isModerator = "moderator".equalsIgnoreCase(role);
+        var isMentor = "mentor".equalsIgnoreCase(role);
 
         String roleClass;
         String roleLabel;
@@ -62,6 +63,9 @@ public class InviteMailService {
         } else if (isModerator) {
             roleClass = "role-badge role-moderator";
             roleLabel = "Moderator";
+        } else if (isMentor) {
+            roleClass = "role-badge role-moderator";
+            roleLabel = "Mentor";
         } else {
             roleClass = "role-badge role-member";
             roleLabel = "Member";

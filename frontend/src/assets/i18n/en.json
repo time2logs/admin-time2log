@@ -162,13 +162,15 @@
       "roleMember": "Member",
       "roleAdmin": "Admin",
       "roleModerator": "Moderator",
+      "roleMentor": "Mentor",
       "semesterLabel": "Semester",
       "semesterOption": "Semester {{ semester }}",
       "inviteButton": "Send Invite",
       "pendingInvites": "Pending Invites",
       "cancelInvite": "Revoke",
       "remove": "Remove",
-      "confirmRemoveIrreversible": "Confirm removal"
+      "confirmRemoveIrreversible": "Confirm removal",
+      "assignLearners": "Assign learners"
     },
     "activities": {
       "title": "Activities",
@@ -251,6 +253,11 @@
     "reports": {
       "title": "Reports"
     }
+  },
+  "mentorManaging": {
+    "title": "Assigned learners",
+    "description": "Select the learners this mentor is allowed to see. Without an assignment, the mentor sees nobody.",
+    "noLearners": "No learners in the organization yet."
   },
   "professionManaging": {
     "active": {
@@ -468,7 +475,7 @@
     "pendingInvites": "Pending Invites",
     "noPendingInvites": "No pending invites",
     "invite": "Invite Admin",
-    "inviteError":  "Invalid email address. Please enter a valid email address and try again.",
+    "inviteError": "Invalid email address. Please enter a valid email address and try again.",
     "inviteSuccess": "Invitation successfully sent."
   }
 }

@@ -138,7 +138,7 @@ export class OrganizationManaging implements OnInit {
       this.toast.error(this.translate.instant('toast.inviteMemberNeedsSemester'));
       return;
     }
-    if (role === 'moderator' && semester !== '-') {
+    if ((role === 'moderator' || role === 'mentor') && semester !== '-') {
       this.toast.error(this.translate.instant('toast.inviteAdminNoSemester'));
       return;
     }
@@ -284,6 +284,11 @@ export class OrganizationManaging implements OnInit {
     this.router.navigate(['/organizations', this.organizationId, 'teams', team.id]);
   }
 
+  protected openMentorAssignment(member: Profile, event: Event): void {
+    event.stopPropagation();
+    this.router.navigate(['/organizations', this.organizationId, 'mentors', member.id]);
+  }
+
   protected openMemberReport(member: Profile): void {
     this.router.navigate(['/reports/members', member.id], {
       queryParams: { organizationId: this.organizationId },
@@ -302,6 +307,9 @@ export class OrganizationManaging implements OnInit {
     }
     else if (role === 'moderator') {
       return this.translate.instant('organizationManaging.members.roleModerator');
+    }
+    else if (role === 'mentor') {
+      return this.translate.instant('organizationManaging.members.roleMentor');
     }
     else{
       return this.translate.instant('organizationManaging.members.roleMember');

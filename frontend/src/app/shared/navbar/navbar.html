@@ -127,6 +127,7 @@
     </a>
 
     <!-- ==================== ORGANIZATIONS ==================== -->
+    @if (!isMentor()) {
     <a
       routerLink="/organizations"
       #organizationLink="routerLinkActive"
@@ -173,6 +174,7 @@
         <span class="text-sm leading-tight">{{ 'nav.organizations' | translate }}</span>
       </span>
     </a>
+    }
 
     <!-- ==================== REPORTS ==================== -->
     <a

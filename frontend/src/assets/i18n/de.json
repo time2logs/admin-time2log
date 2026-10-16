@@ -162,13 +162,15 @@
       "roleMember": "Mitglied",
       "roleAdmin": "Admin",
       "roleModerator": "Moderator",
+      "roleMentor": "Mentor/in",
       "semesterLabel": "Semester",
       "semesterOption": "Semester {{ semester }}",
       "inviteButton": "Einladung senden",
       "pendingInvites": "Offene Einladungen",
       "cancelInvite": "Widerrufen",
       "remove": "Entfernen",
-      "confirmRemoveIrreversible": "Entfernen bestätigen"
+      "confirmRemoveIrreversible": "Entfernen bestätigen",
+      "assignLearners": "Lernende zuweisen"
     },
     "activities": {
       "title": "Aktivitäten",
@@ -252,6 +254,11 @@
     "reports": {
       "title": "Reports"
     }
+  },
+  "mentorManaging": {
+    "title": "Zugewiesene Lernende",
+    "description": "Wähle die Lernenden aus, die diese Person sehen darf. Ohne Zuweisung sieht sie niemanden.",
+    "noLearners": "Noch keine Lernenden in der Organisation."
   },
   "professionManaging": {
     "active": {
