@@ -1,6 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { finalize } from 'rxjs';
 import { OrganizationService } from '@services/organization.service';
 import { MentorService } from '@services/mentor.service';
 import { Profile } from '@app/core/models/profile.models';
@@ -54,20 +55,16 @@ export class MentorManaging implements OnInit {
       ? this.mentorService.unassignLearner(this.organizationId, this.mentorId, learner.id)
       : this.mentorService.assignLearner(this.organizationId, this.mentorId, learner.id);
 
-    request$.subscribe({
-      next: () => {
-        this.assignedIds.update((ids) => {
-          const next = new Set(ids);
-          if (learner.assigned) {
-            next.delete(learner.id);
-          } else {
-            next.add(learner.id);
-          }
-          return next;
-        });
-        this.togglingId.set(null);
-      },
-      error: () => this.togglingId.set(null),
+    request$.pipe(finalize(() => this.togglingId.set(null))).subscribe(() => {
+      this.assignedIds.update((ids) => {
+        const next = new Set(ids);
+        if (learner.assigned) {
+          next.delete(learner.id);
+        } else {
+          next.add(learner.id);
+        }
+        return next;
+      });
     });
   }
 

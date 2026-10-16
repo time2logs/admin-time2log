@@ -158,15 +158,15 @@
                     </div>
                   </div>
                   <div class="flex items-center gap-2">
-                  @if (member.role === 'mentor') {
-                    <button
-                      class="px-2 py-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
-                      (click)="openMentorAssignment(member, $event)"
-                      data-testid="assign-learners-button"
-                    >
-                      {{ 'organizationManaging.members.assignLearners' | translate }}
-                    </button>
-                  }
+                    @if (member.role === 'mentor') {
+                      <button
+                        class="px-2 py-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
+                        (click)="openMentorAssignment(member, $event)"
+                        data-testid="assign-learners-button"
+                      >
+                        {{ 'organizationManaging.members.assignLearners' | translate }}
+                      </button>
+                    }
                   @if (memberToConfirmRemoval() === member.id) {
                     <button
                       class="px-3 py-1.5 text-xs text-white bg-red-600 hover:bg-red-700 rounded transition-colors font-medium"

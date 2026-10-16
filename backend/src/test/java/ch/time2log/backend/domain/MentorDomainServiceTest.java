@@ -6,7 +6,6 @@ import ch.time2log.backend.domain.models.Profile;
 import ch.time2log.backend.infrastructure.supabase.SupabaseApiException;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
 import ch.time2log.backend.infrastructure.supabase.responses.MentorLearnerResponse;
-import ch.time2log.backend.infrastructure.supabase.responses.OrganizationMemberResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,8 +51,6 @@ class MentorDomainServiceTest {
 
     @Test
     void assignLearner_happyPath_postsAssignment() {
-        stubRole(mentorId, "mentor");
-        stubRole(learnerId, "user");
 
         mentorDomainService.assignLearner(orgId, mentorId, learnerId);
 
@@ -61,29 +58,7 @@ class MentorDomainServiceTest {
     }
 
     @Test
-    void assignLearner_whenTargetIsNotMentor_throwsBadRequest() {
-        stubRole(mentorId, "admin");
-
-        assertThatThrownBy(() -> mentorDomainService.assignLearner(orgId, mentorId, learnerId))
-                .isInstanceOf(NoRowsAffectedException.class)
-                .hasMessageContaining("not a mentor");
-        verify(supabaseService, never()).post(any(), any(), any());
-    }
-
-    @Test
-    void assignLearner_whenLearnerIsNotUser_throwsBadRequest() {
-        stubRole(mentorId, "mentor");
-        stubRole(learnerId, "moderator");
-
-        assertThatThrownBy(() -> mentorDomainService.assignLearner(orgId, mentorId, learnerId))
-                .isInstanceOf(NoRowsAffectedException.class)
-                .hasMessageContaining("not a learner");
-    }
-
-    @Test
     void assignLearner_whenAlreadyAssigned_throwsAlreadyExists() {
-        stubRole(mentorId, "mentor");
-        stubRole(learnerId, "user");
         when(supabaseService.post(eq("admin.mentor_learners"), any(), eq(Void.class)))
                 .thenThrow(new SupabaseApiException(409, "duplicate"));
 
@@ -106,11 +81,5 @@ class MentorDomainServiceTest {
                 .thenReturn(1);
 
         mentorDomainService.unassignLearner(orgId, mentorId, learnerId);
-    }
-
-    private void stubRole(UUID userId, String role) {
-        when(supabaseService.getListWithQuery(eq("admin.organization_members"),
-                eq("organization_id=eq." + orgId + "&user_id=eq." + userId), eq(OrganizationMemberResponse.class)))
-                .thenReturn(List.of(new OrganizationMemberResponse(userId, orgId, role, OffsetDateTime.now())));
     }
 }
