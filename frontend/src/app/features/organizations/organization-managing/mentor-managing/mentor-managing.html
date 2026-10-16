@@ -41,7 +41,6 @@
                 (keydown.enter)="toggleLearner(learner)"
                 data-testid="toggle-learner"
               >
-                <!-- Checkbox -->
                 <div
                   class="h-5 w-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors"
                   [class.border-teal-500]="learner.assigned"
@@ -56,7 +55,6 @@
                   }
                 </div>
 
-                <!-- Avatar -->
                 <div class="h-9 w-9 rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0"
                   [class.bg-teal-100]="learner.assigned"
                   [class.dark:bg-teal-900/30]="learner.assigned"
@@ -70,12 +68,10 @@
                   {{ learner.firstName.charAt(0) }}{{ learner.lastName.charAt(0) }}
                 </div>
 
-                <!-- Name -->
                 <span class="font-medium" [class.text-gray-800]="learner.assigned" [class.text-gray-600]="!learner.assigned" [class.dark:text-[hsl(210,15%,90%)]]="learner.assigned" [class.dark:text-[hsl(210,15%,70%)]]="!learner.assigned">
                   {{ learner.firstName }} {{ learner.lastName }}
                 </span>
 
-                <!-- Loading spinner -->
                 @if (togglingId() === learner.id) {
                   <svg class="animate-spin h-4 w-4 text-gray-400 dark:text-[hsl(210,15%,45%)] ml-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

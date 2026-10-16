@@ -3,7 +3,6 @@ import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '@services/auth.service';
 import { combineLatest, filter, map, take } from 'rxjs';
 
-/** Mentoren sehen nur Dashboard und Reports, keine Organisationsverwaltung. */
 export const noMentorGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
