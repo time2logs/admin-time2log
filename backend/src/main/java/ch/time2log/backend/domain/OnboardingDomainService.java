@@ -16,7 +16,7 @@ import java.util.UUID;
 public class OnboardingDomainService {
 
     private static final Logger log = LoggerFactory.getLogger(OnboardingDomainService.class);
-    private static final Set<String> ADMIN_ROLES = Set.of("admin", "system_admin", "moderator");
+    private static final Set<String> ADMIN_ROLES = Set.of("admin", "system_admin", "moderator", "mentor");
 
     private final SupabaseAdminClient adminClient;
     private final SupabaseService supabaseService;
