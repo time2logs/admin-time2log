@@ -74,7 +74,7 @@ public class OrganizationDomainService {
     }
 
     public Invite createInvite(UUID organizationId, String email, String userRole, String semester, UUID invitedBy) {
-        var targetUrl = "moderator".equals(userRole) ? adminAppUrl : userAppUrl;
+        var targetUrl = "moderator".equals(userRole) || "mentor".equals(userRole) ? adminAppUrl : userAppUrl;
         boolean isExistingUser = profileDomainService.existsByEmail(email);
 
         var body = new HashMap<String, Object>();
@@ -103,7 +103,7 @@ public class OrganizationDomainService {
             var acceptUrl = targetUrl + "/auth/accept-invite?invite_token=" + invite.token();
             inviteMailService.sendOrgJoinInvite(email, orgName, userRole, acceptUrl);
         } else {
-            var isAdminApp = "admin".equals(userRole) || "moderator".equals(userRole);
+            var isAdminApp = "admin".equals(userRole) || "moderator".equals(userRole) || "mentor".equals(userRole);
             var onboardingPath = isAdminApp ? "/auth/onboarding" : "/onboarding";
             var redirectTo = targetUrl + onboardingPath + "?invite_token=" + invite.token();
             var metadata = Map.<String, Object>of(

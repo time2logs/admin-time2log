@@ -26,4 +26,11 @@ export const ORGANIZATIONS_ROUTES: Routes = [
         (m) => m.TeamManaging,
       ),
   },
+  {
+    path: ':id/mentors/:mentorId',
+    loadComponent: () =>
+      import('./organization-managing/mentor-managing/mentor-managing').then(
+        (m) => m.MentorManaging,
+      ),
+  },
 ];
