@@ -1,7 +1,9 @@
-FROM node:25.9.0-alpine AS build
+FROM node:26.13.0-alpine AS build
 
 ARG BUILD_CONFIGURATION=development
-ARG API_BASE_URL
+ARG API_BASE_URL=""
+ARG SUPABASE_URL=""
+ARG SUPABASE_PUBLISHABLE_KEY=""
 
 WORKDIR /app
 
@@ -9,7 +11,10 @@ COPY package.json package-lock.json ./
 RUN npm ci --legacy-peer-deps
 
 COPY . .
-RUN npm run build -- --configuration=$BUILD_CONFIGURATION --define "ENV_API_BASE_URL=\"$API_BASE_URL\""
+RUN npm run build -- --configuration=$BUILD_CONFIGURATION \
+    --define "ENV_API_BASE_URL=\"$API_BASE_URL\"" \
+    --define "ENV_SUPABASE_URL=\"$SUPABASE_URL\"" \
+    --define "ENV_SUPABASE_PUBLISHABLE_KEY=\"$SUPABASE_PUBLISHABLE_KEY\""
 
 FROM nginx:alpine
 

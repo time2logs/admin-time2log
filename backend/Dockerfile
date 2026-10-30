@@ -1,4 +1,4 @@
-FROM eclipse-temurin:25.0.3_9-jdk-alpine AS build
+FROM eclipse-temurin:25.0.5_8-jdk-alpine AS build
 #Build backend
 
 WORKDIR /app
@@ -8,7 +8,7 @@ RUN ./mvnw -q dependency:go-offline
 COPY src/ src/
 RUN ./mvnw -q -DskipTests package
 
-FROM eclipse-temurin:25.0.3_9-jre-alpine
+FROM eclipse-temurin:25.0.5_8-jre-alpine
 # Build Image
 
 RUN addgroup -S spring && adduser -S spring -G spring
@@ -22,6 +22,6 @@ USER spring:spring
 EXPOSE 9080
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:9080/actuator/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT:-9080}/actuator/health || exit 1
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

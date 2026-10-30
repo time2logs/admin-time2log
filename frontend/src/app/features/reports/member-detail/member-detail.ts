@@ -83,6 +83,7 @@ export class MemberDetail implements OnInit {
 
   protected readonly openActivityFilter = signal<OpenActivityFilter>('notPerformed');
   protected readonly openActivityThreshold = OPEN_ACTIVITY_HOURS_THRESHOLD;
+  protected readonly mergeSameActivities = signal(true);
 
   /** Alle Absenzen des Members (ungefiltert); Filterung erfolgt clientseitig. */
   protected readonly absences = signal<MemberAbsence[]>([]);
@@ -233,6 +234,19 @@ export class MemberDetail implements OnInit {
     return map;
   });
 
+  protected readonly selectedDayLocations = computed<string[]>(() => {
+    const locationsByNormalizedName = new Map<string, string>();
+    for (const record of this.selectedDayRecords()) {
+      const location = record.location?.trim();
+      if (!location) continue;
+      const normalizedLocation = location.toLocaleLowerCase();
+      if (!locationsByNormalizedName.has(normalizedLocation)) {
+        locationsByNormalizedName.set(normalizedLocation, location);
+      }
+    }
+    return Array.from(locationsByNormalizedName.values()).sort((a, b) => a.localeCompare(b));
+  });
+
   /** Abwesenheiten, die auf den aktuell gewählten Tag fallen (Semesterfilter ignoriert). */
   protected readonly selectedDayAbsences = computed(() => {
     const date = this.selectedDate();
@@ -297,8 +311,12 @@ export class MemberDetail implements OnInit {
 
       const labelById = new Map(curriculumActivities.map(a => [a.id, a.label]));
 
-      const activityProgress = Array.from(activityMap.entries())
-        .map(([id, { label, hours }]) => ({ id, label: labelById.get(id) ?? label, hours }))
+      const individualActivityProgress = Array.from(activityMap.entries())
+        .map(([id, { label, hours }]) => ({ id, label: labelById.get(id) ?? label, hours }));
+
+      const activityProgress = (this.mergeSameActivities()
+        ? mergeActivitiesByLabel(individualActivityProgress)
+        : individualActivityProgress)
         .sort((a, b) => b.hours - a.hours);
 
       if (activityProgress.length === 0 && curriculumActivities.length === 0) continue;
@@ -412,6 +430,10 @@ export class MemberDetail implements OnInit {
 
   protected onOpenActivityFilterSelected(filter: OpenActivityFilter): void {
     this.openActivityFilter.set(filter);
+  }
+
+  protected onMergeSameActivitiesChanged(merge: boolean): void {
+    this.mergeSameActivities.set(merge);
   }
 
   protected onLocationSelected(location: string): void {
