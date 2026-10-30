@@ -19,10 +19,10 @@ public class SupabaseClient {
     private final WebClient webClient;
 
     public SupabaseClient(@Value("${supabase.url}") String supabaseUrl,
-                          @Value("${supabase.anon-key}") String anonKey) {
+                          @Value("${supabase.publishable-key}") String publishableKey) {
         this.webClient = WebClient.builder()
                 .baseUrl(supabaseUrl + "/rest/v1")
-                .defaultHeader("apikey", anonKey)
+                .defaultHeader("apikey", publishableKey)
                 .defaultHeader("Accept", "application/json")
                 .build();
     }
