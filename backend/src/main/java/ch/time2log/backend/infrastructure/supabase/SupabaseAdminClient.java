@@ -19,20 +19,26 @@ public class SupabaseAdminClient {
     private static final Logger log = LoggerFactory.getLogger(SupabaseAdminClient.class);
     private final WebClient webClient;
     private final WebClient restClient;
-    private final String serviceRoleKey;
 
     public SupabaseAdminClient(@Value("${supabase.url}") String supabaseUrl,
-                               @Value("${supabase.service-role-key}") String serviceRoleKey) {
-        this.serviceRoleKey = serviceRoleKey;
-        this.webClient = WebClient.builder()
-                .baseUrl(supabaseUrl)
-                .defaultHeader("apikey", serviceRoleKey)
-                .defaultHeader("Authorization", "Bearer " + serviceRoleKey)
+                               @Value("${supabase.secret-key}") String secretKey) {
+        this.webClient = authenticated(WebClient.builder().baseUrl(supabaseUrl), secretKey)
                 .build();
-        this.restClient = WebClient.builder()
-                .baseUrl(supabaseUrl + "/rest/v1")
+        this.restClient = authenticated(WebClient.builder().baseUrl(supabaseUrl + "/rest/v1"), secretKey)
                 .defaultHeader("Accept", "application/json")
                 .build();
+    }
+
+    /**
+     * Secret keys (sb_secret_...) are not JWTs: the API gateway answers "Invalid JWT" when
+     * they arrive as a bearer token. Legacy service_role keys are, and still need one.
+     */
+    private static WebClient.Builder authenticated(WebClient.Builder builder, String secretKey) {
+        builder.defaultHeader("apikey", secretKey);
+        if (!secretKey.startsWith("sb_")) {
+            builder.defaultHeader("Authorization", "Bearer " + secretKey);
+        }
+        return builder;
     }
 
     /**
@@ -97,7 +103,7 @@ public class SupabaseAdminClient {
     }
 
     /**
-     * Queries a Supabase table using the service-role key (bypasses RLS).
+     * Queries a Supabase table using the secret key (bypasses RLS).
      * Used for scheduled tasks that run without a user context.
      */
     public <T> List<T> getListWithQuery(String schemaTable, String query, Class<T> elementType) {
@@ -107,8 +113,6 @@ public class SupabaseAdminClient {
                         .path("/{table}")
                         .query(query)
                         .build(st.table()))
-                .header("apikey", serviceRoleKey)
-                .header("Authorization", "Bearer " + serviceRoleKey)
                 .header("Accept-Profile", st.schema())
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
@@ -218,15 +222,13 @@ public class SupabaseAdminClient {
     }
 
     /**
-     * Calls a Postgres function via PostgREST RPC using the service-role key (bypasses RLS).
+     * Calls a Postgres function via PostgREST RPC using the secret key (bypasses RLS).
      * The schema (e.g. "admin") is selected via the Content-Profile header.
      * Pass Void.class as responseType for functions that return void.
      */
     public <T> T callRpc(String schema, String functionName, Map<String, Object> params, Class<T> responseType) {
         return restClient.post()
                 .uri("/rpc/{fn}", functionName)
-                .header("apikey", serviceRoleKey)
-                .header("Authorization", "Bearer " + serviceRoleKey)
                 .header("Content-Profile", schema)
                 .header("Accept-Profile", schema)
                 .contentType(MediaType.APPLICATION_JSON)
