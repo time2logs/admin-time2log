@@ -83,6 +83,7 @@ export class MemberDetail implements OnInit {
 
   protected readonly openActivityFilter = signal<OpenActivityFilter>('notPerformed');
   protected readonly openActivityThreshold = OPEN_ACTIVITY_HOURS_THRESHOLD;
+  protected readonly mergeSameActivities = signal(true);
 
   /** Alle Absenzen des Members (ungefiltert); Filterung erfolgt clientseitig. */
   protected readonly absences = signal<MemberAbsence[]>([]);
@@ -310,8 +311,12 @@ export class MemberDetail implements OnInit {
 
       const labelById = new Map(curriculumActivities.map(a => [a.id, a.label]));
 
-      const activityProgress = Array.from(activityMap.entries())
-        .map(([id, { label, hours }]) => ({ id, label: labelById.get(id) ?? label, hours }))
+      const individualActivityProgress = Array.from(activityMap.entries())
+        .map(([id, { label, hours }]) => ({ id, label: labelById.get(id) ?? label, hours }));
+
+      const activityProgress = (this.mergeSameActivities()
+        ? mergeActivitiesByLabel(individualActivityProgress)
+        : individualActivityProgress)
         .sort((a, b) => b.hours - a.hours);
 
       if (activityProgress.length === 0 && curriculumActivities.length === 0) continue;
@@ -425,6 +430,10 @@ export class MemberDetail implements OnInit {
 
   protected onOpenActivityFilterSelected(filter: OpenActivityFilter): void {
     this.openActivityFilter.set(filter);
+  }
+
+  protected onMergeSameActivitiesChanged(merge: boolean): void {
+    this.mergeSameActivities.set(merge);
   }
 
   protected onLocationSelected(location: string): void {
