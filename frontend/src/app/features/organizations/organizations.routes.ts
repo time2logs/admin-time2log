@@ -27,10 +27,10 @@ export const ORGANIZATIONS_ROUTES: Routes = [
       ),
   },
   {
-    path: ':id/mentors/:mentorId',
+    path: ':id/moderators/:moderatorId',
     loadComponent: () =>
-      import('./organization-managing/mentor-managing/mentor-managing').then(
-        (m) => m.MentorManaging,
+      import('./organization-managing/moderator-managing/moderator-managing').then(
+        (m) => m.ModeratorManaging,
       ),
   },
 ];

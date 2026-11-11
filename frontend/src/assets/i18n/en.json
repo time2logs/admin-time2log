@@ -162,7 +162,6 @@
       "roleMember": "Member",
       "roleAdmin": "Admin",
       "roleModerator": "Moderator",
-      "roleMentor": "Mentor",
       "semesterLabel": "Semester",
       "semesterOption": "Semester {{ semester }}",
       "inviteButton": "Send Invite",
@@ -254,9 +253,9 @@
       "title": "Reports"
     }
   },
-  "mentorManaging": {
+  "moderatorManaging": {
     "title": "Assigned learners",
-    "description": "Select the learners this mentor is allowed to see. Without an assignment, the mentor sees nobody.",
+    "description": "Select the learners this moderator is allowed to see. Without an assignment, the moderator sees nobody.",
     "noLearners": "No learners in the organization yet."
   },
   "professionManaging": {

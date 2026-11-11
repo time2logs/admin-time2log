@@ -3,7 +3,7 @@ import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '@services/auth.service';
 import { combineLatest, filter, map, take } from 'rxjs';
 
-export const noMentorGuard: CanActivateFn = () => {
+export const noModeratorGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
@@ -18,7 +18,7 @@ export const noMentorGuard: CanActivateFn = () => {
       if (!user) {
         return router.createUrlTree(['/auth/login']);
       }
-      if (profile?.role === 'mentor') {
+      if (profile?.role === 'moderator') {
         return router.createUrlTree(['/dashboard']);
       }
       return true;

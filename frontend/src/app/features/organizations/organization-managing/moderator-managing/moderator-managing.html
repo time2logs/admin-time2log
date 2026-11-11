@@ -9,17 +9,17 @@
     {{ 'common.back' | translate }}
   </button>
 
-  @if (mentor(); as mentor) {
-    <h1 class="text-3xl font-semibold mb-8 dark:text-[hsl(210,15%,90%)]">{{ mentor.firstName }} {{ mentor.lastName }}</h1>
+  @if (moderator(); as moderator) {
+    <h1 class="text-3xl font-semibold mb-8 dark:text-[hsl(210,15%,90%)]">{{ moderator.firstName }} {{ moderator.lastName }}</h1>
 
     <div class="bg-white dark:bg-[hsl(215,25%,13%)] border border-gray-200 dark:border-[hsl(215,20%,22%)] rounded-lg shadow-sm overflow-hidden">
       <div class="px-5 py-3 bg-gray-50 dark:bg-[hsl(215,25%,16%)] border-b border-gray-200 dark:border-[hsl(215,20%,22%)]">
-        <h2 class="text-lg font-medium text-gray-800 dark:text-[hsl(210,15%,90%)]">{{ 'mentorManaging.title' | translate }}</h2>
-        <p class="text-sm text-gray-500 dark:text-[hsl(210,15%,55%)] mt-1">{{ 'mentorManaging.description' | translate }}</p>
+        <h2 class="text-lg font-medium text-gray-800 dark:text-[hsl(210,15%,90%)]">{{ 'moderatorManaging.title' | translate }}</h2>
+        <p class="text-sm text-gray-500 dark:text-[hsl(210,15%,55%)] mt-1">{{ 'moderatorManaging.description' | translate }}</p>
       </div>
       <div class="p-5">
         @if (selectionList().length === 0) {
-          <p class="text-gray-500 dark:text-[hsl(210,15%,55%)] text-sm">{{ 'mentorManaging.noLearners' | translate }}</p>
+          <p class="text-gray-500 dark:text-[hsl(210,15%,55%)] text-sm">{{ 'moderatorManaging.noLearners' | translate }}</p>
         } @else {
           <ul class="space-y-1">
             @for (learner of selectionList(); track learner.id) {

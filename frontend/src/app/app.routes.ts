@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
 import { systemAdminGuard } from './core/guards/system-admin.guard';
-import { noMentorGuard } from './core/guards/no-mentor.guard';
+import { noModeratorGuard } from './core/guards/no-moderator.guard';
 
 export const routes: Routes = [
   {
@@ -35,7 +35,7 @@ export const routes: Routes = [
   },
   {
     path: 'organizations',
-    canActivate: [authGuard, noMentorGuard],
+    canActivate: [authGuard, noModeratorGuard],
     loadChildren: () =>
       import('./features/organizations/organizations.routes').then(
         (m) => m.ORGANIZATIONS_ROUTES

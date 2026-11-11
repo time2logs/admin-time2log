@@ -5,7 +5,7 @@ import ch.time2log.backend.domain.exception.NoRowsAffectedException;
 import ch.time2log.backend.domain.models.Profile;
 import ch.time2log.backend.infrastructure.supabase.SupabaseApiException;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
-import ch.time2log.backend.infrastructure.supabase.responses.MentorLearnerResponse;
+import ch.time2log.backend.infrastructure.supabase.responses.ModeratorLearnerResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -14,52 +14,52 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
-public class MentorDomainService {
-    private static final String TABLE = "admin.mentor_learners";
+public class ModeratorDomainService {
+    private static final String TABLE = "admin.moderator_learners";
 
     private final SupabaseService supabaseService;
     private final ProfileDomainService profileDomainService;
 
-    public MentorDomainService(SupabaseService supabaseService, ProfileDomainService profileDomainService) {
+    public ModeratorDomainService(SupabaseService supabaseService, ProfileDomainService profileDomainService) {
         this.supabaseService = supabaseService;
         this.profileDomainService = profileDomainService;
     }
 
-    public List<Profile> getAssignedLearners(UUID organizationId, UUID mentorId) {
+    public List<Profile> getAssignedLearners(UUID organizationId, UUID moderatorId) {
         var assignments = supabaseService.getListWithQuery(
                 TABLE,
-                "organization_id=eq." + organizationId + "&mentor_id=eq." + mentorId,
-                MentorLearnerResponse.class
+                "organization_id=eq." + organizationId + "&moderator_id=eq." + moderatorId,
+                ModeratorLearnerResponse.class
         );
-        var ids = assignments.stream().map(MentorLearnerResponse::learner_id).toList();
+        var ids = assignments.stream().map(ModeratorLearnerResponse::learner_id).toList();
         return profileDomainService.getByIds(ids);
     }
 
-    public void assignLearner(UUID organizationId, UUID mentorId, UUID learnerId) {
+    public void assignLearner(UUID organizationId, UUID moderatorId, UUID learnerId) {
         var body = Map.of(
                 "organization_id", organizationId,
-                "mentor_id", mentorId,
+                "moderator_id", moderatorId,
                 "learner_id", learnerId
         );
         try {
             supabaseService.post(TABLE, body, Void.class);
         } catch (SupabaseApiException e) {
             if (e.getStatusCode() == 409) {
-                throw new EntityAlreadyExistsException("Learner is already assigned to this mentor");
+                throw new EntityAlreadyExistsException("Learner is already assigned to this moderator");
             }
             throw e;
         }
     }
 
-    public void unassignLearner(UUID organizationId, UUID mentorId, UUID learnerId) {
+    public void unassignLearner(UUID organizationId, UUID moderatorId, UUID learnerId) {
         int deleted = supabaseService.deleteReturningCount(
                 TABLE,
-                "organization_id=eq." + organizationId + "&mentor_id=eq." + mentorId + "&learner_id=eq." + learnerId
+                "organization_id=eq." + organizationId + "&moderator_id=eq." + moderatorId + "&learner_id=eq." + learnerId
         );
         if (deleted == 0) {
             throw new NoRowsAffectedException(
                     HttpStatus.FORBIDDEN,
-                    "MENTOR_LEARNER_REMOVE_BLOCKED",
+                    "MODERATOR_LEARNER_REMOVE_BLOCKED",
                     "Forbidden operation",
                     "Learner could not be unassigned."
             );

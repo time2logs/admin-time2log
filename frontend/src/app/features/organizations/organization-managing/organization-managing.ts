@@ -82,7 +82,6 @@ export class OrganizationManaging implements OnInit {
 
   private readonly authService = inject(AuthService);
   protected readonly currentUserId = signal<string | null>(null);
-  protected readonly isModerator = signal(false);
 
   ngOnInit(): void {
     this.organizationId = this.route.snapshot.params['id'];
@@ -103,10 +102,6 @@ export class OrganizationManaging implements OnInit {
 
     this.authService.currentUser$.subscribe(user => {
       this.currentUserId.set(user?.id ?? null);
-    });
-
-    this.authService.currentProfile$.subscribe(profile => {
-      this.isModerator.set(profile?.role === 'moderator');
     });
   }
 
@@ -138,7 +133,7 @@ export class OrganizationManaging implements OnInit {
       this.toast.error(this.translate.instant('toast.inviteMemberNeedsSemester'));
       return;
     }
-    if ((role === 'moderator' || role === 'mentor') && semester !== '-') {
+    if (role === 'moderator' && semester !== '-') {
       this.toast.error(this.translate.instant('toast.inviteAdminNoSemester'));
       return;
     }
@@ -284,9 +279,9 @@ export class OrganizationManaging implements OnInit {
     this.router.navigate(['/organizations', this.organizationId, 'teams', team.id]);
   }
 
-  protected openMentorAssignment(member: Profile, event: Event): void {
+  protected openModeratorAssignment(member: Profile, event: Event): void {
     event.stopPropagation();
-    this.router.navigate(['/organizations', this.organizationId, 'mentors', member.id]);
+    this.router.navigate(['/organizations', this.organizationId, 'moderators', member.id]);
   }
 
   protected openMemberReport(member: Profile): void {
@@ -307,9 +302,6 @@ export class OrganizationManaging implements OnInit {
     }
     else if (role === 'moderator') {
       return this.translate.instant('organizationManaging.members.roleModerator');
-    }
-    else if (role === 'mentor') {
-      return this.translate.instant('organizationManaging.members.roleMentor');
     }
     else{
       return this.translate.instant('organizationManaging.members.roleMember');

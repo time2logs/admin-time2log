@@ -5,7 +5,7 @@ import ch.time2log.backend.domain.exception.NoRowsAffectedException;
 import ch.time2log.backend.domain.models.Profile;
 import ch.time2log.backend.infrastructure.supabase.SupabaseApiException;
 import ch.time2log.backend.infrastructure.supabase.SupabaseService;
-import ch.time2log.backend.infrastructure.supabase.responses.MentorLearnerResponse;
+import ch.time2log.backend.infrastructure.supabase.responses.ModeratorLearnerResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class MentorDomainServiceTest {
+class ModeratorDomainServiceTest {
 
     @Mock
     private SupabaseService supabaseService;
@@ -32,54 +32,54 @@ class MentorDomainServiceTest {
     private ProfileDomainService profileDomainService;
 
     @InjectMocks
-    private MentorDomainService mentorDomainService;
+    private ModeratorDomainService moderatorDomainService;
 
     private final UUID orgId = UUID.randomUUID();
-    private final UUID mentorId = UUID.randomUUID();
+    private final UUID moderatorId = UUID.randomUUID();
     private final UUID learnerId = UUID.randomUUID();
 
     @Test
     void getAssignedLearners_returnsProfilesOfAssignedLearners() {
-        when(supabaseService.getListWithQuery(eq("admin.mentor_learners"),
-                eq("organization_id=eq." + orgId + "&mentor_id=eq." + mentorId), eq(MentorLearnerResponse.class)))
-                .thenReturn(List.of(new MentorLearnerResponse(orgId, mentorId, learnerId, OffsetDateTime.now())));
+        when(supabaseService.getListWithQuery(eq("admin.moderator_learners"),
+                eq("organization_id=eq." + orgId + "&moderator_id=eq." + moderatorId), eq(ModeratorLearnerResponse.class)))
+                .thenReturn(List.of(new ModeratorLearnerResponse(orgId, moderatorId, learnerId, OffsetDateTime.now())));
         var profile = new Profile(learnerId, "Lea", "Lernende", OffsetDateTime.now(), OffsetDateTime.now(), "user", "normal");
         when(profileDomainService.getByIds(List.of(learnerId))).thenReturn(List.of(profile));
 
-        assertThat(mentorDomainService.getAssignedLearners(orgId, mentorId)).containsExactly(profile);
+        assertThat(moderatorDomainService.getAssignedLearners(orgId, moderatorId)).containsExactly(profile);
     }
 
     @Test
     void assignLearner_happyPath_postsAssignment() {
 
-        mentorDomainService.assignLearner(orgId, mentorId, learnerId);
+        moderatorDomainService.assignLearner(orgId, moderatorId, learnerId);
 
-        verify(supabaseService).post(eq("admin.mentor_learners"), any(), eq(Void.class));
+        verify(supabaseService).post(eq("admin.moderator_learners"), any(), eq(Void.class));
     }
 
     @Test
     void assignLearner_whenAlreadyAssigned_throwsAlreadyExists() {
-        when(supabaseService.post(eq("admin.mentor_learners"), any(), eq(Void.class)))
+        when(supabaseService.post(eq("admin.moderator_learners"), any(), eq(Void.class)))
                 .thenThrow(new SupabaseApiException(409, "duplicate"));
 
-        assertThatThrownBy(() -> mentorDomainService.assignLearner(orgId, mentorId, learnerId))
+        assertThatThrownBy(() -> moderatorDomainService.assignLearner(orgId, moderatorId, learnerId))
                 .isInstanceOf(EntityAlreadyExistsException.class);
     }
 
     @Test
     void unassignLearner_whenNothingDeleted_throwsForbidden() {
-        when(supabaseService.deleteReturningCount(eq("admin.mentor_learners"), any())).thenReturn(0);
+        when(supabaseService.deleteReturningCount(eq("admin.moderator_learners"), any())).thenReturn(0);
 
-        assertThatThrownBy(() -> mentorDomainService.unassignLearner(orgId, mentorId, learnerId))
+        assertThatThrownBy(() -> moderatorDomainService.unassignLearner(orgId, moderatorId, learnerId))
                 .isInstanceOf(NoRowsAffectedException.class);
     }
 
     @Test
     void unassignLearner_happyPath_deletesAssignment() {
-        when(supabaseService.deleteReturningCount(eq("admin.mentor_learners"),
-                eq("organization_id=eq." + orgId + "&mentor_id=eq." + mentorId + "&learner_id=eq." + learnerId)))
+        when(supabaseService.deleteReturningCount(eq("admin.moderator_learners"),
+                eq("organization_id=eq." + orgId + "&moderator_id=eq." + moderatorId + "&learner_id=eq." + learnerId)))
                 .thenReturn(1);
 
-        mentorDomainService.unassignLearner(orgId, mentorId, learnerId);
+        moderatorDomainService.unassignLearner(orgId, moderatorId, learnerId);
     }
 }

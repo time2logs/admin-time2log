@@ -162,7 +162,6 @@
       "roleMember": "Mitglied",
       "roleAdmin": "Admin",
       "roleModerator": "Moderator",
-      "roleMentor": "Mentor/in",
       "semesterLabel": "Semester",
       "semesterOption": "Semester {{ semester }}",
       "inviteButton": "Einladung senden",
@@ -255,9 +254,9 @@
       "title": "Reports"
     }
   },
-  "mentorManaging": {
+  "moderatorManaging": {
     "title": "Zugewiesene Lernende",
-    "description": "Wähle die Lernenden aus, die diese Person sehen darf. Ohne Zuweisung sieht sie niemanden.",
+    "description": "Wähle die Lernenden aus, die diese Moderatorin bzw. dieser Moderator sehen darf. Ohne Zuweisung sieht sie oder er niemanden.",
     "noLearners": "Noch keine Lernenden in der Organisation."
   },
   "professionManaging": {
