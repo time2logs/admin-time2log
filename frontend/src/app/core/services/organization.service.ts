@@ -1,9 +1,11 @@
 import { Injectable, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
-import { Observable, shareReplay, tap } from 'rxjs';
+import { distinctUntilChanged, map, Observable, shareReplay, tap } from 'rxjs';
 import { environment } from '@env/environment';
 import { Invite, Organization, Profession, Reminder } from '@app/core/models/organizations.models';
 import { Profile } from '@app/core/models/profile.models';
+import { AuthService } from '@app/core/services/auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class OrganizationService {
@@ -13,6 +15,20 @@ export class OrganizationService {
   private readonly professions = new Map<string, Observable<Profession[]>>();
   private readonly members = new Map<string, Observable<Profile[]>>();
   private readonly onlyMembers = new Map<string, Observable<Profile[]>>();
+
+  constructor() {
+    // Responses are user-specific (RLS), so drop all cached data when the logged-in user changes.
+    inject(AuthService).currentUser$
+      .pipe(map((user) => user?.id ?? null), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.clearCache());
+  }
+
+  private clearCache(): void {
+    this.organizations$ = undefined;
+    this.members.clear();
+    this.onlyMembers.clear();
+    this.professions.clear();
+  }
 
   getOrganizations(): Observable<Organization[]> {
     this.organizations$ ??= this.http.get<Organization[]>(this.baseUrl).pipe(shareReplay({ bufferSize: 1, refCount: true }));

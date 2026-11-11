@@ -1,6 +1,8 @@
 import { Injectable, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
-import {Observable, shareReplay} from 'rxjs';
+import { distinctUntilChanged, Observable, shareReplay } from 'rxjs';
+import { AuthService } from '@app/core/services/auth.service';
 import { environment } from '@env/environment';
 import {
   ActivitySummary,
@@ -25,6 +27,13 @@ export class ReportService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiBaseUrl}/organizations`;
   private readonly lastEntryDates = new Map<string, Observable<Record<string, string>>>();
+
+  constructor() {
+    // Responses are user-specific (RLS), so drop all cached data when the logged-in user changes.
+    inject(AuthService).currentUser$
+      .pipe(map((user) => user?.id ?? null), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.lastEntryDates.clear());
+  }
 
   getDailyReport(organizationId: string, date: string): Observable<DailyMemberReport[]> {
     return this.http.get<DailyMemberReport[]>(
