@@ -26,4 +26,11 @@ export const ORGANIZATIONS_ROUTES: Routes = [
         (m) => m.TeamManaging,
       ),
   },
+  {
+    path: ':id/moderators/:moderatorId',
+    loadComponent: () =>
+      import('./organization-managing/moderator-managing/moderator-managing').then(
+        (m) => m.ModeratorManaging,
+      ),
+  },
 ];

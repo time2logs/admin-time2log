@@ -82,7 +82,6 @@ export class OrganizationManaging implements OnInit {
 
   private readonly authService = inject(AuthService);
   protected readonly currentUserId = signal<string | null>(null);
-  protected readonly isModerator = signal(false);
 
   ngOnInit(): void {
     this.organizationId = this.route.snapshot.params['id'];
@@ -103,10 +102,6 @@ export class OrganizationManaging implements OnInit {
 
     this.authService.currentUser$.subscribe(user => {
       this.currentUserId.set(user?.id ?? null);
-    });
-
-    this.authService.currentProfile$.subscribe(profile => {
-      this.isModerator.set(profile?.role === 'moderator');
     });
   }
 
@@ -282,6 +277,11 @@ export class OrganizationManaging implements OnInit {
 
   protected openTeam(team: Team): void {
     this.router.navigate(['/organizations', this.organizationId, 'teams', team.id]);
+  }
+
+  protected openModeratorAssignment(member: Profile, event: Event): void {
+    event.stopPropagation();
+    this.router.navigate(['/organizations', this.organizationId, 'moderators', member.id]);
   }
 
   protected openMemberReport(member: Profile): void {

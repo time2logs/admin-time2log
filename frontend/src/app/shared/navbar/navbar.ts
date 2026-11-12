@@ -51,6 +51,7 @@ export class HeaderComponent {
   private readonly currentUser = toSignal(this.authService.currentUser$, { initialValue: null });
   private readonly currentProfile = toSignal(this.authService.currentProfile$, { initialValue: null });
   protected readonly isSystemAdmin = computed(() => this.currentProfile()?.role === 'system_admin');
+  protected readonly isModerator = computed(() => this.currentProfile()?.role === 'moderator');
 
   toggleLangMenu(): void {
     this.isLangMenuOpen.update((v) => !v);
