@@ -168,7 +168,8 @@
       "pendingInvites": "Pending Invites",
       "cancelInvite": "Revoke",
       "remove": "Remove",
-      "confirmRemoveIrreversible": "Confirm removal"
+      "confirmRemoveIrreversible": "Confirm removal",
+      "assignLearners": "Assign learners"
     },
     "activities": {
       "title": "Activities",
@@ -251,6 +252,11 @@
     "reports": {
       "title": "Reports"
     }
+  },
+  "moderatorManaging": {
+    "title": "Assigned learners",
+    "description": "Select the learners this moderator is allowed to see. Without an assignment, the moderator sees nobody.",
+    "noLearners": "No learners in the organization yet."
   },
   "professionManaging": {
     "active": {
@@ -468,7 +474,7 @@
     "pendingInvites": "Pending Invites",
     "noPendingInvites": "No pending invites",
     "invite": "Invite Admin",
-    "inviteError":  "Invalid email address. Please enter a valid email address and try again.",
+    "inviteError": "Invalid email address. Please enter a valid email address and try again.",
     "inviteSuccess": "Invitation successfully sent."
   }
 }

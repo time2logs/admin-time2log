@@ -1,9 +1,11 @@
 import { Injectable, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
-import { Observable, shareReplay, tap } from 'rxjs';
+import { distinctUntilChanged, map, Observable, shareReplay, tap } from 'rxjs';
 import { environment } from '@env/environment';
 import { Team } from '@app/core/models/team.models';
 import { Profile } from '@app/core/models/profile.models';
+import { AuthService } from '@app/core/services/auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class TeamService {
@@ -11,6 +13,18 @@ export class TeamService {
   private readonly baseUrl = `${environment.apiBaseUrl}/organizations`;
   private readonly teams = new Map<string, Observable<Team[]>>();
   private readonly teamMembers = new Map<string, Observable<Profile[]>>();
+
+  constructor() {
+    // Responses are user-specific (RLS), so drop all cached data when the logged-in user changes.
+    inject(AuthService).currentUser$
+      .pipe(map((user) => user?.id ?? null), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.clearCache());
+  }
+
+  private clearCache(): void {
+    this.teams.clear();
+    this.teamMembers.clear();
+  }
 
   getTeams(organizationId: string): Observable<Team[]> {
     const cached = this.teams.get(organizationId);
